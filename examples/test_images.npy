@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head> 
+
+  <script type="text/javascript" language="JavaScript">
+if (self != top){
+	top.location.href = "/index.adp?ProxyHost=&UserAgent=&TunnelIfId=10555114&authType=&NmdId=489007&ReturnHost=nmd%2ephillyiap04%2ephilapa%2ewayport%2enet&MacAddr=xhO%2b3HKMYAuAAI0pJWI61U41JnydcG7MOkju5%2bQPhMU%3d&IpAddr=10%2e40%2e35%2e153&NduMacAddr=&NduPort=&PortType=Guest&PortDesc=&UseCount=&PaymentMethod=SponsoredSV&ChargeAmount=&Style=AWS&vsgpId=&pVersion=2&ValidationHash=328affd13041e0069776395ed5cb4063&origDest=http%3a%2f%2fgithub%2ecom%2farogozhnikov%2feinops%2fblob%2fmaster%2fdocs%2fresources%2ftest%5fimages%2enpy&ProxyHost=&vsgId=79214&Ip6Addr=&VlanId=440&ts=1546371186";
+}
+  </script>  
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge; text/html; charset=UTF-8"/>
+  <meta name="robots" content="noindex,nofollow,noarchive"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Welcome to AT&T Wi-Fi Service @ Philadelphia International Airport</title>
+  <link rel="shortcut icon" href="/graphics/att/favicon.ico"/>
+  <link href="/css/aws/laptop/sitestyle.css" rel="stylesheet" type="text/css"/>
+  <script type="text/javascript" src="/dhtml/aws/dhtml.js"></script>
+  <script type="text/javascript" src="/dhtml/jquery/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="/dhtml/shared/htmlParser.js"></script>
+  <script type="text/javascript" src="/dhtml/shared/postscribe.js"></script>
+<!--[if lte IE 7]>
+<style>
+#memberid {
+	width:230px;
+    border-color:#7b9ebd;
+    border-width:1px;
+}
+</style>
+<![endif]-->
+
+  <script type="text/javascript">
+
+
+$(document).ready(function() {
+	tall=$(document).height();
+	
+});
+
+function moreClick(){
+	$(".infomask").animate({opacity:.5},0);
+	$(".infomask").height(tall);
+	$(".infomask").css({'display':'block'});
+	$(".infowindow").show();
+	return false;
+}
+
+function closeAlert(){
+	return false;
+}
+
+  </script> 
+
+  <script src="/dhtml/mtagconfig.js" type="text/Javascript"></script> 
+
+
+ </head>
+ <body>
+<div id="topbar">
+	<div id="header_logo"></div>
+</div id="topbar">
+
+  <div class="infowindow">
+   <div class="infobox">
+   </div>
+  </div>
+  <div class="infomask"></div> 
+
+  <div id="index_page" class="page">	
+
+   <div class="toplinks">
+    <div id="leftside"> 
+    </div id="leftside">
+    <div id="rightside">
+     <a href="/add-ins/shared/help.adp?ProxyHost=&UserAgent=Wget%2f1%2e17%2e1+%28linux%2dgnu%29&TunnelIfId=10555114&authType=&NmdId=489007&ReturnHost=nmd%2ephillyiap04%2ephilapa%2ewayport%2enet&MacAddr=C4%3a8E%3a8F%3aF4%3a33%3aEB&IpAddr=10%2e40%2e35%2e153&NduMacAddr=&NduPort=&PortType=Guest&PortDesc=&UseCount=&PaymentMethod=&ChargeAmount=&Style=AWS&vsgpId=&pVersion=2&ValidationHash=dea36754155bbe7cfbfa41c7e155238a&origDest=http%3a%2f%2fgithub%2ecom%2farogozhnikov%2feinops%2fblob%2fmaster%2fdocs%2fresources%2ftest%5fimages%2enpy&ProxyHost=&vsgId=79214&Ip6Addr=&VlanId=440&ts=1546371186&MainDivId=index" class="floatright">Help</a>
+     <div class="dividerright"></div>
+     <a href="http://www.att.com/maps/wifi.html" class="floatright" target="_blank">AT&amp;T&nbsp;Wi&ndash;Fi&nbsp;Locations</a>
+    </div id="rightside">
+   </div class="toplinks"> 
+
+   <div class="navbar">
+    <div class="branding"></div>
+    <div class="searchbox"> &nbsp;
+    </div class="searchbox">
+   </div class="navbar"> 
+
+   <div id="index_content" class="content">
+    <div class="contentbox_top"></div>
+    <div class="contentbox_middle">
+
+     <div id="index_leftcolumn" class="leftcolumn">	
+
+      <div id="locationmodule" class="moduleleft">
+       <div class="moduleleft_top"></div>
+       <div class="moduleleft_middle">
+        <div class="modulespacer">
+
+         <div class="location_logo_box">
+          <div class="location_logo"><a target="_new" href="http://www.phl.org/"><img src="/graphics/att/splash_default_attwifi.gif" width="128" border="0"/></a></div>
+         </div> 
+         <div class="location_address">
+         <p>You are located at:</p>
+          <h2>Philadelphia International Airport</h2>
+<p>8500 Bartram Ave<br/>Philadelphia, PA, 19153</p>
+
+         </div class="location_address">
+        </div class="modulespacer">
+       </div class="moduleleft_middle">
+       <div class="moduleleft_bottom"></div>
+      </div id="locationmodule" class="moduleleft"> 
+
+
+
+
+<script type="text/javascript">
+		$(document).ready(function() {
+			var thisId = $(".options_button").parent().parent().attr("id");
+			clickedbutton = "#"+thisId+" .options_box_middle";
+			formheight = $("#"+thisId+" .options_forms").height() +50;
+			$(clickedbutton).animate({height: "28px"},1);
+			$(clickedbutton).animate({height: formheight},1);
+			if (typeof window.c9loader !== "undefined") { 
+			    window.c9loader();
+			}
+			
+
+});
+    </script>
+      <div id="connectionoptions" class="moduleleft">
+       <div class="moduleleft_top"></div>
+       <div class="moduleleft_middle">
+	<div class="modulespacer">
+	 <div class="title_options"><h1>Welcome!</h1><br><h2 class="enjoyMsg">Get connected to the Internet</h2></div> <noscript><h4>Please enable Javascript to continue.</h4></noscript>
+					<script type="text/javascript" charset="utf-8">
+					 venueId = "att_101004";
+					 hashedMac  = "ca36075b31a936e53c3beb1558ca204a";
+					</script>
+					  
+								<script type="text/javascript" charset="utf-8">
+								(function(w, d){
+								    w.c9options = {};
+								    /** IMPORTANT! CHANGE THESE! **/
+								    c9options.venueId =  venueId;
+								    c9options.uid = hashedMac; 
+								    /******************************/
+								    c9options.disable = false;
+								    // use an anchor to login begin ////////////////////////////////////////
+								    c9options.authmethod = 'function';
+								    var redirectId = 'connectbtn'; // anchor element name
+								    c9options.waitForInter = function(cb) {
+							      
+									var anchor = document.getElementById(redirectId);
+									anchor.onclick = function(e){
+									    e.preventDefault(); // Don't go to the href
+									    cb(); // call the promo instead
+									    return false;
+									};
+								    };
+							      
+								    // When the promo is finished lets go to the href
+								    // in our anchor element.
+								    c9options.submitfn = function (widget) {
+									var anchor = document.getElementById(redirectId);
+									window.location.href = anchor.getAttribute("href");
+								    };
+								    // use an anchor to login end ////////////////////////////////////////      
+							      
+								    w.c9init = function(c9) {
+									if(c9options.disable) { return; }
+								//	console.log(JSON.stringify(c9options));
+									(new _c9.RedirectWidget(c9options)).pageLoad();
+								    };
+								    w.c9killLoader = function() {
+									var l = d.getElementById('c9loader'), s = d.getElementById('c9styles');
+									l && (l.style.display = 'none'); s && s.parentNode.removeChild(s);
+								    };
+								    w.c9loader = function() {
+									      console.log("c9loader() called!");
+									      if(c9options.disable) { return; }
+									      console.log("c9 enabled!");
+							      
+									      var css = 'body{width:100%;height:100%;display:none;background:#fff;overflow:hidden;}',
+									      head = document.head || document.getElementsByTagName('head')[0],
+									      style = document.createElement('style');
+							      
+									      style.type = 'text/css';
+									      if (style.styleSheet){
+										      style.styleSheet.cssText = css;
+									      } else {
+										      style.appendChild(document.createTextNode(css));
+									      }
+									      style.id = "c9styles";              
+							      
+									      head.appendChild(style);
+							      
+									      d.getElementById('c9loader').style.display = 'block';
+									      setTimeout(function(){if(!w._c9 && d.body){ d.body.style.display = 'block';}}, c9options.msgTimeout || 3000);
+									      setTimeout(function(){if(!(w._c9 && w._c9.pageLoaded)){ c9killLoader();}}, c9options.loadTimeout || 9000);
+								    };
+								})(window, document);
+								</script>
+								<script type="text/javascript" charset="utf-8">
+								(function(){
+								    var s, host = "https:" == document.location.protocol ? "https://"+"nimbus.c9w.net" : "http://"+"nimbus.c9w.net",
+									c9 = document.createElement('script');
+								    c9.type ='text/javascript'; c9.async = true;
+								    c9.src = host + "/wifi/" + c9options.venueId + "/asset.js";
+								    s = document.getElementsByTagName('script')[0];
+								    s.parentNode.insertBefore(c9, s);
+								})();
+								window.onunload = function(){};
+								</script>
+								<div id="c9loader" style="display: none; z-index: 9999; position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; overflow: auto; vertical-align: middle; color: rgb(119, 119, 119); font-family: arial; font-size: 15px; text-align: center; background: rgb(255, 255, 255) none repeat scroll 0% 0%; line-height: 150px;"><div id="c9loadermsg">Loading...</div></div>
+								
+		
+	<style type="text/css">
+	#promo{
+		cursor: pointer;
+		margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+	}
+
+	#connection_button{
+		width: 107px;
+		margin: -10px auto;
+	}
+	.infowindow{
+		position: relative;
+		display: none;
+		width: 750px;
+		margin-left: auto;
+		margin-right: auto;
+		z-index: 102;
+	}
+	.infomask {
+	position: fixed;
+	background-color: #000;
+	z-index: 101;
+	display: none;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+}
+	#svpromobox {
+		padding-top:2%;
+		position:fixed;
+	}
+
+	#promo img{
+	width: 100%;
+	margin-top: 25px;
+	}
+
+	@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+		.infowindow{
+			width: 360px;
+		}
+		#svpromobox {
+			position: absolute;
+			padding-top: 0px;
+		}
+		.infomask {
+			position: fixed;
+			background-color: #000;
+			z-index: 101;
+			display: none;
+			left: 0px;
+			width: 100%;
+			height: 100%;
+		}
+	}
+	</style>
+	 <div id="sponsored" class="options_box">
+	  <div class="options_box_top"></div>
+	  <div class="options_box_middle">
+	   <div class="options_button">Free Sponsored Wi-Fi<a href="#" class="options_button_text">Free Sponsored Wi-Fi</a></div>
+	   <div class="options_forms_top"></div>
+	   <div class="options_forms">
+			<div id="sponsored_area" style="height:175px;">
+			 
+		<div id="promo"><img src='/graphics/shared/LargeSVCTA.png' alt='Click here to connect'/><div id='connection_button'><a href='/add-ins/shared/use_sponsored.adp?ProxyHost=&UserAgent=Wget%2f1%2e17%2e1+%28linux%2dgnu%29&TunnelIfId=10555114&authType=&NmdId=489007&ReturnHost=nmd%2ephillyiap04%2ephilapa%2ewayport%2enet&MacAddr=C4%3a8E%3a8F%3aF4%3a33%3aEB&IpAddr=10%2e40%2e35%2e153&NduMacAddr=&NduPort=&PortType=Guest&PortDesc=&UseCount=&PaymentMethod=SponsoredSV&ChargeAmount=&Style=AWS&vsgpId=&pVersion=2&ValidationHash=328affd13041e0069776395ed5cb4063&origDest=http%3a%2f%2fgithub%2ecom%2farogozhnikov%2feinops%2fblob%2fmaster%2fdocs%2fresources%2ftest%5fimages%2enpy&ProxyHost=&vsgId=79214&Ip6Addr=&VlanId=440&ts=1546371186' id="connectbtn"><img src='/graphics/aws/laptop/button_getconnected.png' alt='Click here to connect' border='0'></a></div></div>
+				
+			 </div>
+<p>By clicking on Get Connected I accept the <a href="https://www.att.com/shop/legalterms.html?toskey=wiFiServices" target="_blank">AT&T Wi-Fi Terms of Service and Acceptable Use Policy</a></p>
+	   </div class="options_forms">
+	  </div class="options_box_middle">
+	  <div class="options_box_bottom"></div>
+	 </div id="sponsored" class="options_box">
+		 
+	</div class="modulespacer">
+       </div class="moduleleft_middle">
+       <div class="moduleleft_bottom"></div>
+      </div id="connectionoptions" class="moduleleft"> 
+
+
+     </div id="index_leftcolumn" class="leftcolumn"> 
+
+     <div id="index_rightcolumn" class="rightcolumn">	
+
+		      <div id="advert" class="moduleright">
+		       <div class="moduleright_top"></div>
+		       <div class="moduleright_middle_advert">
+			<div class="modulespacer">
+			 <div id="jiwire_ad">
+		<iframe src="/add-ins/ads/power_of_one/index.html" frameBorder=0 width=100% height=600 ></iframe>
+				 
+			 </div id="jiwire_ad"> 
+			</div class="modulespacer">
+		       </div class="moduleright_middle_advert">
+		       <div class="moduleright_bottom"></div>
+		      </div id="advert" class="moduleright">
+		<div id="mobilead"><a href="https://www.business.att.com/solutions/Portfolio/network-services/?source=EBNsp400000000DyO&wtExtndSource=NetSrv&LNS=TP_NS_SSG_WyPtNS_0518" target="_blank"><img src="/graphics/cwf2a/ABS_Security_PowerOfAnd_TYPE_320x50.jpg" border="0"/></a></div>		
+				
+
+     </div id="index_rightcolumn" class="rightcolumn"> 
+	
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $(".rightcolumn").show();
+        });
+        </script>  
+
+    </div class="contentbox_middle">
+    <div class="contentbox_bottom"></div>
+   </div id="index_content" class="content"> 
+
+  </div id="index_page" class="page"> 
+
+  <div id="index_footer_footer" class="footer">
+
+
+ <div class="footer_bar">
+  <div id="footer_left">AT&amp;T on the Web | <a href="http://att.com" target="_blank">att.com</a> </div>
+  <div id="footer_center"><a href="http://www.att.com/gen/privacy-policy?pid=2506" target="_blank">Privacy Policy</a> | <a href="https://support.attwifi.com/att/" target="_blank">Help</a> | <a href="https://www.att.com/maps/wifi.html" target="_blank">Wi&#8209;Fi Locations</a></div>
+  <div id="footer_right">&copy;&nbsp;<script>document.write(new Date().getFullYear())</script> AT&amp;T Intellectual Property. All rights reserved.</div>
+ </div>
+ 
+
+  </div id="index_footer_footer" class="footer"> 
+
+  <img width="1" height="1" alt="" src="http://secure.wayport.net/add-ins/aws/tv.adp?ProxyHost=&UserAgent=Wget%2f1%2e17%2e1+%28linux%2dgnu%29&TunnelIfId=10555114&authType=&NmdId=489007&ReturnHost=nmd%2ephillyiap04%2ephilapa%2ewayport%2enet&MacAddr=C4%3a8E%3a8F%3aF4%3a33%3aEB&IpAddr=10%2e40%2e35%2e153&NduMacAddr=&NduPort=&PortType=Guest&PortDesc=&UseCount=&PaymentMethod=&ChargeAmount=&Style=AWS&vsgpId=&pVersion=2&ValidationHash=dea36754155bbe7cfbfa41c7e155238a&origDest=http%3a%2f%2fgithub%2ecom%2farogozhnikov%2feinops%2fblob%2fmaster%2fdocs%2fresources%2ftest%5fimages%2enpy&ProxyHost=&vsgId=79214&Ip6Addr=&VlanId=440&ts=1546371186&MainDivId=index"/>
+ </body>
+</html> 
+
