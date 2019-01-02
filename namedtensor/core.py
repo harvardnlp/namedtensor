@@ -140,6 +140,11 @@ class NamedTensor:
         results = self.tensor.unbind(self._axes[name])
         return tuple((self._new(r, name) for r in results))
 
+    def get(self, name, idx):
+        results = self.access(name)[idx]
+        return tuple((self._new(r, name) for r in results))
+
+
 
     def sort(self, name):
         results = self.tensor.sort(self._axes[name])
