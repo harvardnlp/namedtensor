@@ -20,7 +20,7 @@ _noshift = {"abs", "acos",  "asin", "atan", "byte",
             "sub", "to", "tan", "tanh", "tril", "triu",
             "trunc"}
 
-_noshift_dim = {"renorm", "sort"}
+_noshift_dim = {}
 
 # Return a non-tensor info object
 _info = {"dim", "is_contigious", "is_pinned", "size",
@@ -139,6 +139,17 @@ class NamedTensor:
     def unbind(self, name):
         results = self.tensor.unbind(self._axes[name])
         return tuple((self._new(r, name) for r in results))
+
+
+    def sort(self, name):
+        results = self.tensor.sort(self._axes[name])
+        return tuple((self._new(r) for r in results))
+
+    def renorm(self, p, name, maxnorm):
+        results = self.tensor.renorm(p, self._axes[name], maxnorm)
+        return self._new(results)
+
+
 
     def shift(self, *ops, **kwargs):
         tensor = self
