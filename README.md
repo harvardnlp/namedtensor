@@ -28,9 +28,10 @@ This library represents a beta proposal for a named tensor for numpy/torch. The 
 many of the problems above are simply consequences of defaulting to math-style tuple notation. Switching to 
 struct-like notation can let us build abstractions on top of this library. 
 
-
+$$
 \begin{align*}
 \mathbf{M}_t &= \tanh(\mathbf{W}^y\mathbf{Y}+(\mathbf{W}^h\mathbf{h}_t+\mathbf{W}^r\mathbf{r}_{t-1})\otimes \mathbf{e}_L) & \mathbf{M}_t &\in\mathbb{R}^{k\times L}\\
 \alpha_t &= \text{softmax}(\mathbf{w}^T\mathbf{M}_t)&\alpha_t&\in\mathbb{R}^L\\
 \mathbf{r}_t &= \mathbf{Y}\alpha^T_t + \tanh(\mathbf{W}^t\mathbf{r}_{t-1})&\mathbf{r}_t&\in\mathbb{R}^k
 \end{align*}
+$$
