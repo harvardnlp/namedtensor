@@ -2,22 +2,26 @@ from einops import reduce, rearrange
 from collections import OrderedDict
 import re
 import numpy as np
+import torch
+import opt_einsum as oe
 
 def contract(names, *tensors):
     args = []
     ids = {}
+    seen_names = []
     for t in tensors:
         group = []
-        for name in t.dims:
+        for name in t._names:
             if name not in ids:
                 ids[name] = len(ids)
+                seen_names.append(name)
             group.append(ids[name])
         args.append(t.tensor)
         args.append(group)
     names = names.split()
-    args.append([ids[n] for n in names])
-    return NamedTensor(np.einsum(*args),
-                       names)
+    keep = [n for n in seen_names if n not in names]
+    args.append([ids[n] for n in keep])
+    return NamedTensor(oe.contract(*args, backend="torch"), keep)
 
 def lift(fn, in_specs, out_spec):
     in_specs = [s.split() for s in in_specs]
@@ -31,7 +35,7 @@ def lift(fn, in_specs, out_spec):
             lifted_inputs.append(inp._promote(spec).tensor
                                  if spec is not None else inp)
             if spec is not None:
-                batch_dims = [d for d in inp.dims not in spec]
+                batch_dims = [d for d in inp._names not in spec]
         out = fn(*lifted_inputs)
         return NamedTensor(out, batch_dims + out_spec)
     return lifted
@@ -41,13 +45,13 @@ def assert_match(*tensors):
     sizes = {}
     failure = False
     for t in tensors:
-        for k, v in t.sizes.items():
+        for k, v in t._sizes.items():
             if v == 1: continue
             if k in sizes:
                 failure = (failure or sizes[k] != v)
             else:
                 sizes[k] = v
-    assert not failure, " ".join([str(t.sizes) for t in tensors])
+    assert not failure, " ".join([str(t._sizes) for t in tensors])
 
 
 class NamedTensor:
@@ -55,19 +59,20 @@ class NamedTensor:
         if isinstance(names, str):
             names = names.split()
         self.tensor = tensor
-        self.dims = names
+        self._names = names
         shape = self.tensor.shape
-        self.sizes = OrderedDict(((d, shape[i]) for i, d in enumerate(self.dims)))
-        self.axes = OrderedDict(((d, i) for i, d in enumerate(self.dims)))
+        self._sizes = OrderedDict(((d, shape[i]) for i, d in enumerate(self._names)))
+        self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
 
     def _to_einops(self):
-        return " ".join(self.dims)
+        return " ".join(self._names)
 
-    def shape(self):
-        return self.sizes
+    @property
+    def named_shape(self):
+        return self._sizes
 
     def contract(self, names, *others):
-        return contract(names, *([self] + others))
+        return contract(names, *((self,) + others))
 
 
     def shift(self, *ops, **kwargs):
@@ -91,7 +96,7 @@ class NamedTensor:
         s = ""
         ex = ""
         first = True
-        for d in self.dims:
+        for d in self._names:
             if d not in names:
                 s += " " + d
                 ex += " " + d
@@ -101,7 +106,6 @@ class NamedTensor:
                 first = False
 
         tensor = rearrange(self.tensor, "%s -> %s"%(self._to_einops(), s))
-        print(ex)
         return NamedTensor(tensor, ex)
 
     def _split(self, splitstr, **kwargs):
@@ -110,7 +114,7 @@ class NamedTensor:
         names = strnames.split()
         query = ""
         ex = ""
-        for i, d in enumerate(self.dims):
+        for i, d in enumerate(self._names):
             if d != dim:
                 query += " " + d
                 ex += " " + d
@@ -131,36 +135,38 @@ class NamedTensor:
 
     def _promote(self, dims):
         "Move dims to the front of the line"
-        term = " ".join([d for d in self.dims if d not in dims]
+        term = " ".join([d for d in self._names if d not in dims]
                         + dims.split()[1:])
         return self._rearrange(term)
 
     def reduce(self, terms, op, **kwargs):
         ls = terms.split()
-        term = " ".join([d for d in self.dims
+        term = " ".join([d for d in self._names
                          if d not in ls])
         tensor = reduce(self.tensor,
                         "%s -> %s"%(self._to_einops(), term), op)
         return NamedTensor(tensor, term)
 
-    def apply(self, dim, axis_op):
-        return NamedTensor(axis_op(self.tensor, dim=self.axes[dim]),
-                           self.dims)
+    def apply(self, axis_op, dim=None):
+        kwargs = {}
+        if dim is not None:
+            assert dim in self._axes, "%s not in %s"%(dim, self._names)
+            kwargs["dim"] = self._axes[dim]
+        return NamedTensor(axis_op(self.tensor, **kwargs), self._names)
 
 
     def _broadcast_to(self, other):
         s = ""
         ex = ""
-        for d in other.dims:
-            ex += " " + d
-            if d in self.sizes:
-                s += " " + d
-            else:
-                s += " ()"
-        for d in self.dims:
-            if d not in other.sizes:
-                s += " " + d
+        broadcast = (set(other._names) |  set(self._names)) - (set(other._names) & set(self._names))
+
+        for d in other._names:
+            if d in broadcast:
                 ex += " " + d
+                s += " ()"
+        for d in self._names:
+            s += " " + d
+            ex += " " + d
         tensor = rearrange(self.tensor, "%s -> %s"% (self._to_einops(), s))
         return NamedTensor(tensor, ex)
 
@@ -169,8 +175,11 @@ class NamedTensor:
         b1 = b._broadcast_to(a1)
         assert_match(a1, b1)
         c = op(a1.tensor, b1.tensor)
-        return NamedTensor(c, a1.dims)
+        return NamedTensor(c, a1._names)
 
+
+    def __add__(self, b):
+        return self.binop(torch.add, b)
 
     def __repr__(self):
         return self.tensor
