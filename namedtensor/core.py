@@ -374,7 +374,7 @@ def _im_init():
            from PIL.Image import fromarray
            from IPython import get_ipython
            def numpy_to_png(a):
-               return fromarray(numpy.array(numpy.clip(a, 0, 1) * 255, 
+               return fromarray(np.array(np.clip(a, 0, 1) * 255, 
                                             dtype='uint8'))._repr_png_()
            png = get_ipython().display_formatter.formatters['image/png']
            txt = get_ipython().display_formatter.formatters['text/plain']
