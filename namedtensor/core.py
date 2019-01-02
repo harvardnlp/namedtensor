@@ -35,7 +35,7 @@ _reduce = {"argmax", "argmin", "cumprod",
            "sum"}
 
 # Broadcast and apply.
-_binop = {"add", "sub", "div", "mul", "eq", "ne", "lt", "gt", "le", "ge", "type_as"}
+_binop = {"add", "masked_fill", "sub", "div", "mul", "eq", "ne", "lt", "gt", "le", "ge", "type_as"}
 
 #
 #unknown = {"diag", "dist", "gather", "index_select", "scatter", "select", trace,  }
