@@ -28,5 +28,9 @@ This library represents a beta proposal for a named tensor for numpy/torch. The 
 many of the problems above are simply consequences of defaulting to math-style tuple notation. Switching to 
 struct-like notation can let us build abstractions on top of this library. 
 
+## Install
 
+> pip install namedtensor
+
+## 
 
