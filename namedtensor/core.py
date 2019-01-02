@@ -18,7 +18,7 @@ _noshift = {"abs", "acos",  "asin", "atan", "byte",
            "reciprical", "round", "rsqrt", "short",
             "sigmoid", "sign", "sin", "sinh", "sqrt",
             "sub", "to", "tan", "tanh", "tril", "triu",
-            "trunc", "renorm", "sort"}
+            "trunc"}
 
 _noshift_dim = {"renorm", "sort"}
 
