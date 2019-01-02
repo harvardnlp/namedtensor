@@ -142,7 +142,7 @@ class NamedTensor:
 
     def get(self, name, idx):
         results = self.access(name)[idx]
-        return tuple((self._new(r, name) for r in results))
+        return self._new(results, name)
 
 
 

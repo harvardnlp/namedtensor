@@ -131,6 +131,7 @@ def test_access():
     ntensor1 = NamedTensor(base1, 'alpha beta gamma')
 
     assert (ntensor1.access("gamma")[45] == base1[:, :, 45]).all()
+    assert (ntensor1.get("gamma", 1).tensor == base1[:, :, 1]).all()
 
     assert (ntensor1.access("gamma beta")[45, 1] == base1[:, 1, 45]).all()
 
