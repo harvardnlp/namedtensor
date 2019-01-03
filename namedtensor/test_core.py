@@ -1,4 +1,4 @@
-from .core import NamedTensor, contract, assert_match, lift, build
+from .core import NamedTensor, contract, assert_match, lift, build, ones
 import numpy as np
 import torch
 from collections import OrderedDict
@@ -14,20 +14,19 @@ def test_shift():
 
         # Split
         ntensor = ntensor.shift('alpha -> (delta epsilon)', delta = 2)
-        assert ntensor.tensor.shape == (2, 5, 2, 50)
+        assert ntensor.shape == (2, 5, 2, 50)
 
         # Merge
         ntensor = ntensor.shift('(delta epsilon) -> alpha')
-        assert ntensor.tensor.shape == (10, 2, 50)
+        assert ntensor.shape == (10, 2, 50)
 
         # Transpose
         ntensor = ntensor.shift('beta alpha gamma')
-        assert ntensor.tensor.shape == (2, 10, 50)
+        assert ntensor.shape == (2, 10, 50)
 
         # Promote
         ntensor = ntensor.shift('... alpha')
-        assert ntensor.tensor.shape == (2, 50, 10)
-
+        assert ntensor.shape == (2, 50, 10)
         assert ntensor.named_shape == OrderedDict([("beta", 2),
                                                    ("gamma", 50),
                                                    ("alpha", 10)])
@@ -48,8 +47,9 @@ def test_apply():
     base = torch.zeros([10, 2, 50])
     ntensor = NamedTensor(base, 'alpha beta gamma')
     ntensor = ntensor.softmax("alpha")
-    assert pytest.approx(ntensor.sum("alpha").tensor[0, 0].item(),
-                         1.0)
+    ntensorb = ones(names=dict(beta=2, gamma=50))
+    assert (ntensor.sum("alpha") == ntensorb).all()
+
 
 
 @pytest.mark.xfail
@@ -90,7 +90,6 @@ def test_contract():
     ntensor3 = contract("beta gamma delta", ntensor1, ntensor2)
     assert ntensor3.named_shape == OrderedDict([("alpha", 10)])
     assert ntensor3.tensor.shape == base3.shape
-    print (ntensor3.tensor - base3)
     assert (np.abs(ntensor3.tensor - base3) < 1e-5).all()
 
 

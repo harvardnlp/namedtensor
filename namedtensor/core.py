@@ -81,7 +81,9 @@ def assert_match(*tensors):
     sizes = {}
     failure = False
     for t in tensors:
-        for k, v in t._sizes.items():
+        shape = t.shape
+        for i, k in t._schema.enum_all():
+            v = shape[i]
             if v == 1: continue
             if k in sizes:
                 failure = (failure or sizes[k] != v)
@@ -103,16 +105,10 @@ def ones(names, **kwargs):
 def zeros(names, **kwargs):
     return build(torch.zeros, names, **kwargs)
 
-
 class NamedTensor:
-    def __init__(self, tensor, names):
-        if isinstance(names, str):
-            names = names.split()
-        self.tensor = tensor
-        self._names = names
-        shape = self.tensor.shape
-        self._sizes = OrderedDict(((d, shape[i]) for i, d in enumerate(self._names)))
-        self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
+    def __init__(self, tensor, names, mask=0):
+        self._tensor = tensor
+        self._schema = _Schema.build(names, mask)
 
     def _new(self, tensor, drop=None, updates=None):
         update_dict = {}
@@ -121,63 +117,52 @@ class NamedTensor:
                 group = re.match(r"(\w+) -> (\w+)", updates)
                 start, end = group.groups()
                 update_dict[start] = end
+        return NamedTensor(tensor, self._schema.drop(drop).update(update_dict))
 
-        return NamedTensor(tensor,
-                           [update_dict.get(n, n) for n in self._names if n != drop])
-
-    def _to_einops(self):
-        return " ".join(self._names)
+    @property
+    def shape(self):
+        "Return the raw shape of the tensor"
+        return self._tensor.shape
 
     @property
     def named_shape(self):
-        return self._sizes
+        "Return an ordered dict of the available dimensions"
+        return OrderedDict(((d, self.shape[i])
+                            for i, d in self._schema.enum_masked()))
 
-    def contract(self, names, *others):
-        return contract(names, *((self,) + others))
+    def _size(self, dim):
+        i = self._schema.get(dim)
+        return self.shape[i]
 
-
-    def unbind(self, name):
-        results = self.tensor.unbind(self._axes[name])
-        return tuple((self._new(r, name) for r in results))
-
-    def get(self, name, idx):
-        results = self.access(name)[idx]
-        return self._new(results, name)
-
-
-
-    def sort(self, name):
-        results = self.tensor.sort(self._axes[name])
-        return tuple((self._new(r) for r in results))
-
-    def renorm(self, p, name, maxnorm):
-        results = self.tensor.renorm(p, self._axes[name], maxnorm)
-        return self._new(results)
-
-
+    def _to_einops(self):
+        return self._schema._to_einops()
 
     def shift(self, *ops, **kwargs):
-        tensor = self
+        """
+        A small transposition language for moving around dimensions
+        within a named tensor.
+        """
+        cur = self
         for op in ops:
             if op.strip().startswith("("):
-                tensor = tensor._merge(op)
+                cur = cur._merge(op)
             elif op.strip().endswith(")"):
-                tensor = tensor._split(op, **kwargs)
+                cur = cur._split(op, **kwargs)
             elif op.strip().startswith("..."):
-                tensor = tensor._promote(op)
+                cur = cur._promote(op)
             else:
-                tensor = tensor._rearrange(op)
-        return tensor
+                cur = cur._rearrange(op)
+        return cur
 
     def _merge(self, mergestr):
         group = re.match(r"\(([\w+ ?]+)\) -> (\w+)", mergestr)
-        shape = self.tensor.shape
+        shape = self.shape
         strnames, dim = group.groups()
         names = strnames.split()
         s = ""
         ex = ""
         first = True
-        for d in self._names:
+        for d in self._schema._names:
             if d not in names:
                 s += " " + d
                 ex += " " + d
@@ -186,7 +171,7 @@ class NamedTensor:
                 ex += " " + dim
                 first = False
 
-        tensor = rearrange(self.tensor, "%s -> %s"%(self._to_einops(), s))
+        tensor = rearrange(self._tensor, "%s -> %s"%(self._schema._to_einops(), s))
         return NamedTensor(tensor, ex)
 
     def _split(self, splitstr, **kwargs):
@@ -195,7 +180,7 @@ class NamedTensor:
         names = strnames.split()
         query = ""
         ex = ""
-        for i, d in enumerate(self._names):
+        for i, d in self._schema.enum_all():
             if d != dim:
                 query += " " + d
                 ex += " " + d
@@ -203,7 +188,7 @@ class NamedTensor:
                 query += " (" + strnames + ")"
                 ex += " " + strnames
 
-        tensor = rearrange(self.tensor, "%s -> %s"%(query, ex),
+        tensor = rearrange(self._tensor, "%s -> %s"%(query, ex),
                            **{d:kwargs[d] for d in names
                               if d in kwargs})
         return NamedTensor(tensor, ex)
@@ -211,58 +196,37 @@ class NamedTensor:
     def _rearrange(self, term):
         assert ")" not in term
         recipe = "%s -> %s"%(self._to_einops(), term)
-        tensor = rearrange(self.tensor, recipe)
+        tensor = rearrange(self._tensor, recipe)
         return NamedTensor(tensor, term)
 
     def _promote(self, dims):
         "Move dims to the front of the line"
-        term = " ".join([d for d in self._names if d not in dims]
+        term = " ".join([d for d in self._schema._names
+                         if d not in dims]
                         + dims.split()[1:])
         return self._rearrange(term)
 
-    def access(self, dims):
-        term = " ".join(dims.split() + [d for d in self._names if d not in dims])
-        return self._rearrange(term).tensor
-
-
-
-
-    # def reduce(self, terms, op, **kwargs):
-    #     ls = terms.split()
-    #     term = " ".join([d for d in self._names
-    #                      if d not in ls])
-    #     tensor = reduce(self.tensor,
-    #                     "%s -> %s"%(self._to_einops(), term), op)
-    #     return NamedTensor(tensor, term)
-
-    def op(self, axis_op, dim=None, shift=None):
-        kwargs = {}
-        if dim is not None:
-            assert dim in self._axes, "%s not in %s"%(dim, self._names)
-            kwargs["dim"] = self._axes[dim]
-        return self._new(axis_op(self.tensor, **kwargs),
-                         updates=shift)
 
     def _force_order(self, names):
         s = ""
         ex = ""
         for d in names:
-            if d not in self._names:
+            if d not in self._schema._names:
                 ex += " " + d
                 s += " ()"
             else:
                 ex += " " + d
                 s += " " + d
-        tensor = rearrange(self.tensor, "%s -> %s"% (self._to_einops(), s))
+        tensor = rearrange(self._tensor, "%s -> %s"% (self._to_einops(), s))
         return NamedTensor(tensor, ex)
 
 
     def _broadcast_order(self, other):
         order = []
         for d in other._names:
-            if d not in self._names:
+            if d not in self._schema._names:
                 order.append(d)
-        for d in self._names:
+        for d in self._schema._names:
             order.append(d)
         return order
 
@@ -271,8 +235,43 @@ class NamedTensor:
         a1 = a._force_order(order)
         b1 = b._force_order(order)
         assert_match(a1, b1)
-        c = op(a1.tensor, b1.tensor)
+        c = op(a1._tensor, b1._tensor)
         return NamedTensor(c, a1._names)
+
+
+    def contract(self, names, *others):
+        "Contract dimension `names` with each of the other tensors"
+        return contract(names, *((self,) + others))
+
+
+    def unbind(self, name):
+        results = self._tensor.unbind(self._schema.get(name))
+        return tuple((self._new(r, name) for r in results))
+
+    def get(self, name, idx):
+        results = self.access(name)[idx]
+        return self._new(results, name)
+
+    def sort(self, name):
+        results = self._tensor.sort(self._schema.get(name))
+        return tuple((self._new(r) for r in results))
+
+    def renorm(self, p, name, maxnorm):
+        results = self._tensor.renorm(p, self.get(name), maxnorm)
+        return self._new(results)
+
+
+    def access(self, dims):
+        term = " ".join(dims.split() + [d for d in self._names
+                                        if d not in dims])
+        return self._rearrange(term)._tensor
+
+    def op(self, axis_op, dim=None, shift=None):
+        kwargs = {}
+        if dim is not None:
+            kwargs["dim"] = self._schema.get(dim)
+        return self._new(axis_op(self._tensor, **kwargs),
+                         updates=shift)
 
 
     def index_select(self, name, index):
@@ -282,24 +281,26 @@ class NamedTensor:
             if n == name:
                 for n2 in index._names:
                     new_names.append(n2)
-                    sizes.append(index._sizes[n2])
+                    sizes.append(index._size(n2))
             else:
                 new_names.append(n)
-                sizes.append(self._sizes[n])
+                sizes.append(self._size(n))
         return NamedTensor(
-            self.tensor.index_select(self._axes[name],
-                                     index.tensor.view(-1)).view(*sizes), new_names)
+            self._tensor.index_select(self._schema.get(name),
+                                     index._tensor.view(-1)).view(*sizes), new_names)
 
     def narrow(self, change, start, end):
         return self._new(
-            self.tensor.narrow(self._axes[change.split("-")[0].strip()], start, end),
+            self._tensor.narrow(self.get(change.split("-")[0].strip()), start, end),
             updates=change)
 
     def softmax(self, name):
-        return self._new(F.softmax(self.tensor, dim=self._axes[name]))
+        return self._new(F.softmax(self._tensor,
+                                   dim=self._schema.get(name)))
 
     def logsoftmax(self, name):
-        return self._new(F.logsoftmax(self.tensor, dim=self._axes[name]))
+        return self._new(F.logsoftmax(self.tensor,
+                         dim=self._schema.get(name)))
 
     def __add__(self, b):
         return self.add(b)
@@ -324,8 +325,8 @@ class NamedTensor:
 
 
     def __getattr__(self, methodname):
-        if methodname in dir(self.tensor):
-            method =  getattr(self.tensor, methodname)
+        if methodname in dir(self._tensor):
+            method =  getattr(self._tensor, methodname)
             if methodname in _noshift:
                 # Call and wrap
                 def call(*args, **kwargs):
@@ -333,7 +334,7 @@ class NamedTensor:
 
             elif methodname in _noshift_dim:
                 def call(dim, *args, **kwargs):
-                    return self._new(method(self._axes[dim], *args, **kwargs))
+                    return self._new(method(self._schema.get(dim), *args, **kwargs))
 
             elif methodname in _info:
                 # Call and return
@@ -343,17 +344,11 @@ class NamedTensor:
                 # Call, replace, and wrap
                 def call(dim, *args, **kwargs):
                     cur = self
-                    method =  getattr(self.tensor, methodname)
+                    method = getattr(self._tensor, methodname)
                     for d in dim.split():
-                        cur = cur._new(method(cur._axes[d], *args, **kwargs), d)
-                        method =  getattr(cur.tensor, methodname)
+                        cur = cur._new(method(cur._schema.get(d), *args, **kwargs), d)
+                        method =  getattr(cur._tensor, methodname)
                     return cur
-            # elif methodname in _axis_multi:
-            #     # Call, replace, and wrap tuple
-            #     def call(dim, *args, **kwargs):
-            #         dim = self._axes[dim]
-            #         results = method(dim, *args, **kwargs)
-            #         return tuple((NamedTensor(r, self._names) for r in results))
 
             elif methodname in _binop:
                 def call(other, *args):
@@ -361,20 +356,23 @@ class NamedTensor:
                     order = self._broadcast_order(b)
                     a1 = self._force_order(order)
                     b1 = b._force_order(order)
-                    method =  getattr(a1.tensor, methodname)
+                    method =  getattr(a1._tensor, methodname)
                     assert_match(a1, b1)
-                    return a1._new(method(b1.tensor, *args))
+                    return a1._new(method(b1._tensor, *args))
             else:
                 assert False, "Method not implemented"
             return call
         assert False, "Method does not exist"
 
+
+## (Just for the blog post)
+##
 def _im_init():
     ## PRINT SETUP
            from PIL.Image import fromarray
            from IPython import get_ipython
            def numpy_to_png(a):
-               return fromarray(np.array(np.clip(a, 0, 1) * 255, 
+               return fromarray(np.array(np.clip(a, 0, 1) * 255,
                                             dtype='uint8'))._repr_png_()
            png = get_ipython().display_formatter.formatters['image/png']
            txt = get_ipython().display_formatter.formatters['text/plain']
