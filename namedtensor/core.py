@@ -42,14 +42,16 @@ class NamedTensorCore:
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
 
-    def _new(self, tensor, drop=None, updates=None):
+    def _new(self, tensor, drop=None, updates=None, mask=None):
         update_dict = {}
         if updates is not None:
             for u in updates:
                 group = re.match(r"(\w+) -> (\w+)", updates)
                 start, end = group.groups()
                 update_dict[start] = end
-        return self.__class__(tensor, self._schema.drop(drop).update(update_dict))
+
+        return self.__class__(tensor, self._schema.drop(drop).update(update_dict),
+                              self._schema._masked if mask is None else mask)
 
     @property
     def tensor(self):
@@ -66,6 +68,12 @@ class NamedTensorCore:
         "Return an ordered dict of the available dimensions"
         return OrderedDict(((d, self.shape[i])
                             for i, d in self._schema.enum_masked()))
+
+    def mask_to(self, name):
+        if name == "":
+            return self._new(self._tensor, mask=0)
+        else:
+            return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
     def _size(self, dim):
         i = self._schema.get(dim)

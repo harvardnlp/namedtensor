@@ -19,7 +19,7 @@ class _Schema:
             names = names.split()
             return _Schema(names, mask)
         if isinstance(names, _Schema):
-            return names
+            return _Schema(names._names, mask)
         return _Schema(names, mask)
 
     def get(self, name):

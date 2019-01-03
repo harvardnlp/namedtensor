@@ -161,3 +161,16 @@ def test_ops():
     base2 = ntorch.log(base1)
 
     base2 = ntorch.exp(base1)
+
+@pytest.mark.xfail
+def test_mask():
+    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base2 = base1.mask_to("alpha")
+    print(base2._schema._masked)
+    base2 = base2.softmax("alpha")
+
+def test_unmask():
+    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base2 = base1.mask_to("alpha")
+    base2 = base2.mask_to("")
+    base2 = base2.softmax("alpha")

@@ -24,7 +24,6 @@ _noshift = {"abs", "acos",  "asin", "atan", "byte",
 
 class MyMetaclass(type):
     def __getattr__(cls, name):
-        print(name)
         if name in _build:
             def call(names, *args, **kwargs):
                 return build(getattr(torch, name), names, *args, **kwargs)
