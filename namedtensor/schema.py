@@ -1,4 +1,4 @@
-
+from collections import OrderedDict
 
 class _Schema:
     def __init__(self, names, mask=0):

@@ -1,5 +1,4 @@
-from .core import NamedTensor
-import core as nt
+from . import NamedTensor, ntorch
 import numpy as np
 import torch
 import torch.nn as nn
@@ -19,20 +18,20 @@ class WrappedModule(nn.Module):
 class NTModule(nn.Module):
     def __init__(self):
         super(NTModule, self).__init__()
-        self.w = nt.randn(dict(inhid=10, outhid=20))
-        self.w_param = nn.Parameter(self.w.tensor)
+        self.w = ntorch.randn(dict(inhid=10, outhid=20))
+        self.w_param = nn.Parameter(self.w._tensor)
 
-        self.b = nt.randn(dict(outhid=20))
-        self.b_param = nn.Parameter(self.b.tensor)
+        self.b = ntorch.randn(dict(outhid=20))
+        self.b_param = nn.Parameter(self.b._tensor)
 
     def forward(self, inp):
         return inp.contract('inhid', self.w) + self.b
 
 def test_run():
     wm = WrappedModule()
-    wm.forward(nt.randn(dict(batch=20, inhid=10)))
+    wm.forward(ntorch.randn(dict(batch=20, inhid=10)))
     nm = NTModule()
-    nm.forward(nt.randn(dict(batch=20, inhid=10)))
+    nm.forward(ntorch.randn(dict(batch=20, inhid=10)))
 
 
 def pe(d_model):
@@ -49,7 +48,7 @@ def pe(d_model):
 class Embedding(nn.Module):
     def __init__(self, num_embeddings, embeddings_dim):
         super(Embedding, self).__init__()
-        self.w = nt.randn(dict(numembeddings = num_embeddings,
+        self.w = ntorch.randn(dict(numembeddings = num_embeddings,
                                embeddingsdim = embeddings_dim))
         self.w_param = nn.Parameter(self.w.tensor)
 
@@ -58,7 +57,7 @@ class Embedding(nn.Module):
 
 def test_embedding():
     wm = Embedding(20, 50)
-    out = wm.forward(nt.ones(dict(batch=20, seqlen=10)).long())
+    out = wm.forward(ntorch.ones(dict(batch=20, seqlen=10)).long())
     print(out.named_shape)
     assert out.named_shape == \
         OrderedDict([("batch", 20), ("seqlen", 10), ("embeddingsdim", 50)])

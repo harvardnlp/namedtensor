@@ -1,4 +1,4 @@
-from .core import NamedTensor, contract, assert_match, lift, build, ones
+from . import assert_match, NamedTensor, contract, build, ntorch
 import numpy as np
 import torch
 from collections import OrderedDict
@@ -11,7 +11,6 @@ def make_tensors(sizes):
 
 def test_shift():
     for ntensor in make_tensors(dict(alpha=10, beta=2, gamma=50)):
-
         # Split
         ntensor = ntensor.shift('alpha -> (delta epsilon)', delta = 2)
         assert ntensor.shape == (2, 5, 2, 50)
@@ -32,7 +31,6 @@ def test_shift():
                                                    ("alpha", 10)])
 
 def test_reduce():
-
     for ntensor in make_tensors(dict(alpha=10, beta=2, gamma=50)):
         ntensora = ntensor.mean("alpha")
         assert ntensora.named_shape == OrderedDict([("beta", 2),
@@ -47,9 +45,8 @@ def test_apply():
     base = torch.zeros([10, 2, 50])
     ntensor = NamedTensor(base, 'alpha beta gamma')
     ntensor = ntensor.softmax("alpha")
-    ntensorb = ones(names=dict(beta=2, gamma=50))
+    ntensorb = ntorch.ones(dict(beta=2, gamma=50))
     assert (ntensor.sum("alpha") == ntensorb).all()
-
 
 
 @pytest.mark.xfail
@@ -74,8 +71,8 @@ def test_multiple():
     ntensor3 = ntensor1.mul(ntensor2).shift("alpha delta beta gamma")
 
 
-    assert base3.shape == ntensor3.tensor.shape
-    assert (base3 == ntensor3.tensor).all()
+    assert base3.shape == ntensor3.shape
+    assert (base3 == ntensor3._tensor).all()
 
 
 def test_contract():
@@ -89,8 +86,8 @@ def test_contract():
 
     ntensor3 = contract("beta gamma delta", ntensor1, ntensor2)
     assert ntensor3.named_shape == OrderedDict([("alpha", 10)])
-    assert ntensor3.tensor.shape == base3.shape
-    assert (np.abs(ntensor3.tensor - base3) < 1e-5).all()
+    assert ntensor3.shape == base3.shape
+    assert (np.abs(ntensor3._tensor - base3) < 1e-5).all()
 
 
         # ntensora = ntensor.reduce("alpha", "mean")
@@ -130,7 +127,7 @@ def test_access():
     ntensor1 = NamedTensor(base1, 'alpha beta gamma')
 
     assert (ntensor1.access("gamma")[45] == base1[:, :, 45]).all()
-    assert (ntensor1.get("gamma", 1).tensor == base1[:, :, 1]).all()
+    assert (ntensor1.get("gamma", 1)._tensor == base1[:, :, 1]).all()
 
     assert (ntensor1.access("gamma beta")[45, 1] == base1[:, 1, 45]).all()
 
@@ -144,7 +141,7 @@ def test_takes():
     ntensor2 = NamedTensor(indices, "indices")
 
     selected = ntensor1.index_select("beta", ntensor2)
-    assert (selected.tensor \
+    assert (selected._tensor \
             == base1.index_select(1, indices)).all()
     print(selected.named_shape)
     assert selected.named_shape ==  \
@@ -157,3 +154,10 @@ def test_narrow():
     narrowed = ntensor1.narrow("gamma -> ngamma", 0, 25)
     assert narrowed.named_shape ==  \
         OrderedDict([("alpha", 10), ("beta", 2), ("ngamma", 25)])
+
+
+def test_ops():
+    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base2 = ntorch.log(base1)
+
+    base2 = ntorch.exp(base1)

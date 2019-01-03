@@ -1,5 +1,4 @@
-from .core import NamedTensor
-import core as nt
+from . import NamedTensor, ntorch
 import numpy as np
 import torch
 import torch.nn as nn
@@ -22,10 +21,9 @@ def test_attention():
 
     key_names = dict(batch=batch, key=keys, hidden=hidden)
     SimpleAttention().forward(
-        nt.build(torch.randn,
-                 dict(batch=batch, queries=queries, hidden=hidden)),
-        nt.build(torch.randn, key_names),
-        nt.build(torch.randn, key_names))
+        ntorch.randn(dict(batch=batch, queries=queries, hidden=hidden)),
+        ntorch.randn(key_names),
+        ntorch.randn(key_names))
 
 
 
@@ -70,7 +68,7 @@ class EinsumAttention():
         return rt, at
 
 def random_ntensors(names, num=1, requires_grad=False):
-    tensors = [nt.build(torch.randn, names, requires_grad=requires_grad)
+    tensors = [ntorch.randn(names, requires_grad=requires_grad)
                for i in range(0, num)]
     return tensors[0] if num == 1 else tensors
 
@@ -86,14 +84,13 @@ class NamedTensorAttention:
     def forward(self, Y, ht, rt1):
         tmp = ht.contract("inhid", self.Wh) + \
               rt1.contract("inhid", self.Wr)
-        at = (Y.contract("inhid", self.WY) + tmp + self.bM) \
-             .tanh() \
+        at = ntorch.tanh(Y.contract("inhid", self.WY) + tmp + self.bM) \
              .contract("outhid", self.w) \
              .softmax("seqlen")
 
         rt = Y.contract("seqlen", at).shift("inhid -> (outhid)") \
-             .add((rt1.contract("inhid", self.Wt) + self.br)
-                  .tanh())
+             + ntorch.tanh(rt1.contract("inhid", self.Wt) + self.br)
+
         return rt, at
 
 def test_attention():
