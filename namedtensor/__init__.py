@@ -12,6 +12,7 @@ def _im_init():
     ## PRINT SETUP
            from PIL.Image import fromarray
            from IPython import get_ipython
+           import torch
            def numpy_to_png(a):
                return fromarray(np.array(np.clip(a, 0, 1) * 255,
                                             dtype='uint8'))._repr_png_()
