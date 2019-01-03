@@ -45,8 +45,7 @@ def test_apply():
     base = torch.zeros([10, 2, 50])
     ntensor = NamedTensor(base, 'alpha beta gamma')
     ntensor = ntensor.softmax("alpha")
-    ntensorb = ntorch.ones(dict(beta=2, gamma=50))
-    assert (ntensor.sum("alpha") == ntensorb).all()
+    assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
 
 
 @pytest.mark.xfail
@@ -174,3 +173,8 @@ def test_unmask():
     base2 = base1.mask_to("alpha")
     base2 = base2.mask_to("")
     base2 = base2.softmax("alpha")
+
+
+def test_scalar():
+    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base2 = base1 + 10

@@ -25,12 +25,16 @@ _info = {"dim", "is_contigious", "is_pinned", "size",
 
 # Takes a dim arg and reduces it.
 _reduce = {"argmax", "argmin", "cumprod",
-           "cumsum", "logsumexp", "max", "mean", "median",
-           "min", "norm", "prod", "squeeze", "std",
+           "cumsum", "logsumexp", "mean", "median",
+            "norm", "prod", "squeeze", "std",
            "sum"}
 
+_reduce_multi = {"min", "max", "unbind"}
+
+
 # Broadcast and apply.
-_binop = {"add", "masked_fill", "sub", "div", "mul", "eq", "ne", "lt", "gt", "le", "ge", "type_as"}
+_binop = {"add", "masked_fill", "sub", "div", "mul", "eq",
+          "ne", "lt", "gt", "le", "ge", "type_as"}
 
 def build(init, names, *args, **kwargs):
     tensor = init(tuple(names.values()), *args, **kwargs)
@@ -88,9 +92,6 @@ class NamedTensor(NamedTensorCore):
                          dim=self._schema.get(name)))
 
 
-    def unbind(self, name):
-        results = self._tensor.unbind(self._schema.get(name))
-        return tuple((self._new(r, name) for r in results))
 
     def get(self, name, idx):
         results = self.access(name)[idx]
@@ -99,6 +100,20 @@ class NamedTensor(NamedTensorCore):
     def sort(self, name):
         results = self._tensor.sort(self._schema.get(name))
         return tuple((self._new(r) for r in results))
+
+
+    def unbind(self, name):
+        results = self._tensor.unbind(self._schema.get(name))
+        return tuple((self._new(r, name) for r in results))
+
+    def max(self, name):
+        results = self._tensor.max(self._schema.get(name))
+        return tuple((self._new(r) for r in results))
+
+    def min(self, name):
+        results = self._tensor.max(self._schema.get(name))
+        return tuple((self._new(r) for r in results))
+
 
     def renorm(self, p, name, maxnorm):
         results = self._tensor.renorm(p, self.get(name), maxnorm)
@@ -164,16 +179,25 @@ class NamedTensor(NamedTensorCore):
                         cur = cur._new(method(cur._schema.get(d), *args, **kwargs), d)
                         method =  getattr(cur._tensor, methodname)
                     return cur
+            elif methodname in _reduce_multi:
+                def call(dim, *args, **kwargs):
+                    method = getattr(self._tensor, methodname)
+                    results = method(self._schema.get(d), *args, **kwargs)
+                    return tuple((cur._new(r, d) for r in results))
 
             elif methodname in _binop:
                 def call(other, *args):
-                    b = other
-                    order = self._broadcast_order(b)
-                    a1 = self._force_order(order)
-                    b1 = b._force_order(order)
-                    method =  getattr(a1._tensor, methodname)
-                    assert_match(a1, b1)
-                    return a1._new(method(b1._tensor, *args))
+                    if isinstance(other, NamedTensor):
+                        b = other
+                        order = self._broadcast_order(b)
+                        a1 = self._force_order(order)
+                        b1 = b._force_order(order)
+                        method =  getattr(a1._tensor, methodname)
+                        assert_match(a1, b1)
+                        return a1._new(method(b1._tensor, *args))
+                    else:
+                        method = getattr(self._tensor, methodname)
+                        return self._new(method(other, *args))
             else:
                 assert False, "Method not implemented"
             return call
@@ -183,21 +207,3 @@ class NamedTensor(NamedTensorCore):
     def contract(self, names, *others):
         "Contract dimension `names` with each of the other tensors"
         return contract(names, *((self,) + others))
-
-
-## (Just for the blog post)
-##
-def _im_init():
-    ## PRINT SETUP
-           from PIL.Image import fromarray
-           from IPython import get_ipython
-           def numpy_to_png(a):
-               return fromarray(np.array(np.clip(a, 0, 1) * 255,
-                                            dtype='uint8'))._repr_png_()
-           png = get_ipython().display_formatter.formatters['image/png']
-           txt = get_ipython().display_formatter.formatters['text/plain']
-
-           png.for_type(torch.Tensor, lambda t: numpy_to_png(t.numpy()))
-           txt.for_type(torch.Tensor, lambda *x: "");
-           png.for_type(NamedTensor, lambda t: numpy_to_png(t.tensor.numpy()))
-           txt.for_type(NamedTensor, lambda *x: "");
