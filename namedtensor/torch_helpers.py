@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from .core import NamedTensorCore, assert_match
+from .core import NamedTensorBase, assert_match
 import opt_einsum as oe
 
 # Torch Ops
@@ -127,7 +127,7 @@ def contract(names, *tensors):
     return NamedTensor(oe.contract(*args, backend="torch"), keep)
 
 
-class NamedTensor(NamedTensorCore):
+class NamedTensor(NamedTensorBase):
     def index_select(self, name, index):
         new_names = []
         sizes = []

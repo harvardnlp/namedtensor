@@ -20,10 +20,44 @@ def assert_match(*tensors):
     assert not failure, " ".join([str(t._sizes) for t in tensors])
 
 
-class NamedTensorCore:
+class NamedTensorBase:
+    """
+    Attributes:
+        tensor: The raw tensor data
+        dims: Tuple of dimension names associated with this array.
+        ndim: Number of dimensions
+        sizes: The raw dimension sizes
+        shape: Ordered mapping from dimension names to lengths.
+    """
+
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
+
+    @property
+    def dims(self):
+        return tuple(self._schema.names)
+
+    @property
+    def named_shape(self):
+        "Return an ordered dict of the available dimensions"
+        return OrderedDict(
+            ((d, self.shape[i]) for i, d in self._schema.enum_masked())
+        )
+
+    @property
+    def shape(self):
+        "Return the raw shape of the tensor"
+        return self._tensor.shape
+
+    @property
+    def tensor(self):
+        return self._tensor
+
+    @property
+    def shape(self):
+        "Return the raw shape of the tensor"
+        return self._tensor.shape
 
     def _new(self, tensor, drop=None, updates=None, mask=None):
         update_dict = {}
@@ -39,28 +73,6 @@ class NamedTensorCore:
             self._schema._masked if mask is None else mask,
         )
 
-    @property
-    def tensor(self):
-        "Return the raw tensor"
-        return self._tensor
-
-    @property
-    def shape(self):
-        "Return the raw shape of the tensor"
-        return self._tensor.shape
-
-    @property
-    def named_shape(self):
-        "Return an ordered dict of the available dimensions"
-        return OrderedDict(
-            ((d, self.shape[i]) for i, d in self._schema.enum_masked())
-        )
-
-    def mask_to(self, name):
-        if name == "":
-            return self._new(self._tensor, mask=0)
-        else:
-            return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
     def _size(self, dim):
         i = self._schema.get(dim)
@@ -68,6 +80,12 @@ class NamedTensorCore:
 
     def _to_einops(self):
         return self._schema._to_einops()
+
+    def mask_to(self, name):
+        if name == "":
+            return self._new(self._tensor, mask=0)
+        else:
+            return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
     def shift(self, *ops, **kwargs):
         """
