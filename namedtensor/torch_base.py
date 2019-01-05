@@ -1,5 +1,6 @@
 import torch
-from .torch_helpers import build
+from .torch_helpers import NamedTensor
+import opt_einsum as oe
 
 _build = {"ones", "zeros", "randn"}
 
@@ -72,12 +73,19 @@ _noshift = {
 }
 
 
-class MyMetaclass(type):
+def make_tuple(names):
+    if isinstance(names, tuple):
+        return names
+    else:
+        return (names,)
+
+
+class NTorch(type):
     def __getattr__(cls, name):
         if name in _build:
 
             def call(names, *args, **kwargs):
-                return build(getattr(torch, name), names, *args, **kwargs)
+                return cls.build(getattr(torch, name), names, *args, **kwargs)
 
             return call
         elif name in _noshift:
@@ -87,6 +95,43 @@ class MyMetaclass(type):
 
             return call
 
+    @classmethod
+    def dot(cls, names, *tensors):
+        args = []
+        ids = {}
+        seen_names = []
+        for t in tensors:
+            group = []
+            for name in t._schema._names:
+                if name not in ids:
+                    ids[name] = len(ids)
+                    seen_names.append(name)
+                group.append(ids[name])
+            args.append(t._tensor)
+            args.append(group)
+        names = make_tuple(names)
+        keep = [n for n in seen_names if n not in names]
+        args.append([ids[n] for n in keep])
+        return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
-class ntorch(metaclass=MyMetaclass):
+    @staticmethod
+    def narrow(tensor1, start, end, **kwargs):
+        key, value = next(iter(kwargs.items()))
+        return tensor1._new(
+            tensor1._tensor.narrow(tensor1._schema.get(key), start, end),
+            updates=kwargs,
+        )
+
+    @staticmethod
+    def build(init, names, *args, **kwargs):
+        tensor = init(tuple(names.values()), *args, **kwargs)
+        names = tuple(names.keys())
+        return NamedTensor(tensor, names)
+
+    @staticmethod
+    def tensor(*args, **kwargs):
+        return NamedTensor(*args, **kwargs)
+
+
+class ntorch(metaclass=NTorch):
     pass

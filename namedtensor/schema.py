@@ -14,9 +14,6 @@ class _Schema:
 
     @staticmethod
     def build(names, mask):
-        if isinstance(names, str):
-            names = names.split()
-            return _Schema(names, mask)
         if isinstance(names, _Schema):
             return _Schema(names._names, mask)
         return _Schema(names, mask)

@@ -1,14 +1,13 @@
 from .schema import _Schema
 from einops import rearrange
 from collections import OrderedDict
-import re
 
 
 def assert_match(*tensors):
     sizes = {}
     failure = False
     for t in tensors:
-        shape = t.shape
+        shape = t.vshape
         for i, k in t._schema.enum_all():
             v = shape[i]
             if v == 1:
@@ -33,44 +32,38 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
+        assert len(self._tensor.shape) == len(self._schema._names)
 
     @property
     def dims(self):
         return tuple(self._schema.names)
 
     @property
-    def named_shape(self):
-        "Return an ordered dict of the available dimensions"
-        return OrderedDict(
-            ((d, self.shape[i]) for i, d in self._schema.enum_masked())
-        )
+    def vshape(self):
+        return tuple(self._tensor.size())
 
     @property
     def shape(self):
-        "Return the raw shape of the tensor"
-        return self._tensor.shape
-
-    @property
-    def tensor(self):
-        return self._tensor
-
-    def _new(self, tensor, drop=None, updates=None, mask=None):
-        update_dict = {}
-        if updates is not None:
-            for u in updates:
-                group = re.match(r"(\w+) -> (\w+)", updates)
-                start, end = group.groups()
-                update_dict[start] = end
-
-        return self.__class__(
-            tensor,
-            self._schema.drop(drop).update(update_dict),
-            self._schema._masked if mask is None else mask,
+        "Return an ordered dict of the available dimensions"
+        return OrderedDict(
+            ((d, self._tensor.size(i)) for i, d in self._schema.enum_masked())
         )
 
-    def _size(self, dim):
+    def size(self, dim):
+        "Return the raw shape of the tensor"
         i = self._schema.get(dim)
-        return self.shape[i]
+        return self._tensor.size(i)
+
+    @property
+    def values(self):
+        return self._tensor
+
+    def _new(self, tensor, drop=None, updates={}, mask=None):
+        return self.__class__(
+            tensor,
+            self._schema.drop(drop).update(updates),
+            self._schema._masked if mask is None else mask,
+        )
 
     def _to_einops(self):
         return self._schema._to_einops()
@@ -81,62 +74,60 @@ class NamedTensorBase:
         else:
             return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
-    def shift(self, *ops, **kwargs):
-        """
-        A small transposition language for moving around dimensions
-        within a named tensor.
-        """
+    def stack(self, **kwargs):
+        "Stack any number of existing dimensions into a single new dimension."
         cur = self
-        for op in ops:
-            if op.strip().startswith("("):
-                cur = cur._merge(op)
-            elif op.strip().endswith(")"):
-                cur = cur._split(op, **kwargs)
-            elif op.strip().startswith("..."):
-                cur = cur._promote(op)
-            else:
-                cur = cur._rearrange(op)
+        for k, v in kwargs.items():
+            cur = cur._merge(v, k)
         return cur
 
-    def _merge(self, mergestr):
-        group = re.match(r"\(([\w+ ?]+)\) -> (\w+)", mergestr)
-        strnames, dim = group.groups()
-        names = strnames.split()
+    def split(self, **kwargs):
+        "Split any number of existing dimensions into new dimensions."
+        cur = self
+        for k, v in kwargs.items():
+            if isinstance(v, tuple):
+                cur = cur._split(k, v, kwargs)
+        return cur
+
+    def transpose(self, *dims):
+        "Return a new DataArray object with transposed dimensions."
+
+        recipe = "%s -> %s" % (self._to_einops(), " ".join(dims))
+        tensor = rearrange(self._tensor, recipe)
+        return self.__class__(tensor, dims)
+
+    def _merge(self, names, dim):
         s = ""
-        ex = ""
+        ex = []
         first = True
         for d in self._schema._names:
             if d not in names:
                 s += " " + d
-                ex += " " + d
+                ex.append(d)
             elif first:
-                s += " (" + strnames + ")"
-                ex += " " + dim
+                s += " (" + " ".join(names) + ")"
+                ex.append(dim)
                 first = False
-
         tensor = rearrange(
             self._tensor, "%s -> %s" % (self._schema._to_einops(), s)
         )
         return self.__class__(tensor, ex)
 
-    def _split(self, splitstr, **kwargs):
-        group = re.match(r"(\w+) -> \(([\w+ ?]+)\)", splitstr)
-        dim, strnames = group.groups()
-        names = strnames.split()
+    def _split(self, dim, names, size_dict):
         query = ""
-        ex = ""
+        ex = []
         for i, d in self._schema.enum_all():
             if d != dim:
                 query += " " + d
-                ex += " " + d
+                ex.append(d)
             else:
-                query += " (" + strnames + ")"
-                ex += " " + strnames
+                query += " (" + " ".join(names) + ")"
+                ex += names
 
         tensor = rearrange(
             self._tensor,
-            "%s -> %s" % (query, ex),
-            **{d: kwargs[d] for d in names if d in kwargs}
+            "%s -> %s" % (query, " ".join(ex)),
+            **{d: size_dict[d] for d in names if d in size_dict}
         )
         return self.__class__(tensor, ex)
 
@@ -156,13 +147,13 @@ class NamedTensorBase:
 
     def _force_order(self, names):
         s = ""
-        ex = ""
+        ex = []
         for d in names:
             if d not in self._schema._names:
-                ex += " " + d
+                ex.append(d)
                 s += " ()"
             else:
-                ex += " " + d
+                ex.append(d)
                 s += " " + d
         tensor = rearrange(self._tensor, "%s -> %s" % (self._to_einops(), s))
         return self.__class__(tensor, ex)
