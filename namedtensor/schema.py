@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+
 class _Schema:
     "Dimension names and order"
 
@@ -22,22 +23,20 @@ class _Schema:
 
     def get(self, name):
         if name not in self._axes:
-            raise RuntimeError('Dimension ' + name + ' does not exist')
+            raise RuntimeError("Dimension " + name + " does not exist")
         i = self._axes[name]
         if i < self._masked:
-            raise RuntimeError('Dimension ' + name + ' is masked')
+            raise RuntimeError("Dimension " + name + " is masked")
         return i
 
     def drop(self, name):
-        return _Schema([n for n in self._names if not n == name],
-                       self._masked)
+        return _Schema([n for n in self._names if not n == name], self._masked)
 
     def update(self, update):
-        return _Schema([update.get(n, n) for n in self._names],
-                       self._masked)
+        return _Schema([update.get(n, n) for n in self._names], self._masked)
 
     def enum_masked(self):
-        return enumerate(self._names[self._masked:], self._masked)
+        return enumerate(self._names[self._masked :], self._masked)
 
     def enum_all(self):
         return enumerate(self._names)

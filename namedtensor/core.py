@@ -28,13 +28,13 @@ def assert_match(*tensors):
         shape = t.shape
         for i, k in t._schema.enum_all():
             v = shape[i]
-            if v == 1: continue
+            if v == 1:
+                continue
             if k in sizes:
-                failure = (failure or sizes[k] != v)
+                failure = failure or sizes[k] != v
             else:
                 sizes[k] = v
     assert not failure, " ".join([str(t._sizes) for t in tensors])
-
 
 
 class NamedTensorCore:
@@ -50,8 +50,11 @@ class NamedTensorCore:
                 start, end = group.groups()
                 update_dict[start] = end
 
-        return self.__class__(tensor, self._schema.drop(drop).update(update_dict),
-                              self._schema._masked if mask is None else mask)
+        return self.__class__(
+            tensor,
+            self._schema.drop(drop).update(update_dict),
+            self._schema._masked if mask is None else mask,
+        )
 
     @property
     def tensor(self):
@@ -66,8 +69,7 @@ class NamedTensorCore:
     @property
     def named_shape(self):
         "Return an ordered dict of the available dimensions"
-        return OrderedDict(((d, self.shape[i])
-                            for i, d in self._schema.enum_masked()))
+        return OrderedDict(((d, self.shape[i]) for i, d in self._schema.enum_masked()))
 
     def mask_to(self, name):
         if name == "":
@@ -116,7 +118,7 @@ class NamedTensorCore:
                 ex += " " + dim
                 first = False
 
-        tensor = rearrange(self._tensor, "%s -> %s"%(self._schema._to_einops(), s))
+        tensor = rearrange(self._tensor, "%s -> %s" % (self._schema._to_einops(), s))
         return self.__class__(tensor, ex)
 
     def _split(self, splitstr, **kwargs):
@@ -133,22 +135,24 @@ class NamedTensorCore:
                 query += " (" + strnames + ")"
                 ex += " " + strnames
 
-        tensor = rearrange(self._tensor, "%s -> %s"%(query, ex),
-                           **{d:kwargs[d] for d in names
-                              if d in kwargs})
+        tensor = rearrange(
+            self._tensor,
+            "%s -> %s" % (query, ex),
+            **{d: kwargs[d] for d in names if d in kwargs}
+        )
         return self.__class__(tensor, ex)
 
     def _rearrange(self, term):
         assert ")" not in term
-        recipe = "%s -> %s"%(self._to_einops(), term)
+        recipe = "%s -> %s" % (self._to_einops(), term)
         tensor = rearrange(self._tensor, recipe)
         return self.__class__(tensor, term)
 
     def _promote(self, dims):
         "Move dims to the front of the line"
-        term = " ".join([d for d in self._schema._names
-                         if d not in dims]
-                        + dims.split()[1:])
+        term = " ".join(
+            [d for d in self._schema._names if d not in dims] + dims.split()[1:]
+        )
         return self._rearrange(term)
 
     def _force_order(self, names):
@@ -161,9 +165,8 @@ class NamedTensorCore:
             else:
                 ex += " " + d
                 s += " " + d
-        tensor = rearrange(self._tensor, "%s -> %s"% (self._to_einops(), s))
+        tensor = rearrange(self._tensor, "%s -> %s" % (self._to_einops(), s))
         return self.__class__(tensor, ex)
-
 
     def _broadcast_order(self, other):
         order = []
