@@ -1,17 +1,15 @@
 from collections import OrderedDict
 
 class _Schema:
+    "Dimension names and order"
+
     def __init__(self, names, mask=0):
         self._names = names
-        # Number of masked leading dimensions
         self._masked = mask
         self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
 
-    def enum_masked(self):
-        return enumerate(self._names[self._masked:], self._masked)
-
-    def enum_all(self):
-        return enumerate(self._names)
+    def _to_einops(self):
+        return " ".join(self._names)
 
     @staticmethod
     def build(names, mask):
@@ -38,5 +36,8 @@ class _Schema:
         return _Schema([update.get(n, n) for n in self._names],
                        self._masked)
 
-    def _to_einops(self):
-        return " ".join(self._names)
+    def enum_masked(self):
+        return enumerate(self._names[self._masked:], self._masked)
+
+    def enum_all(self):
+        return enumerate(self._names)

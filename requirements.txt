@@ -1,2 +1,5 @@
+torch
+numpy
 pytest
 einops
+opt-einsum
