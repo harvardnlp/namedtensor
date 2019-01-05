@@ -54,11 +54,6 @@ class NamedTensorBase:
     def tensor(self):
         return self._tensor
 
-    @property
-    def shape(self):
-        "Return the raw shape of the tensor"
-        return self._tensor.shape
-
     def _new(self, tensor, drop=None, updates=None, mask=None):
         update_dict = {}
         if updates is not None:
@@ -72,7 +67,6 @@ class NamedTensorBase:
             self._schema.drop(drop).update(update_dict),
             self._schema._masked if mask is None else mask,
         )
-
 
     def _size(self, dim):
         i = self._schema.get(dim)
