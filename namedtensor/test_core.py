@@ -2,7 +2,6 @@ from . import assert_match, NamedTensor, contract, build, ntorch
 import numpy as np
 import torch
 from collections import OrderedDict
-import torch.nn.functional as F
 import pytest
 
 
@@ -35,7 +34,9 @@ def test_shift():
 def test_reduce():
     for ntensor in make_tensors(dict(alpha=10, beta=2, gamma=50)):
         ntensora = ntensor.mean("alpha")
-        assert ntensora.named_shape == OrderedDict([("beta", 2), ("gamma", 50)])
+        assert ntensora.named_shape == OrderedDict(
+            [("beta", 2), ("gamma", 50)]
+        )
 
         ntensorb = ntensor.sum("alpha gamma")
         assert ntensorb.named_shape == OrderedDict([("beta", 2)])
@@ -50,7 +51,9 @@ def test_apply():
 
 @pytest.mark.xfail
 def test_fail():
-    for base1, base2 in zip(make_tensors([10, 2, 50]), make_tensors([10, 20, 2])):
+    for base1, base2 in zip(
+        make_tensors([10, 2, 50]), make_tensors([10, 20, 2])
+    ):
         ntensor1 = NamedTensor(base1, "alpha beta gamma")
         ntensor2 = NamedTensor(base2, "alpha beat gamma")
         assert_match(ntensor1, ntensor2)
@@ -151,11 +154,10 @@ def test_narrow():
     )
 
 
-def test_ops():
-    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
-    base2 = ntorch.log(base1)
-
-    base2 = ntorch.exp(base1)
+# def test_ops():
+#     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+#     base2 = ntorch.log(base1)
+#     base2 = ntorch.exp(base1)
 
 
 @pytest.mark.xfail
@@ -173,6 +175,6 @@ def test_unmask():
     base2 = base2.softmax("alpha")
 
 
-def test_scalar():
-    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
-    base2 = base1 + 10
+# def test_scalar():
+#     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+#     base2 = base1 + 10

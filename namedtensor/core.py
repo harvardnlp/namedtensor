@@ -1,24 +1,7 @@
 from .schema import _Schema
-from einops import reduce, rearrange
+from einops import rearrange
 from collections import OrderedDict
 import re
-
-# def lift(fn, in_specs, out_spec):
-#     in_specs = [s.split() for s in in_specs]
-#     out_spec = out_spec.split()
-#     def lifted(*inputs):
-#         assert_match(inputs)
-#         assert len(inputs) == len(in_specs)
-#         lifted_inputs = []
-#         batch_dims = []
-#         for inp, spec in zip(inputs, in_specs):
-#             lifted_inputs.append(inp._promote(spec).tensor
-#                                  if spec is not None else inp)
-#             if spec is not None:
-#                 batch_dims = [d for d in inp._names not in spec]
-#         out = fn(*lifted_inputs)
-#         return NamedTensor(out, batch_dims + out_spec)
-#     return lifted
 
 
 def assert_match(*tensors):
@@ -69,7 +52,9 @@ class NamedTensorCore:
     @property
     def named_shape(self):
         "Return an ordered dict of the available dimensions"
-        return OrderedDict(((d, self.shape[i]) for i, d in self._schema.enum_masked()))
+        return OrderedDict(
+            ((d, self.shape[i]) for i, d in self._schema.enum_masked())
+        )
 
     def mask_to(self, name):
         if name == "":
@@ -103,7 +88,6 @@ class NamedTensorCore:
 
     def _merge(self, mergestr):
         group = re.match(r"\(([\w+ ?]+)\) -> (\w+)", mergestr)
-        shape = self.shape
         strnames, dim = group.groups()
         names = strnames.split()
         s = ""
@@ -118,7 +102,9 @@ class NamedTensorCore:
                 ex += " " + dim
                 first = False
 
-        tensor = rearrange(self._tensor, "%s -> %s" % (self._schema._to_einops(), s))
+        tensor = rearrange(
+            self._tensor, "%s -> %s" % (self._schema._to_einops(), s)
+        )
         return self.__class__(tensor, ex)
 
     def _split(self, splitstr, **kwargs):
@@ -151,7 +137,8 @@ class NamedTensorCore:
     def _promote(self, dims):
         "Move dims to the front of the line"
         term = " ".join(
-            [d for d in self._schema._names if d not in dims] + dims.split()[1:]
+            [d for d in self._schema._names if d not in dims]
+            + dims.split()[1:]
         )
         return self._rearrange(term)
 
@@ -176,11 +163,3 @@ class NamedTensorCore:
         for d in self._schema._names:
             order.append(d)
         return order
-
-    def _binop(a, op, b):
-        order = a._broadcast_order(b)
-        a1 = a._force_order(order)
-        b1 = b._force_order(order)
-        assert_match(a1, b1)
-        c = op(a1._tensor, b1._tensor)
-        return self.__class__(c, a1._names)

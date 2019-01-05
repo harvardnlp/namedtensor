@@ -5,17 +5,21 @@ import numpy as np
 
 version = "0.0.1"
 
+# For flake8 compatibility.
+__all__ = [assert_match, ntorch, NamedTensor, build, contract]
 
-## (Just for the blog post)
-##
+
+# (Just for the blog post)
 def _im_init():
-    ## PRINT SETUP
+    # PRINT SETUP
     from PIL.Image import fromarray
     from IPython import get_ipython
     import torch
 
     def numpy_to_png(a):
-        return fromarray(np.array(np.clip(a, 0, 1) * 255, dtype="uint8"))._repr_png_()
+        return fromarray(
+            np.array(np.clip(a, 0, 1) * 255, dtype="uint8")
+        )._repr_png_()
 
     png = get_ipython().display_formatter.formatters["image/png"]
     txt = get_ipython().display_formatter.formatters["text/plain"]

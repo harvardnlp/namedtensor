@@ -1,4 +1,3 @@
-import torch
 import torch.nn.functional as F
 from .core import NamedTensorCore, assert_match
 import opt_einsum as oe
@@ -238,7 +237,9 @@ class NamedTensor(NamedTensorCore):
             elif methodname in _noshift_dim:
 
                 def call(dim, *args, **kwargs):
-                    return self._new(method(self._schema.get(dim), *args, **kwargs))
+                    return self._new(
+                        method(self._schema.get(dim), *args, **kwargs)
+                    )
 
             elif methodname in _info:
                 # Call and return
@@ -250,19 +251,19 @@ class NamedTensor(NamedTensorCore):
                     cur = self
                     method = getattr(self._tensor, methodname)
                     for d in dim.split():
-                        cur = cur._new(method(cur._schema.get(d), *args, **kwargs), d)
+                        cur = cur._new(
+                            method(cur._schema.get(d), *args, **kwargs), d
+                        )
                         method = getattr(cur._tensor, methodname)
                     return cur
 
             elif methodname in _reduce_multi:
-
                 def call(dim, *args, **kwargs):
                     method = getattr(self._tensor, methodname)
-                    results = method(self._schema.get(d), *args, **kwargs)
-                    return tuple((cur._new(r, d) for r in results))
-
+                    results = method(self._schema.get(dim), *args, **kwargs)
+                    return tuple((self._new(r, dim)
+                                  for r in results))
             elif methodname in _binop:
-
                 def call(other, *args):
                     if isinstance(other, NamedTensor):
                         b = other

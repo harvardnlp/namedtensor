@@ -1,28 +1,26 @@
 from . import NamedTensor, ntorch
-import numpy as np
 import torch
-import torch.nn as nn
-from collections import OrderedDict
 import torch.nn.functional as F
-import pytest
 
 
 def attention(query, key, value):
-    return key.contract("hidden", query).softmax("keys").contract("keys", value)
-
-
-def test_attention():
-    batch = 50
-    queries = 20
-    keys = 15
-    hidden = 10
-
-    key_names = dict(batch=batch, key=keys, hidden=hidden)
-    SimpleAttention().forward(
-        ntorch.randn(dict(batch=batch, queries=queries, hidden=hidden)),
-        ntorch.randn(key_names),
-        ntorch.randn(key_names),
+    return (
+        key.contract("hidden", query).softmax("keys").contract("keys", value)
     )
+
+
+# def test_attention():
+#     batch = 50
+#     queries = 20
+#     keys = 15
+#     hidden = 10
+
+#     key_names = dict(batch=batch, key=keys, hidden=hidden)
+#     SimpleAttention().forward(
+#         ntorch.randn(dict(batch=batch, queries=queries, hidden=hidden)),
+#         ntorch.randn(key_names),
+#         ntorch.randn(key_names),
+#     )
 
 
 # Parameters
@@ -30,7 +28,9 @@ def test_attention():
 
 
 def random_tensors(shape, num=1, requires_grad=False):
-    tensors = [torch.randn(shape, requires_grad=requires_grad) for i in range(0, num)]
+    tensors = [
+        torch.randn(shape, requires_grad=requires_grad) for i in range(0, num)
+    ]
     return tensors[0] if num == 1 else tensors
 
 
@@ -48,7 +48,9 @@ class EinsumAttention:
         self.WY, self.Wh, self.Wr, self.Wt = random_tensors(
             [in_hid, out_hid], num=4, requires_grad=True
         )
-        self.bM, self.br, self.w = random_tensors([out_hid], num=3, requires_grad=True)
+        self.bM, self.br, self.w = random_tensors(
+            [out_hid], num=3, requires_grad=True
+        )
 
     def forward(self, Y, ht, rt1):
         # -- [batch_size x hidden_dimension]
@@ -74,7 +76,9 @@ class EinsumAttention:
 
 
 def random_ntensors(names, num=1, requires_grad=False):
-    tensors = [ntorch.randn(names, requires_grad=requires_grad) for i in range(0, num)]
+    tensors = [
+        ntorch.randn(names, requires_grad=requires_grad) for i in range(0, num)
+    ]
     return tensors[0] if num == 1 else tensors
 
 
@@ -117,9 +121,3 @@ def test_attention():
     rt1 = NamedTensor(rt1, "batch inhid")
     nta = NamedTensorAttention()
     nr, na = nta.forward(Y, ht, rt1)
-
-
-def layer_norm(x):
-    mean = x.reduce("mean", "hidden")
-    std = x.reduce("std", "hidden")
-    return (x - mean).contract("hidden", self.a_2) / (std + self.eps) + self.b_2

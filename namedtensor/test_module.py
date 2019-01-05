@@ -1,10 +1,6 @@
-from . import NamedTensor, ntorch
-import numpy as np
-import torch
+from . import ntorch
 import torch.nn as nn
 from collections import OrderedDict
-import torch.nn.functional as F
-import pytest
 
 
 class WrappedModule(nn.Module):
@@ -36,18 +32,18 @@ def test_run():
     nm.forward(ntorch.randn(dict(batch=20, inhid=10)))
 
 
-def pe(d_model):
-    pe = nt.zeros(dict(size=MAX_LEN, dmodel=d_model))
-    position = NamedTensor(torch.arange(0, MAX_LEN).float(), "size")
-    val = (
-        NamedTensor(torch.arange(0, d_model, 2).float(), "tmp")
-        .mul(-(math.log(10000.0) / d_model))
-        .exp()
-        .contract(position)
-    )
-    pe.access("dmodel")[0::2] = val.sin()
-    pe.access("dmodel")[1::2] = val.cos()
-    return pe
+# def pe(d_model):
+#     pe = nt.zeros(dict(size=MAX_LEN, dmodel=d_model))
+#     position = NamedTensor(torch.arange(0, MAX_LEN).float(), "size")
+#     val = (
+#         NamedTensor(torch.arange(0, d_model, 2).float(), "tmp")
+#         .mul(-(math.log(10000.0) / d_model))
+#         .exp()
+#         .contract(position)
+#     )
+#     pe.access("dmodel")[0::2] = val.sin()
+#     pe.access("dmodel")[1::2] = val.cos()
+#     return pe
 
 
 class Embedding(nn.Module):
