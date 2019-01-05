@@ -1,6 +1,6 @@
 import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
-import opt_einsum as oe
+
 
 # Torch Ops
 # Return a tensor of the same dimensions
@@ -102,31 +102,6 @@ _binop = {
 }
 
 
-def build(init, names, *args, **kwargs):
-    tensor = init(tuple(names.values()), *args, **kwargs)
-    names = tuple(names.keys())
-    return NamedTensor(tensor, names)
-
-
-def contract(names, *tensors):
-    args = []
-    ids = {}
-    seen_names = []
-    for t in tensors:
-        group = []
-        for name in t._schema._names:
-            if name not in ids:
-                ids[name] = len(ids)
-                seen_names.append(name)
-            group.append(ids[name])
-        args.append(t._tensor)
-        args.append(group)
-    names = names.split()
-    keep = [n for n in seen_names if n not in names]
-    args.append([ids[n] for n in keep])
-    return NamedTensor(oe.contract(*args, backend="torch"), keep)
-
-
 class NamedTensor(NamedTensorBase):
     def index_select(self, name, index):
         new_names = []
@@ -135,10 +110,10 @@ class NamedTensor(NamedTensorBase):
             if n == name:
                 for n2 in index._schema._names:
                     new_names.append(n2)
-                    sizes.append(index._size(n2))
+                    sizes.append(index.size(n2))
             else:
                 new_names.append(n)
-                sizes.append(self._size(n))
+                sizes.append(self.size(n))
         return NamedTensor(
             self._tensor.index_select(
                 self._schema.get(name), index._tensor.view(-1)
@@ -146,13 +121,10 @@ class NamedTensor(NamedTensorBase):
             new_names,
         )
 
-    def narrow(self, change, start, end):
-        return self._new(
-            self._tensor.narrow(
-                self._schema.get(change.split("-")[0].strip()), start, end
-            ),
-            updates=change,
-        )
+    def narrow(self, start, end, **kwargs):
+        from .torch_base import ntorch
+
+        return ntorch.narrow(self, start, end, **kwargs)
 
     def softmax(self, name):
         return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
@@ -185,16 +157,14 @@ class NamedTensor(NamedTensorBase):
         return self._new(results)
 
     def access(self, dims):
-        term = " ".join(
-            dims.split() + [d for d in self._schema._names if d not in dims]
-        )
-        return self._rearrange(term)._tensor
+        term = dims.split() + [d for d in self._schema._names if d not in dims]
+        return self.transpose(*term)._tensor
 
-    def op(self, axis_op, dim=None, shift=None):
+    def op(self, axis_op, dim=None, **kwargs):
         kwargs = {}
         if dim is not None:
             kwargs["dim"] = self._schema.get(dim)
-        return self._new(axis_op(self._tensor, **kwargs), updates=shift)
+        return self._new(axis_op(self._tensor, **kwargs), updates=kwargs)
 
     def __add__(self, b):
         return self.add(b)
@@ -249,8 +219,10 @@ class NamedTensor(NamedTensorBase):
                 # Call, replace, and wrap
                 def call(dim, *args, **kwargs):
                     cur = self
+                    if not isinstance(dim, tuple):
+                        dim = (dim,)
                     method = getattr(self._tensor, methodname)
-                    for d in dim.split():
+                    for d in dim:
                         cur = cur._new(
                             method(cur._schema.get(d), *args, **kwargs), d
                         )
@@ -284,6 +256,8 @@ class NamedTensor(NamedTensorBase):
             return call
         assert False, "Method does not exist"
 
-    def contract(self, names, *others):
+    def dot(self, names, *others):
         "Contract dimension `names` with each of the other tensors"
-        return contract(names, *((self,) + others))
+        from .torch_base import ntorch
+
+        return ntorch.dot(names, *((self,) + others))
