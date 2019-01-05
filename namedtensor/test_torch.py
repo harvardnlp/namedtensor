@@ -52,22 +52,22 @@ class EinsumAttention:
             [out_hid], num=3, requires_grad=True
         )
 
-    def forward(self, Y, ht, rt1):
+    def forward(self, y, ht, rt1):
         # -- [batch_size x hidden_dimension]
         tmp = torch.einsum("ik,kl->il", [ht, self.Wh]) + torch.einsum(
             "ik,kl->il", [rt1, self.Wr]
         )
 
-        Mt = torch.tanh(
-            torch.einsum("ijk,kl->ijl", [Y, self.WY])
-            + tmp.unsqueeze(1).expand_as(Y)
+        mt = torch.tanh(
+            torch.einsum("ijk,kl->ijl", [y, self.WY])
+            + tmp.unsqueeze(1).expand_as(y)
             + self.bM
         )
         # -- [batch_size x sequence_length]
-        at = F.softmax(torch.einsum("ijk,k->ij", [Mt, self.w]), dim=-1)
+        at = F.softmax(torch.einsum("ijk,k->ij", [mt, self.w]), dim=-1)
 
         # -- [batch_size x hidden_dimension]
-        rt = torch.einsum("ijk,ij->ik", [Y, at]) + torch.tanh(
+        rt = torch.einsum("ijk,ij->ik", [y, at]) + torch.tanh(
             torch.einsum("ij,jk->ik", [rt1, self.Wt]) + self.br
         )
 
@@ -92,15 +92,15 @@ class NamedTensorAttention:
             dict(outhid=out_hid), num=3, requires_grad=True
         )
 
-    def forward(self, Y, ht, rt1):
+    def forward(self, y, ht, rt1):
         tmp = ht.contract("inhid", self.Wh) + rt1.contract("inhid", self.Wr)
         at = (
-            ntorch.tanh(Y.contract("inhid", self.WY) + tmp + self.bM)
+            ntorch.tanh(y.contract("inhid", self.WY) + tmp + self.bM)
             .contract("outhid", self.w)
             .softmax("seqlen")
         )
 
-        rt = Y.contract("seqlen", at).shift("inhid -> (outhid)") + ntorch.tanh(
+        rt = y.contract("seqlen", at).shift("inhid -> (outhid)") + ntorch.tanh(
             rt1.contract("inhid", self.Wt) + self.br
         )
 
@@ -110,14 +110,14 @@ class NamedTensorAttention:
 def test_attention():
     # Sampled dummy inputs
     # -- [batch_size x sequence_length x hidden_dimension]
-    Y = torch.randn(3, 5, in_hid)
+    y = torch.randn(3, 5, in_hid)
     # -- [batch_size x hidden_dimension]
     ht, rt1 = torch.randn(3, in_hid), torch.randn(3, in_hid)
     ea = EinsumAttention()
-    r, a = ea.forward(Y, ht, rt1)
+    r, a = ea.forward(y, ht, rt1)
 
-    Y = NamedTensor(Y, "batch seqlen inhid")
+    y = NamedTensor(y, "batch seqlen inhid")
     ht = NamedTensor(ht, "batch inhid")
     rt1 = NamedTensor(rt1, "batch inhid")
     nta = NamedTensorAttention()
-    nr, na = nta.forward(Y, ht, rt1)
+    nr, na = nta.forward(y, ht, rt1)

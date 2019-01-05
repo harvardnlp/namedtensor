@@ -36,7 +36,7 @@ class _Schema:
         return _Schema([update.get(n, n) for n in self._names], self._masked)
 
     def enum_masked(self):
-        return enumerate(self._names[self._masked:], self._masked)
+        return enumerate(self._names[self._masked :], self._masked)
 
     def enum_all(self):
         return enumerate(self._names)

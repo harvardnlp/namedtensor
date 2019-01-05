@@ -258,12 +258,14 @@ class NamedTensor(NamedTensorCore):
                     return cur
 
             elif methodname in _reduce_multi:
+
                 def call(dim, *args, **kwargs):
                     method = getattr(self._tensor, methodname)
                     results = method(self._schema.get(dim), *args, **kwargs)
-                    return tuple((self._new(r, dim)
-                                  for r in results))
+                    return tuple((self._new(r, dim) for r in results))
+
             elif methodname in _binop:
+
                 def call(other, *args):
                     if isinstance(other, NamedTensor):
                         b = other
