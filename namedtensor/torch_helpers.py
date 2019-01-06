@@ -2,9 +2,7 @@ import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 
 
-
 class NamedTensor(NamedTensorBase):
-
     def index_select(self, name, index):
         "Index into dimension names with the `index` named tensors."
         new_names = []
@@ -215,7 +213,6 @@ class NamedTensor(NamedTensorBase):
         "any",
     }
 
-
     # Takes a dim arg and reduces it.
     _reduce = {
         "argmax",
@@ -233,7 +230,6 @@ class NamedTensor(NamedTensorBase):
     }
 
     _reduce_multi = {"min", "max", "sort", "unbind"}
-
 
     # Broadcast and apply.
     _binop = {

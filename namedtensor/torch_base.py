@@ -3,7 +3,6 @@ from .torch_helpers import NamedTensor
 import opt_einsum as oe
 
 
-
 def make_tuple(names):
     if isinstance(names, tuple):
         return names
@@ -14,6 +13,7 @@ def make_tuple(names):
 class NTorch(type):
     def __getattr__(cls, name):
         if name in cls._build:
+
             def call(names, *args, **kwargs):
                 return cls.build(getattr(torch, name), names, *args, **kwargs)
 
@@ -65,7 +65,6 @@ class NTorch(type):
 
     _build = {"ones", "zeros", "randn", "empty", "rand"}
 
-
     _noshift = {
         "abs",
         "acos",
@@ -109,6 +108,7 @@ class NTorch(type):
         "triu",
         "trunc",
     }
+
 
 class ntorch(metaclass=NTorch):
 
