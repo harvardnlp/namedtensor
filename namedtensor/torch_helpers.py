@@ -232,7 +232,7 @@ class NamedTensor(NamedTensorBase):
         "sum",
     }
 
-    _reduce_multi = {"min", "max", "sort", "unbindss"}
+    _reduce_multi = {"min", "max", "sort", "unbind"}
 
 
     # Broadcast and apply.
