@@ -93,15 +93,15 @@ class NamedTensorAttention:
         )
 
     def forward(self, y, ht, rt1):
-        tmp = ht.contract("inhid", self.Wh) + rt1.contract("inhid", self.Wr)
+        tmp = ht.dot("inhid", self.Wh) + rt1.dot("inhid", self.Wr)
         at = (
-            ntorch.tanh(y.contract("inhid", self.WY) + tmp + self.bM)
-            .contract("outhid", self.w)
+            ntorch.tanh(y.dot("inhid", self.WY) + tmp + self.bM)
+            .dot("outhid", self.w)
             .softmax("seqlen")
         )
 
-        rt = y.contract("seqlen", at).shift("inhid -> (outhid)") + ntorch.tanh(
-            rt1.contract("inhid", self.Wt) + self.br
+        rt = y.dot("seqlen", at).stack(outhid=("inhid",)) + ntorch.tanh(
+            rt1.dot("inhid", self.Wt) + self.br
         )
 
         return rt, at
@@ -116,8 +116,8 @@ def test_attention():
     ea = EinsumAttention()
     r, a = ea.forward(y, ht, rt1)
 
-    y = NamedTensor(y, "batch seqlen inhid")
-    ht = NamedTensor(ht, "batch inhid")
-    rt1 = NamedTensor(rt1, "batch inhid")
+    y = NamedTensor(y, ("batch", "seqlen", "inhid"))
+    ht = NamedTensor(ht, ("batch", "inhid"))
+    rt1 = NamedTensor(rt1, ("batch", "inhid"))
     nta = NamedTensorAttention()
     nr, na = nta.forward(y, ht, rt1)

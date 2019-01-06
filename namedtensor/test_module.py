@@ -9,7 +9,7 @@ class WrappedModule(nn.Module):
         self.linear = nn.Linear(10, 20)
 
     def forward(self, inp):
-        return inp.op(self.linear, shift="inhid -> outhid")
+        return inp.op(self.linear, inhid="outhid")
 
 
 class NTModule(nn.Module):
@@ -22,7 +22,7 @@ class NTModule(nn.Module):
         self.b_param = nn.Parameter(self.b._tensor)
 
     def forward(self, inp):
-        return inp.contract("inhid", self.w) + self.b
+        return inp.dot("inhid", self.w) + self.b
 
 
 def test_run():
@@ -52,7 +52,7 @@ class Embedding(nn.Module):
         self.w = ntorch.randn(
             dict(numembeddings=num_embeddings, embeddingsdim=embeddings_dim)
         )
-        self.w_param = nn.Parameter(self.w.tensor)
+        self.w_param = nn.Parameter(self.w.values)
 
     def forward(self, inp):
         return self.w.index_select("numembeddings", inp)
@@ -61,7 +61,7 @@ class Embedding(nn.Module):
 def test_embedding():
     wm = Embedding(20, 50)
     out = wm.forward(ntorch.ones(dict(batch=20, seqlen=10)).long())
-    print(out.named_shape)
-    assert out.named_shape == OrderedDict(
+
+    assert out.shape == OrderedDict(
         [("batch", 20), ("seqlen", 10), ("embeddingsdim", 50)]
     )
