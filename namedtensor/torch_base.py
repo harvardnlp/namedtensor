@@ -55,7 +55,7 @@ class NTorch(type):
 
     @staticmethod
     def build(init, names, *args, **kwargs):
-        tensor = init(tuple(names.values()), *args, **kwargs)
+        tensor = init(*tuple(names.values()), *args, **kwargs)
         names = tuple(names.keys())
         return NamedTensor(tensor, names)
 
@@ -63,7 +63,8 @@ class NTorch(type):
     def tensor(*args, **kwargs):
         return NamedTensor(*args, **kwargs)
 
-    _build = {"ones", "zeros", "randn"}
+    _build = {"ones", "zeros", "randn", "empty", "rand"}
+
 
     _noshift = {
         "abs",
