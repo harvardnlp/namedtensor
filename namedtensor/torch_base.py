@@ -2,75 +2,6 @@ import torch
 from .torch_helpers import NamedTensor
 import opt_einsum as oe
 
-_build = {"ones", "zeros", "randn"}
-
-_unary = {
-    "abs",
-    "acos",
-    "asin",
-    "atan",
-    "ceil",
-    "cos",
-    "cosh",
-    "exp",
-    "expm1",
-    "log",
-    "rsqrt",
-    "sigmoid",
-    "sign",
-    "sin",
-    "sinh",
-    "sqrt",
-    "tan",
-    "tanh",
-    "tril",
-    "triu",
-}
-
-
-_noshift = {
-    "abs",
-    "acos",
-    "asin",
-    "atan",
-    "byte",
-    "ceil",
-    "clamp",
-    "clone",
-    "contiguous",
-    "cos",
-    "cosh",
-    "cpu",
-    "cuda",
-    "double",
-    "exp",
-    "expm1",
-    "float",
-    "floor",
-    "fmod",
-    "frac",
-    "half",
-    "int",
-    "long",
-    "log",
-    "pow",
-    "reciprical",
-    "round",
-    "rsqrt",
-    "short",
-    "sigmoid",
-    "sign",
-    "sin",
-    "sinh",
-    "sqrt",
-    "sub",
-    "to",
-    "tan",
-    "tanh",
-    "tril",
-    "triu",
-    "trunc",
-}
 
 
 def make_tuple(names):
@@ -82,18 +13,18 @@ def make_tuple(names):
 
 class NTorch(type):
     def __getattr__(cls, name):
-        if name in _build:
-
+        if name in cls._build:
             def call(names, *args, **kwargs):
                 return cls.build(getattr(torch, name), names, *args, **kwargs)
 
             return call
-        elif name in _noshift:
+        elif name in cls._noshift:
 
             def call(ntensor, *args, **kwargs):
                 return getattr(ntensor, name)(*args, **kwargs)
 
             return call
+        assert False, "Function does not exist"
 
     @classmethod
     def dot(cls, names, *tensors):
@@ -132,6 +63,52 @@ class NTorch(type):
     def tensor(*args, **kwargs):
         return NamedTensor(*args, **kwargs)
 
+    _build = {"ones", "zeros", "randn"}
+
+    _noshift = {
+        "abs",
+        "acos",
+        "asin",
+        "atan",
+        "byte",
+        "ceil",
+        "clamp",
+        "clone",
+        "contiguous",
+        "cos",
+        "cosh",
+        "cpu",
+        "cuda",
+        "double",
+        "exp",
+        "expm1",
+        "float",
+        "floor",
+        "fmod",
+        "frac",
+        "half",
+        "int",
+        "long",
+        "log",
+        "pow",
+        "reciprical",
+        "round",
+        "rsqrt",
+        "short",
+        "sigmoid",
+        "sign",
+        "sin",
+        "sinh",
+        "sqrt",
+        "sub",
+        "to",
+        "tan",
+        "tanh",
+        "tril",
+        "triu",
+        "trunc",
+    }
 
 class ntorch(metaclass=NTorch):
+
     pass

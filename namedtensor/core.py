@@ -36,15 +36,17 @@ class NamedTensorBase:
 
     @property
     def dims(self):
+        "Return the dim names for the tensor"
         return tuple(self._schema.names)
 
     @property
     def vshape(self):
+        "The raw dim size for the tensor."
         return tuple(self._tensor.size())
 
     @property
     def shape(self):
-        "Return an ordered dict of the available dimensions"
+        "The ordered dict of available dimensions."
         return OrderedDict(
             ((d, self._tensor.size(i)) for i, d in self._schema.enum_masked())
         )
@@ -56,6 +58,7 @@ class NamedTensorBase:
 
     @property
     def values(self):
+        "The raw underlying tensor object."
         return self._tensor
 
     def _new(self, tensor, drop=None, updates={}, mask=None):
