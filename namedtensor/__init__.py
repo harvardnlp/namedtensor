@@ -26,5 +26,5 @@ def _im_init():
 
     png.for_type(torch.Tensor, lambda t: numpy_to_png(t.numpy()))
     txt.for_type(torch.Tensor, lambda *x: "")
-    png.for_type(NamedTensor, lambda t: numpy_to_png(t.tensor.numpy()))
+    png.for_type(NamedTensor, lambda t: numpy_to_png(t.values.numpy()))
     txt.for_type(NamedTensor, lambda *x: "")
