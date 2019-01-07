@@ -31,7 +31,8 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
-        assert len(self._tensor.shape) == len(self._schema._names)
+        assert len(self._tensor.shape) == len(self._schema._names), \
+            "Tensor has  %d dim, but only %d names"%(len(self._tensor.shape), len(self._schema._names))
 
     @property
     def dims(self):
@@ -52,6 +53,14 @@ class NamedTensorBase:
         "Return the raw shape of the tensor"
         i = self._schema.get(dim)
         return self._tensor.size(i)
+
+    def assert_size(self, **kwargs):
+        "Return the raw shape of the tensor"
+        for dim, v in kwargs.items():
+            i = self._schema.get(dim)
+            assert self._tensor.size(i) == v,\
+                "Size of %s should be %d, got %d"%(dim, v, self._tensor.size(i))
+        return self
 
     @property
     def values(self):
@@ -91,10 +100,10 @@ class NamedTensorBase:
 
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."
-
-        recipe = "%s -> %s" % (self._to_einops(), " ".join(dims))
+        to_dims = tuple((d for d in self._schema._names if d not in dims)) + dims
+        recipe = "%s -> %s" % (self._to_einops(), " ".join(to_dims))
         tensor = rearrange(self._tensor, recipe)
-        return self.__class__(tensor, dims)
+        return self.__class__(tensor, to_dims)
 
     def _merge(self, names, dim):
         s = ""
@@ -136,6 +145,9 @@ class NamedTensorBase:
         recipe = "%s -> %s" % (self._to_einops(), term)
         tensor = rearrange(self._tensor, recipe)
         return self.__class__(tensor, term)
+
+    def __len__(self):
+        return len(self._tensor)
 
     def _promote(self, dims):
         "Move dims to the front of the line"

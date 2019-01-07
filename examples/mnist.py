@@ -19,13 +19,15 @@ class Net(nn.Module):
         def pool(x):
             return F.max_pool2d(x, 2, 2)
         return (
-            NamedTensor(x, ("b", "c", "h", "w"))
-            .op(self.conv1,  c1="c", h1="h", w1="w").op(F.relu)
+            x.transpose("c", "h", "w")
+            .op(self.conv1, F.relu, c1="c", h1="h", w1="w")
+            .assert_size(c1=20)
             .op(pool, h1a="h1", w1a="w1")
-            .op(self.conv2, c2="c1", h2="h1a", w2="w1a").op(F.relu)
+            .op(self.conv2, F.relu, c2="c1", h2="h1a", w2="w1a")
+            .assert_size(c2=50)
             .op(pool, h2a="h2", w2a="w2")
             .stack(fc=("c2", "h2a", "w2a"))
-            .op(self.fc1, fc2="fc").op(F.relu)
+            .op(self.fc1, F.relu, fc2="fc")
             .op(self.fc2, classes="fc2")
             .log_softmax("classes"))
 
@@ -33,9 +35,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
+        data = NamedTensor(data, ("b", "c", "h", "w"))
+        target = NamedTensor(target, ("b",))
         optimizer.zero_grad()
         output = model(data)
-        loss = F.nll_loss(output.values, target)
+        loss = output.reduce2(target, F.nll_loss, ("b", "classes"))
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -50,10 +54,14 @@ def test(args, model, device, test_loader):
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
+            data = NamedTensor(data, ("b", "c", "h", "w"))
+            target = NamedTensor(target, ("b",))
             output = model(data)
-            test_loss += F.nll_loss(output.values, target, reduction='sum').item() # sum up batch loss
-            pred = output.values.max(1, keepdim=True)[1] # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum().item()
+            test_loss = output.reduce2(target,
+                                       lambda x, y: F.nll_loss(x, y, reduction="sum"),
+                                       ("b", "classes")).item()
+            pred = output.max("classes")[1] # get the index of the max log-probability
+            correct += (pred == target).sum("b").item()
 
     test_loss /= len(test_loader.dataset)
 

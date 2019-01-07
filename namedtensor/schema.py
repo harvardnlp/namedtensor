@@ -29,8 +29,10 @@ class _Schema:
             raise RuntimeError("Dimension " + name + " is masked")
         return i
 
-    def drop(self, name):
-        return _Schema([n for n in self._names if not n == name], self._masked)
+    def drop(self, names):
+        if not isinstance(names, tuple):
+            names = (names,)
+        return _Schema([n for n in self._names if not n in names], self._masked)
 
     def update(self, update):
         return _Schema([update.get(n, n) for n in self._names], self._masked)

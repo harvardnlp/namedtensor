@@ -61,13 +61,25 @@ class NamedTensor(NamedTensorBase):
         print(self.shape)
         return self
 
-    def op(self, axis_op, *extra, dim=None, **kwargs):
-        "Apply an op that may change dimensions sizes "
+    def reduce(self, axis_op, reduced, dim=None, **kwargs):
+        return self.op(axis_op, dim=dim, _drop=reduced, **kwargs)
+
+    def reduce2(self, other, axis_op, reduced, dim=None, **kwargs):
+        return self.op2(other, axis_op, dim=dim, _drop=reduced, **kwargs)
+
+
+    def op(self, *axis_ops, dim=None, _drop=None, **kwargs):
+        "Apply ops that may change dimensions sizes "
         func_args = {}
         if dim is not None:
             func_args["dim"] = self._schema.get(dim)
-        out = self._new(
-            axis_op(self._tensor, *extra, **func_args),
+
+        cur = self._tensor
+        for axis_op in axis_ops:
+            cur = axis_op(cur, **func_args)
+
+        out = self._new(cur,
+            drop=_drop,
             updates={
                 (v[0] if isinstance(v, tuple) else v): k
                 for k, v in kwargs.items()
@@ -79,6 +91,11 @@ class NamedTensor(NamedTensorBase):
                 k not in out.shape or v == out.shape[k]
             ), "name needs to change for updated dimensions"
         return out
+
+    def op2(self, y, axis_op, dim=None, _drop=None, **kwargs):
+        return self.op(lambda x: axis_op(x, y.values),
+                       _drop=_drop, **kwargs)
+
 
     def __add__(self, b):
         return self.add(b)
@@ -230,6 +247,8 @@ class NamedTensor(NamedTensorBase):
         "stride",
         "all",
         "any",
+        "backward",
+        "item",
     }
 
     # Takes a dim arg and reduces it.
