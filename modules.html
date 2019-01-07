@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Named Tensor &mdash; NamedTensor  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Named Tensor" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> NamedTensor
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Named Tensor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-methods">Basic Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reduction-methods">Reduction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tupled-reduction-methods">Tupled Reduction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#non-tensor-methods">Non-Tensor Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#broadcast-methods">Broadcast Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#named-torch">Named Torch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dictionary-builders">Dictionary Builders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-builders">Other Builders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-functions">Basic Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#distributions">Distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#builders">Builders</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">NamedTensor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Named Tensor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="named-tensor">
+<h1>Named Tensor<a class="headerlink" href="#named-tensor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="namedtensor.NamedTensor">
+<em class="property">class </em><code class="descclassname">namedtensor.</code><code class="descname">NamedTensor</code><span class="sig-paren">(</span><em>tensor</em>, <em>names</em>, <em>mask=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="namedtensor.NamedTensor.dims">
+<code class="descname">dims</code><a class="headerlink" href="#namedtensor.NamedTensor.dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dim names for the tensor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.dot">
+<code class="descname">dot</code><span class="sig-paren">(</span><em>names</em>, <em>*others</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contract dimension <cite>names</cite> with each of the other tensors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.index_select">
+<code class="descname">index_select</code><span class="sig-paren">(</span><em>name</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.index_select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.index_select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index into dimension names with the <cite>index</cite> named tensors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.logsoftmax">
+<code class="descname">logsoftmax</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.logsoftmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.logsoftmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply log softmax over dim <cite>name</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.narrow">
+<code class="descname">narrow</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.narrow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.narrow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Narrow into the <cite>kwargs</cite> dimension and rename it</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.op">
+<code class="descname">op</code><span class="sig-paren">(</span><em>axis_op</em>, <em>dim=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.op"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply an op that may change dimensions sizes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.renorm">
+<code class="descname">renorm</code><span class="sig-paren">(</span><em>p</em>, <em>name</em>, <em>maxnorm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.renorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.renorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.renorm" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.renorm()</span></code></a> over <cite>name</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="namedtensor.NamedTensor.shape">
+<code class="descname">shape</code><a class="headerlink" href="#namedtensor.NamedTensor.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ordered dict of available dimensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.size">
+<code class="descname">size</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#namedtensor.NamedTensor.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the raw shape of the tensor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.softmax">
+<code class="descname">softmax</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/namedtensor/torch_helpers.html#NamedTensor.softmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#namedtensor.NamedTensor.softmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply softmax over dim <cite>name</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.split">
+<code class="descname">split</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#namedtensor.NamedTensor.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split any number of existing dimensions into new dimensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.stack">
+<code class="descname">stack</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#namedtensor.NamedTensor.stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stack any number of existing dimensions into a single new dimension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="namedtensor.NamedTensor.transpose">
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>*dims</em><span class="sig-paren">)</span><a class="headerlink" href="#namedtensor.NamedTensor.transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new DataArray object with transposed dimensions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="namedtensor.NamedTensor.values">
+<code class="descname">values</code><a class="headerlink" href="#namedtensor.NamedTensor.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw underlying tensor object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="namedtensor.NamedTensor.vshape">
+<code class="descname">vshape</code><a class="headerlink" href="#namedtensor.NamedTensor.vshape" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw dim size for the tensor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="basic-methods">
+<h2>Basic Methods<a class="headerlink" href="#basic-methods" title="Permalink to this headline">¶</a></h2>
+<p>These methods return a named tensor of the same form as the original.</p>
+<blockquote>
+<div><dl class="method">
+<dt id="_basic">
+<code class="descname">_basic</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_basic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sqrt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sqrt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sigmoid" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sigmoid()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.double" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.double()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.atan" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.atan()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sinh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sinh()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.rsqrt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.rsqrt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.abs" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.abs()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.pow" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.pow()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cuda" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cuda()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.to" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.to()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.long" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.long()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.half" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.half()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.fmod" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.fmod()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.float" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.float()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.tanh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.tanh()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.contiguous" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.contiguous()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.clamp" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.clamp()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.round" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.round()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.acos" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.acos()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.byte" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.byte()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.triu" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.triu()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.ceil" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.ceil()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.floor" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.floor()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.asin" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.asin()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cos" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cos()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.frac" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.frac()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cpu" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cpu()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.clone" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.clone()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.log" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.log()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sign" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sign()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.exp" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.exp()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.expm1" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.expm1()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sub" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sub()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sin" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sin()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.trunc" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.trunc()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.short" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.short()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.tan" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.tan()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.tril" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.tril()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cosh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cosh()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.int" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.int()</span></code></a>   <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.reciprical()</span></code></div></blockquote>
+</div>
+<div class="section" id="reduction-methods">
+<h2>Reduction Methods<a class="headerlink" href="#reduction-methods" title="Permalink to this headline">¶</a></h2>
+<p>These methods return a named tensor with one or more reduced dimensions</p>
+<blockquote>
+<div><dl class="method">
+<dt id="_reduction">
+<code class="descname">_reduction</code><span class="sig-paren">(</span><em>dims</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_reduction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.median" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.median()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cumsum" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cumsum()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.argmin" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.argmin()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.mean" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.mean()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sum" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sum()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.norm" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.norm()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.squeeze" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.squeeze()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.prod" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.prod()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.cumprod" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.cumprod()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.std" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.std()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.logsumexp" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.logsumexp()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.argmax" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.argmax()</span></code></a></div></blockquote>
+</div>
+<div class="section" id="tupled-reduction-methods">
+<h2>Tupled Reduction Methods<a class="headerlink" href="#tupled-reduction-methods" title="Permalink to this headline">¶</a></h2>
+<p>These methods return a tuple of named tensor with one or more reduced dimensions</p>
+<blockquote>
+<div><dl class="method">
+<dt id="_tuple_reduction">
+<code class="descname">_tuple_reduction</code><span class="sig-paren">(</span><em>dims</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_tuple_reduction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.unbind()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.max" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.max()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.min" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.min()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sort" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sort()</span></code></a></div></blockquote>
+</div>
+<div class="section" id="non-tensor-methods">
+<h2>Non-Tensor Methods<a class="headerlink" href="#non-tensor-methods" title="Permalink to this headline">¶</a></h2>
+<p>These methods return non-tensor information.</p>
+<blockquote>
+<div><dl class="method">
+<dt id="_info">
+<code class="descname">_info</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.is_contigious()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.stride" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.stride()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.storage" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.storage()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.is_pinned" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.is_pinned()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.tolist" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.tolist()</span></code></a>   <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.any()</span></code>   <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.all()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.dim" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.dim()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.storage_offset" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.storage_offset()</span></code></a></div></blockquote>
+</div>
+<div class="section" id="broadcast-methods">
+<h2>Broadcast Methods<a class="headerlink" href="#broadcast-methods" title="Permalink to this headline">¶</a></h2>
+<p>These methods apply broadcasting before operating between two tensors.</p>
+<blockquote>
+<div><dl class="method">
+<dt id="_operate">
+<code class="descname">_operate</code><span class="sig-paren">(</span><em>other</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_operate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.div" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.div()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.ne" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.ne()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.lt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.lt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.eq" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.eq()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.sub" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.sub()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.add" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.add()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.gt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.gt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.type_as" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.type_as()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.mul" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.mul()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.le" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.le()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.ge" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.ge()</span></code></a>   <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.masked_fill()</span></code></div></blockquote>
+</div>
+</div>
+<div class="section" id="named-torch">
+<h1>Named Torch<a class="headerlink" href="#named-torch" title="Permalink to this headline">¶</a></h1>
+<p>Named torch <cite>ntorch</cite> is a module that wraps the core torch operations
+with named variants. It contains named variants of most of the the
+core torch functionality.</p>
+<div class="section" id="dictionary-builders">
+<h2>Dictionary Builders<a class="headerlink" href="#dictionary-builders" title="Permalink to this headline">¶</a></h2>
+<p>These methods construct a new named tensor where the sizes are specified
+through an ordered dict of names.</p>
+<dl class="function">
+<dt id="_build">
+<code class="descname">_build</code><span class="sig-paren">(</span><em>ordereddict</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#_build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.empty" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.empty()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.randn" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.randn()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.rand" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.rand()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.ones" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.ones()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.zeros" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.zeros()</span></code></a></div></blockquote>
+</div>
+<div class="section" id="other-builders">
+<h2>Other Builders<a class="headerlink" href="#other-builders" title="Permalink to this headline">¶</a></h2>
+<p>These methods construct a new named tensor where the sizes are specified
+through an ordered dict of names.</p>
+<dl class="function">
+<dt>
+<code class="descname">_build</code><span class="sig-paren">(</span><em>ordereddict</em>, <em>*args</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.empty" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.empty()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.randn" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.randn()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.rand" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.rand()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.ones" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.ones()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.zeros" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.zeros()</span></code></a></div></blockquote>
+</div>
+<div class="section" id="basic-functions">
+<h2>Basic Functions<a class="headerlink" href="#basic-functions" title="Permalink to this headline">¶</a></h2>
+<p>These functions return a named tensor of the same form as the original.</p>
+<blockquote>
+<div><dl class="method">
+<dt>
+<code class="descname">_basic</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+<blockquote>
+<div><a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.sqrt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sqrt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.sigmoid" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sigmoid()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.double()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.atan" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.atan()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.sinh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sinh()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.rsqrt" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.rsqrt()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.abs" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.abs()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.pow" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.pow()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.cuda()</span></code>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.to()</span></code>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.long()</span></code>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.half()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.fmod" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.fmod()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.float()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.tanh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.tanh()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.contiguous()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.clamp" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.clamp()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.round" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.round()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.acos" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.acos()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.byte()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.triu" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.triu()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.ceil" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.ceil()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.floor" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.floor()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.asin" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.asin()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.cos" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.cos()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.frac" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.frac()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.cpu()</span></code>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.clone()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.log" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.log()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.sign" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sign()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.exp" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.exp()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.expm1" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.expm1()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sub()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.sin" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.sin()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.trunc" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.trunc()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.short()</span></code>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.tan" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.tan()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.tril" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.tril()</span></code></a>   <a class="reference external" href="https://pytorch.org/docs/stable/torch.html#torch.cosh" title="(in PyTorch vmaster (1.0.0 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.cosh()</span></code></a>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.int()</span></code>   <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.reciprical()</span></code></div></blockquote>
+</div>
+</div>
+<div class="section" id="distributions">
+<h1>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">¶</a></h1>
+<p>A wrapping of the torch distributions library to make it more clear
+to sample and batch the object.</p>
+<div class="section" id="builders">
+<h2>Builders<a class="headerlink" href="#builders" title="Permalink to this headline">¶</a></h2>
+<p>These methods construct a new named distributinon where the sizes are specified
+through an ordered dict of names.</p>
+<dl class="function">
+<dt>
+<code class="descname">_build</code><span class="sig-paren">(</span><em>ordereddict</em>, <em>*args</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<blockquote>
+<div><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Exponential</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.TransformedDistribution</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Chi2</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.MultivariateNormal</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Weibull</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Multinomial</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Geometric</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Poisson</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Uniform</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.OneHotCategorical</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Independent</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Categorical</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Dirichlet</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.HalfCauchy</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Pareto</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.RelaxedOneHotCategorical</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.FisherSnedecor</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Bernoulli</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Binomial</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Laplace</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.NegativeBinomial</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Beta</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.StudentT</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Normal</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.RelaxedBernoulli</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Cauchy</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Gamma</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.LogNormal</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.LowRankMultivariateNormal</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.HalfNormal</span></code>   <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.distributions.Gumbel</span></code></div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Named Tensor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alexander Rush
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

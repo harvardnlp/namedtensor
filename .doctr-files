@@ -1,4 +1,8 @@
+./_modules/index.html
+./_modules/namedtensor/core.html
+./_modules/namedtensor/torch_helpers.html
 ./_sources/index.rst.txt
+./_sources/modules.rst.txt
 ./_static/ajax-loader.gif
 ./_static/basic.css
 ./_static/comment-bright.png
@@ -63,6 +67,7 @@
 ./_static/websupport.js
 ./genindex.html
 ./index.html
+./modules.html
 ./objects.inv
 ./search.html
 ./searchindex.js

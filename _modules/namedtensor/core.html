@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>namedtensor.core &mdash; NamedTensor  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> NamedTensor
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Named Tensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#named-torch">Named Torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#distributions">Distributions</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">NamedTensor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>namedtensor.core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for namedtensor.core</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.schema</span> <span class="k">import</span> <span class="n">_Schema</span>
+<span class="kn">from</span> <span class="nn">einops</span> <span class="k">import</span> <span class="n">rearrange</span>
+
+
+<span class="k">def</span> <span class="nf">assert_match</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">failure</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">vshape</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">enum_all</span><span class="p">():</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sizes</span><span class="p">:</span>
+                <span class="n">failure</span> <span class="o">=</span> <span class="n">failure</span> <span class="ow">or</span> <span class="n">sizes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sizes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">failure</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">_sizes</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">])</span>
+
+
+<span class="k">class</span> <span class="nc">NamedTensorBase</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        tensor: The raw tensor data</span>
+<span class="sd">        dims: Tuple of dimension names associated with this array.</span>
+<span class="sd">        ndim: Number of dimensions</span>
+<span class="sd">        sizes: The raw dimension sizes</span>
+<span class="sd">        shape: Ordered mapping from dimension names to lengths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span> <span class="o">=</span> <span class="n">tensor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">_Schema</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Return the dim names for the tensor&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vshape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;The raw dim size for the tensor.&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;The ordered dict of available dimensions.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">ordered_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="s2">&quot;Return the raw shape of the tensor&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;The raw underlying tensor object.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span>
+
+    <span class="k">def</span> <span class="nf">_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">updates</span><span class="o">=</span><span class="p">{},</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="n">tensor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updates</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_masked</span> <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">mask</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_to_einops</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">mask_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s2">&quot;Stack any number of existing dimensions into a single new dimension.&quot;</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cur</span>
+
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s2">&quot;Split any number of existing dimensions into new dimensions.&quot;</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">_split</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cur</span>
+
+    <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">dims</span><span class="p">):</span>
+        <span class="s2">&quot;Return a new DataArray object with transposed dimensions.&quot;</span>
+
+        <span class="n">recipe</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dims</span><span class="p">))</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">recipe</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">first</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">s</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">size_dict</span><span class="p">):</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">enum_all</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="n">dim</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="n">ex</span> <span class="o">+=</span> <span class="n">names</span>
+
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ex</span><span class="p">)),</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">size_dict</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">size_dict</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_rearrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="s2">&quot;)&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span>
+        <span class="n">recipe</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">term</span><span class="p">)</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">recipe</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_promote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+        <span class="s2">&quot;Move dims to the front of the line&quot;</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rearrange</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_force_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; ()&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">s</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+                <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">order</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alexander Rush
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
