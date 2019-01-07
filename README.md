@@ -1,6 +1,6 @@
 # NamedTensor
 
-## Introductiono
+## Introduction
 
 A proposal for a named tensor for PyTorch. For now check out the blog post:
 
