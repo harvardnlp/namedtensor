@@ -1,15 +1,16 @@
 # NamedTensor
 
-## Introductiono
+## Introduction
 
 A proposal for a named tensor for PyTorch. For now check out the blog post:
 
 http://nlp.seas.harvard.edu/NamedTensor
 
 
-## Syntax
+## Documentation
 
+http://nlp.seas.harvard.edu/namedtensor/
 
 ## Authors
 
-* Alexander Rush (@harvardnlp)
+* Alexander Rush (srush@seas.harvard.edu, @harvardnlp)
