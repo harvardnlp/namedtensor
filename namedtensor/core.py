@@ -74,7 +74,8 @@ class NamedTensorBase:
     def _new(self, tensor, drop=None, add=None, updates={}, mask=None):
         return self.__class__(
             tensor,
-            self._schema.drop(drop).update(updates)._names + (() if not add else add),
+            self._schema.drop(drop).update(updates)._names
+            + (() if not add else add),
             self._schema._masked if mask is None else mask,
         )
 

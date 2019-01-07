@@ -96,8 +96,9 @@ class NamedTensor(NamedTensorBase):
                 self._schema.get(v)
 
         if _add is None and _drop is None:
-            assert len(cur.shape) == len(self._tensor.shape), \
-                "In shape %s, Out shape %s"%(cur.shape, self._tensor.shape)
+            assert len(cur.shape) == len(
+                self._tensor.shape
+            ), "In shape %s, Out shape %s" % (cur.shape, self._tensor.shape)
 
         out = self._new(
             cur,

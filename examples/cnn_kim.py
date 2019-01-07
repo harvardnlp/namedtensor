@@ -83,16 +83,22 @@ class CNN(nn.Module):
         self.fc = nn.Linear(num_filters * len(kernel_sizes), num_classes)
 
     def forward(self, x):  # x: (batch, slen)
-        x = x.augment(self.embedding, "embedding") \
-             .transpose("embedding", "slen")
-        x_list = [x.op(conv_block, F.relu,  slen2="slen", filters="embedding")
-                  .max("slen2")[0]
-                  for conv_block in self.conv_blocks]
+        x = x.augment(self.embedding, "embedding").transpose(
+            "embedding", "slen"
+        )
+        x_list = [
+            x.op(conv_block, F.relu, slen2="slen", filters="embedding").max(
+                "slen2"
+            )[0]
+            for conv_block in self.conv_blocks
+        ]
         out = ntorch.cat(x_list, "filters")
         feature_extracted = out
-        out = out.op(lambda x: F.dropout(x, p=0.5, training=self.training)) \
-              .op(self.fc, classes="filters") \
-              .softmax("classes")
+        out = (
+            out.op(lambda x: F.dropout(x, p=0.5, training=self.training))
+            .op(self.fc, classes="filters")
+            .softmax("classes")
+        )
         return out, feature_extracted
 
 
@@ -102,7 +108,9 @@ def evaluate(model, x_test, y_test):
     preds, vector = model(inputs)
     preds = preds.max("classes")[1]
 
-    eval_acc = (preds == y_test).sum("batch").item() / len(y_test)  # pytorch 0.4
+    eval_acc = (preds == y_test).sum("batch").item() / len(
+        y_test
+    )  # pytorch 0.4
     return eval_acc, vector.cpu().detach().numpy()
 
 
