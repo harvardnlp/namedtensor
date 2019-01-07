@@ -56,10 +56,23 @@ class NamedTensor(NamedTensorBase):
         return self.transpose(*term)._tensor
 
     def op(self, axis_op, dim=None, **kwargs):
-        kwargs = {}
+        "Apply an op that may change dimensions sizes "
+        func_args = {}
         if dim is not None:
-            kwargs["dim"] = self._schema.get(dim)
-        return self._new(axis_op(self._tensor, **kwargs), updates=kwargs)
+            func_args["dim"] = self._schema.get(dim)
+        out = self._new(
+            axis_op(self._tensor, **func_args),
+            updates={
+                (v[0] if isinstance(v, tuple) else v): k
+                for k, v in kwargs.items()
+            },
+        )
+
+        for k, v in self.shape.items():
+            assert (
+                k not in out.shape or v == out.shape[k]
+            ), "name needs to change for updated dimensions"
+        return out
 
     def __add__(self, b):
         return self.add(b)

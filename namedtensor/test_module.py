@@ -9,7 +9,7 @@ class WrappedModule(nn.Module):
         self.linear = nn.Linear(10, 20)
 
     def forward(self, inp):
-        return inp.op(self.linear, inhid="outhid")
+        return inp.op(self.linear, outhid="inhid")
 
 
 class NTModule(nn.Module):
