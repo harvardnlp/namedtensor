@@ -22,7 +22,7 @@ class Net(nn.Module):
             NamedTensor(x, ("b", "c", "h", "w"))
             .op(self.conv1,  c1="c", h1="h", w1="w").op(F.relu)
             .op(pool, h1a="h1", w1a="w1")
-            .op(self.conv2, c2="c1", h2="h1a", w2="w1a")
+            .op(self.conv2, c2="c1", h2="h1a", w2="w1a").op(F.relu)
             .op(pool, h2a="h2", w2a="w2")
             .stack(fc=("c2", "h2a", "w2a"))
             .op(self.fc1, fc2="fc").op(F.relu)
