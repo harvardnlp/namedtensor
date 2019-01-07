@@ -40,7 +40,9 @@ class NamedTensor(NamedTensorBase):
 
     def log_softmax(self, name):
         "Apply log softmax over dim `name`"
-        return self._new(F.log_softmax(self._tensor, dim=self._schema.get(name)))
+        return self._new(
+            F.log_softmax(self._tensor, dim=self._schema.get(name))
+        )
 
     def get(self, name, idx):
         results = self.access(name)[idx]
@@ -54,6 +56,10 @@ class NamedTensor(NamedTensorBase):
     def access(self, dims):
         term = dims.split() + [d for d in self._schema._names if d not in dims]
         return self.transpose(*term)._tensor
+
+    def debug(self):
+        print(self.shape)
+        return self
 
     def op(self, axis_op, *extra, dim=None, **kwargs):
         "Apply an op that may change dimensions sizes "
