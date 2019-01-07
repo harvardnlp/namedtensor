@@ -5,12 +5,17 @@ class _Schema:
     "Dimension names and order"
 
     def __init__(self, names, mask=0):
-        self._names = names
+        self._names = tuple(names)
         self._masked = mask
         self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
 
     def _to_einops(self):
         return " ".join(self._names)
+
+    def ordered_dict(self, size):
+        return OrderedDict(
+            ((d, size[i]) for i, d in self.enum_masked())
+        )
 
     @staticmethod
     def build(names, mask):

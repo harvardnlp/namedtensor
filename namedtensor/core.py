@@ -47,9 +47,7 @@ class NamedTensorBase:
     @property
     def shape(self):
         "The ordered dict of available dimensions."
-        return OrderedDict(
-            ((d, self._tensor.size(i)) for i, d in self._schema.enum_masked())
-        )
+        return self._schema.ordered_dict(self._tensor.size())
 
     def size(self, dim):
         "Return the raw shape of the tensor"

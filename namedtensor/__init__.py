@@ -1,12 +1,13 @@
 from .core import assert_match
 from .torch_base import ntorch
 from .torch_helpers import NamedTensor
+from .distributions import NamedDistribution, ndistributions
 import numpy as np
 
-version = "0.0.1"
+version = "0.0.2"
 
 # For flake8 compatibility.
-__all__ = [assert_match, ntorch, NamedTensor]
+__all__ = [assert_match, ntorch, NamedTensor, ndistributions]
 
 
 # (Just for the blog post)
