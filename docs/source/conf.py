@@ -35,6 +35,8 @@
 from recommonmark.parser import CommonMarkParser
 import sphinx_rtd_theme
 from recommonmark.transform import AutoStructify
+import namedtensor
+import torch
 
 source_parsers = {
     '.md': CommonMarkParser,
@@ -47,8 +49,31 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.githubpages',
               'sphinx.ext.napoleon',
-              'sphinxcontrib.mermaid',
-              'sphinxcontrib.bibtex']
+              'sphinxcontrib.jinja',
+              'sphinx.ext.intersphinx'
+]
+
+
+intersphinx_mapping = {'torch': ('https://pytorch.org/docs/stable/', None)}
+
+print(namedtensor.ntorch._build)
+jinja_contexts = {
+          'tensor': {
+              'noshift_methods': namedtensor.NamedTensor._noshift,
+              'reduce_methods': namedtensor.NamedTensor._reduce,
+              'multi_reduce_methods': namedtensor.NamedTensor._reduce_multi,
+              'info_methods': namedtensor.NamedTensor._info,
+              'binop_methods': namedtensor.NamedTensor._binop,
+          },
+          'ntorch': {
+              'build': namedtensor.ntorch._build,
+              'noshift': namedtensor.ntorch._noshift,
+              },
+          'ndistributions': {
+              'build': namedtensor.ndistributions._build,
+              }
+
+      }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']

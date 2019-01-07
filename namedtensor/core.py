@@ -1,6 +1,5 @@
 from .schema import _Schema
 from einops import rearrange
-from collections import OrderedDict
 
 
 def assert_match(*tensors):
@@ -36,18 +35,18 @@ class NamedTensorBase:
 
     @property
     def dims(self):
+        "Return the dim names for the tensor"
         return tuple(self._schema.names)
 
     @property
     def vshape(self):
+        "The raw dim size for the tensor."
         return tuple(self._tensor.size())
 
     @property
     def shape(self):
-        "Return an ordered dict of the available dimensions"
-        return OrderedDict(
-            ((d, self._tensor.size(i)) for i, d in self._schema.enum_masked())
-        )
+        "The ordered dict of available dimensions."
+        return self._schema.ordered_dict(self._tensor.size())
 
     def size(self, dim):
         "Return the raw shape of the tensor"
@@ -56,6 +55,7 @@ class NamedTensorBase:
 
     @property
     def values(self):
+        "The raw underlying tensor object."
         return self._tensor
 
     def _new(self, tensor, drop=None, updates={}, mask=None):

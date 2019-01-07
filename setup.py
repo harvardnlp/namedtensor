@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="namedtensor",
-    version="0.0.1",
+    version="0.0.2",
     author="Alexander Rush",
     author_email="srush@seas.harvard.edu",
     packages=["namedtensor"],

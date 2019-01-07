@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from collections import OrderedDict
 import pytest
+import torch.nn.functional as F
 
 
 def make_tensors(sizes):
@@ -37,6 +38,13 @@ def test_apply():
     base = torch.zeros([10, 2, 50])
     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
     ntensor = ntensor.softmax("alpha")
+    assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
+
+
+def test_apply2():
+    base = torch.zeros([10, 2, 50])
+    ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
+    ntensor = ntensor.op(F.softmax, dim="alpha")
     assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
 
 

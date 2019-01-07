@@ -2,108 +2,9 @@ import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 
 
-# Torch Ops
-# Return a tensor of the same dimensions
-_noshift = {
-    "abs",
-    "acos",
-    "asin",
-    "atan",
-    "byte",
-    "ceil",
-    "clamp",
-    "clone",
-    "contiguous",
-    "cos",
-    "cosh",
-    "cpu",
-    "cuda",
-    "double",
-    "exp",
-    "expm1",
-    "float",
-    "floor",
-    "fmod",
-    "frac",
-    "half",
-    "int",
-    "long",
-    "log",
-    "pow",
-    "reciprical",
-    "round",
-    "rsqrt",
-    "short",
-    "sigmoid",
-    "sign",
-    "sin",
-    "sinh",
-    "sqrt",
-    "sub",
-    "to",
-    "tan",
-    "tanh",
-    "tril",
-    "triu",
-    "trunc",
-}
-
-_noshift_dim = {}
-
-# Return a non-tensor info object
-_info = {
-    "dim",
-    "is_contigious",
-    "is_pinned",
-    "size",
-    "storage",
-    "storage_offset",
-    "storage_offset",
-    "tolist",
-    "stride",
-    "all",
-    "any",
-}
-
-
-# Takes a dim arg and reduces it.
-_reduce = {
-    "argmax",
-    "argmin",
-    "cumprod",
-    "cumsum",
-    "logsumexp",
-    "mean",
-    "median",
-    "norm",
-    "prod",
-    "squeeze",
-    "std",
-    "sum",
-}
-
-_reduce_multi = {"min", "max", "unbind"}
-
-
-# Broadcast and apply.
-_binop = {
-    "add",
-    "masked_fill",
-    "sub",
-    "div",
-    "mul",
-    "eq",
-    "ne",
-    "lt",
-    "gt",
-    "le",
-    "ge",
-    "type_as",
-}
-
-
 class NamedTensor(NamedTensorBase):
     def index_select(self, name, index):
+        "Index into dimension names with the `index` named tensors."
         new_names = []
         sizes = []
         for n in self._schema._names:
@@ -121,38 +22,32 @@ class NamedTensor(NamedTensorBase):
             new_names,
         )
 
+    def dot(self, names, *others):
+        "Contract dimension `names` with each of the other tensors"
+        from .torch_base import ntorch
+
+        return ntorch.dot(names, *((self,) + others))
+
     def narrow(self, start, end, **kwargs):
+        "Narrow into the `kwargs` dimension and rename it"
         from .torch_base import ntorch
 
         return ntorch.narrow(self, start, end, **kwargs)
 
     def softmax(self, name):
+        "Apply softmax over dim `name`"
         return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
 
     def logsoftmax(self, name):
+        "Apply log softmax over dim `name`"
         return self._new(F.logsoftmax(self.tensor, dim=self._schema.get(name)))
 
     def get(self, name, idx):
         results = self.access(name)[idx]
         return self._new(results, name)
 
-    def sort(self, name):
-        results = self._tensor.sort(self._schema.get(name))
-        return tuple((self._new(r) for r in results))
-
-    def unbind(self, name):
-        results = self._tensor.unbind(self._schema.get(name))
-        return tuple((self._new(r, name) for r in results))
-
-    def max(self, name):
-        results = self._tensor.max(self._schema.get(name))
-        return tuple((self._new(r) for r in results))
-
-    def min(self, name):
-        results = self._tensor.max(self._schema.get(name))
-        return tuple((self._new(r) for r in results))
-
     def renorm(self, p, name, maxnorm):
+        "Apply :py:meth:`torch.Tensor.renorm` over `name`"
         results = self._tensor.renorm(p, self.get(name), maxnorm)
         return self._new(results)
 
@@ -161,10 +56,23 @@ class NamedTensor(NamedTensorBase):
         return self.transpose(*term)._tensor
 
     def op(self, axis_op, dim=None, **kwargs):
-        kwargs = {}
+        "Apply an op that may change dimensions sizes "
+        func_args = {}
         if dim is not None:
-            kwargs["dim"] = self._schema.get(dim)
-        return self._new(axis_op(self._tensor, **kwargs), updates=kwargs)
+            func_args["dim"] = self._schema.get(dim)
+        out = self._new(
+            axis_op(self._tensor, **func_args),
+            updates={
+                (v[0] if isinstance(v, tuple) else v): k
+                for k, v in kwargs.items()
+            },
+        )
+
+        for k, v in self.shape.items():
+            assert (
+                k not in out.shape or v == out.shape[k]
+            ), "name needs to change for updated dimensions"
+        return out
 
     def __add__(self, b):
         return self.add(b)
@@ -199,23 +107,23 @@ class NamedTensor(NamedTensorBase):
     def __getattr__(self, methodname):
         if methodname in dir(self._tensor):
             method = getattr(self._tensor, methodname)
-            if methodname in _noshift:
+            if methodname in self._noshift:
                 # Call and wrap
                 def call(*args, **kwargs):
                     return self._new(method(*args, **kwargs))
 
-            elif methodname in _noshift_dim:
+            elif methodname in self._noshift_dim:
 
                 def call(dim, *args, **kwargs):
                     return self._new(
                         method(self._schema.get(dim), *args, **kwargs)
                     )
 
-            elif methodname in _info:
+            elif methodname in self._info:
                 # Call and return
                 call = method
 
-            elif methodname in _reduce:
+            elif methodname in self._reduce:
                 # Call, replace, and wrap
                 def call(dim, *args, **kwargs):
                     cur = self
@@ -229,14 +137,14 @@ class NamedTensor(NamedTensorBase):
                         method = getattr(cur._tensor, methodname)
                     return cur
 
-            elif methodname in _reduce_multi:
+            elif methodname in self._reduce_multi:
 
                 def call(dim, *args, **kwargs):
                     method = getattr(self._tensor, methodname)
                     results = method(self._schema.get(dim), *args, **kwargs)
                     return tuple((self._new(r, dim) for r in results))
 
-            elif methodname in _binop:
+            elif methodname in self._binop:
 
                 def call(other, *args):
                     if isinstance(other, NamedTensor):
@@ -256,8 +164,98 @@ class NamedTensor(NamedTensorBase):
             return call
         assert False, "Method does not exist"
 
-    def dot(self, names, *others):
-        "Contract dimension `names` with each of the other tensors"
-        from .torch_base import ntorch
+    # Torch Ops
+    # Return a tensor of the same dimensions
+    _noshift = {
+        "abs",
+        "acos",
+        "asin",
+        "atan",
+        "byte",
+        "ceil",
+        "clamp",
+        "clone",
+        "contiguous",
+        "cos",
+        "cosh",
+        "cpu",
+        "cuda",
+        "double",
+        "exp",
+        "expm1",
+        "float",
+        "floor",
+        "fmod",
+        "frac",
+        "half",
+        "int",
+        "long",
+        "log",
+        "pow",
+        "reciprical",
+        "round",
+        "rsqrt",
+        "short",
+        "sigmoid",
+        "sign",
+        "sin",
+        "sinh",
+        "sqrt",
+        "sub",
+        "to",
+        "tan",
+        "tanh",
+        "tril",
+        "triu",
+        "trunc",
+    }
 
-        return ntorch.dot(names, *((self,) + others))
+    _noshift_dim = {}
+
+    # Return a non-tensor info object
+    _info = {
+        "dim",
+        "is_contigious",
+        "is_pinned",
+        "storage",
+        "storage_offset",
+        "storage_offset",
+        "tolist",
+        "stride",
+        "all",
+        "any",
+    }
+
+    # Takes a dim arg and reduces it.
+    _reduce = {
+        "argmax",
+        "argmin",
+        "cumprod",
+        "cumsum",
+        "logsumexp",
+        "mean",
+        "median",
+        "norm",
+        "prod",
+        "squeeze",
+        "std",
+        "sum",
+    }
+
+    _reduce_multi = {"min", "max", "sort", "unbind"}
+
+    # Broadcast and apply.
+    _binop = {
+        "add",
+        "masked_fill",
+        "sub",
+        "div",
+        "mul",
+        "eq",
+        "ne",
+        "lt",
+        "gt",
+        "le",
+        "ge",
+        "type_as",
+    }
