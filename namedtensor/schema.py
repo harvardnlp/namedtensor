@@ -6,6 +6,8 @@ class _Schema:
 
     def __init__(self, names, mask=0):
         self._names = tuple(names)
+        for n in self._names:
+            assert n is not None
         self._masked = mask
         self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
 
@@ -23,7 +25,12 @@ class _Schema:
 
     def get(self, name):
         if name not in self._axes:
-            raise RuntimeError("Dimension " + name + " does not exist. Available dimensions are " + str(self._names))
+            raise RuntimeError(
+                "Dimension "
+                + name
+                + " does not exist. Available dimensions are "
+                + str(self._names)
+            )
         i = self._axes[name]
         if i < self._masked:
             raise RuntimeError("Dimension " + name + " is masked")
@@ -32,7 +39,9 @@ class _Schema:
     def drop(self, names):
         if not isinstance(names, tuple):
             names = (names,)
-        return _Schema([n for n in self._names if not n in names], self._masked)
+        return _Schema(
+            [n for n in self._names if n not in names], self._masked
+        )
 
     def update(self, update):
         return _Schema([update.get(n, n) for n in self._names], self._masked)

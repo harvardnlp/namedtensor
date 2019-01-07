@@ -31,8 +31,10 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
-        assert len(self._tensor.shape) == len(self._schema._names), \
-            "Tensor has  %d dim, but only %d names"%(len(self._tensor.shape), len(self._schema._names))
+        assert len(self._tensor.shape) == len(self._schema._names), (
+            "Tensor has  %d dim, but only %d names"
+            % (len(self._tensor.shape), len(self._schema._names))
+        )
 
     @property
     def dims(self):
@@ -58,8 +60,10 @@ class NamedTensorBase:
         "Return the raw shape of the tensor"
         for dim, v in kwargs.items():
             i = self._schema.get(dim)
-            assert self._tensor.size(i) == v,\
-                "Size of %s should be %d, got %d"%(dim, v, self._tensor.size(i))
+            assert self._tensor.size(i) == v, (
+                "Size of %s should be %d, got %d"
+                % (dim, v, self._tensor.size(i))
+            )
         return self
 
     @property
@@ -67,10 +71,10 @@ class NamedTensorBase:
         "The raw underlying tensor object."
         return self._tensor
 
-    def _new(self, tensor, drop=None, updates={}, mask=None):
+    def _new(self, tensor, drop=None, add=None, updates={}, mask=None):
         return self.__class__(
             tensor,
-            self._schema.drop(drop).update(updates),
+            self._schema.drop(drop).update(updates)._names + (() if not add else add),
             self._schema._masked if mask is None else mask,
         )
 
@@ -87,6 +91,8 @@ class NamedTensorBase:
         "Stack any number of existing dimensions into a single new dimension."
         cur = self
         for k, v in kwargs.items():
+            for dim in v:
+                self._schema.get(dim)
             cur = cur._merge(v, k)
         return cur
 
@@ -95,12 +101,17 @@ class NamedTensorBase:
         cur = self
         for k, v in kwargs.items():
             if isinstance(v, tuple):
+                self._schema.get(k)
                 cur = cur._split(k, v, kwargs)
         return cur
 
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."
-        to_dims = tuple((d for d in self._schema._names if d not in dims)) + dims
+        for dim in dims:
+            self._schema.get(dim)
+        to_dims = (
+            tuple((d for d in self._schema._names if d not in dims)) + dims
+        )
         recipe = "%s -> %s" % (self._to_einops(), " ".join(to_dims))
         tensor = rearrange(self._tensor, recipe)
         return self.__class__(tensor, to_dims)

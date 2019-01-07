@@ -4,6 +4,9 @@ import opt_einsum as oe
 
 
 def make_tuple(names):
+    if names is None:
+        return ()
+
     if isinstance(names, tuple):
         return names
     else:
@@ -50,17 +53,15 @@ class NTorch(type):
         value, key = next(iter(kwargs.items()))
         return tensor1._new(
             tensor1._tensor.narrow(tensor1._schema.get(key), start, end),
-            updates={v:k for k,v in kwargs.items()}
+            updates={v: k for k, v in kwargs.items()},
         )
-
 
     @staticmethod
     def cat(tensors, dim):
         dim = tensors[0]._schema.get(dim)
         for t in tensors[1:]:
             assert t._schema._names == tensors[0]._schema._names
-        return tensors[0]._new(torch.cat([t.values for t in tensors],
-                                         dim=dim))
+        return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
     def build(init, names, *args, **kwargs):

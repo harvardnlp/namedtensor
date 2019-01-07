@@ -8,17 +8,37 @@ from torchvision import datasets, transforms
 from torchvision.utils import save_image
 from namedtensor import NamedTensor, ndistributions, ntorch
 
-parser = argparse.ArgumentParser(description='VAE MNIST Example')
-parser.add_argument('--batch-size', type=int, default=128, metavar='N',
-                    help='input batch size for training (default: 128)')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 10)')
-parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='enables CUDA training')
-parser.add_argument('--seed', type=int, default=1, metavar='S',
-                    help='random seed (default: 1)')
-parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                    help='how many batches to wait before logging training status')
+parser = argparse.ArgumentParser(description="VAE MNIST Example")
+parser.add_argument(
+    "--batch-size",
+    type=int,
+    default=128,
+    metavar="N",
+    help="input batch size for training (default: 128)",
+)
+parser.add_argument(
+    "--epochs",
+    type=int,
+    default=10,
+    metavar="N",
+    help="number of epochs to train (default: 10)",
+)
+parser.add_argument(
+    "--no-cuda",
+    action="store_true",
+    default=False,
+    help="enables CUDA training",
+)
+parser.add_argument(
+    "--seed", type=int, default=1, metavar="S", help="random seed (default: 1)"
+)
+parser.add_argument(
+    "--log-interval",
+    type=int,
+    default=10,
+    metavar="N",
+    help="how many batches to wait before logging training status",
+)
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -26,20 +46,26 @@ torch.manual_seed(args.seed)
 
 device = torch.device("cuda" if args.cuda else "cpu")
 
-kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+kwargs = {"num_workers": 1, "pin_memory": True} if args.cuda else {}
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=True, download=True,
-                   transform=transforms.ToTensor()),
-    batch_size=args.batch_size, shuffle=True, **kwargs)
+    datasets.MNIST(
+        "../data", train=True, download=True, transform=transforms.ToTensor()
+    ),
+    batch_size=args.batch_size,
+    shuffle=True,
+    **kwargs
+)
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
-    batch_size=args.batch_size, shuffle=True, **kwargs)
+    datasets.MNIST("../data", train=False, transform=transforms.ToTensor()),
+    batch_size=args.batch_size,
+    shuffle=True,
+    **kwargs
+)
 
 
 class VAE(nn.Module):
     def __init__(self):
         super(VAE, self).__init__()
-
         self.fc1 = nn.Linear(784, 400)
         self.fc21 = nn.Linear(400, 20)
         self.fc22 = nn.Linear(400, 20)
@@ -48,19 +74,17 @@ class VAE(nn.Module):
 
     def encode(self, x):
         h1 = x.op(self.fc1, F.relu, h="x")
-        return h1.op(self.fc21, z="h"),\
-            h1.op(self.fc22, z="h")
+        return h1.op(self.fc21, z="h"), h1.op(self.fc22, z="h")
 
     def reparameterize(self, mu, logvar):
         normal = ndistributions.Normal(mu, logvar.exp())
         return normal.rsample(), normal
 
     def decode(self, z):
-        return (z.op(self.fc3, F.relu, h="z")
-                .op(self.fc4, x="h").sigmoid())
+        return z.op(self.fc3, F.relu, h="z").op(self.fc4, x="h").sigmoid()
 
     def forward(self, x):
-        mu, logvar = self.encode(x.stack(x =("ch", "height", "width")))
+        mu, logvar = self.encode(x.stack(x=("ch", "height", "width")))
         z, normal = self.reparameterize(mu, logvar)
         return self.decode(z), normal
 
@@ -71,11 +95,14 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, var_posterior):
-    BCE = recon_x.reduce2(x.stack(h =("ch", "height", "width")),
-                          lambda x, y: F.binary_cross_entropy(x, y, reduction='sum'),
-                          ("batch", "x"))
-    prior = ndistributions.Normal(ntorch.zeros(dict(batch=1, z=1)),
-                                  ntorch.ones(dict(batch=1, z=1)))
+    BCE = recon_x.reduce2(
+        x.stack(h=("ch", "height", "width")),
+        lambda x, y: F.binary_cross_entropy(x, y, reduction="sum"),
+        ("batch", "x"),
+    )
+    prior = ndistributions.Normal(
+        ntorch.zeros(dict(batch=1, z=1)), ntorch.ones(dict(batch=1, z=1))
+    )
     KLD = ndistributions.kl_divergence(var_posterior, prior).sum()
     return BCE + KLD
 
@@ -93,13 +120,21 @@ def train(epoch):
         train_loss += loss.item()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader),
-                loss.item() / len(data)))
+            print(
+                "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                    epoch,
+                    batch_idx * len(data),
+                    len(train_loader.dataset),
+                    100.0 * batch_idx / len(train_loader),
+                    loss.item() / len(data),
+                )
+            )
 
-    print('====> Epoch: {} Average loss: {:.4f}'.format(
-          epoch, train_loss / len(train_loader.dataset)))
+    print(
+        "====> Epoch: {} Average loss: {:.4f}".format(
+            epoch, train_loss / len(train_loader.dataset)
+        )
+    )
 
 
 def test(epoch):
@@ -113,16 +148,24 @@ def test(epoch):
             test_loss += loss_function(recon_batch, data, normal).item()
             if i == 0:
                 n = min(data.size("batch"), 8)
-                comparison = ntorch.cat([data.narrow(0, n, small="batch"),
-                                        recon_batch.split(x=("ch", "height", "width"),
-                                                          height=28, width=28)
-                                         .narrow(0, n, small="batch")],
-                                        "small")
-                save_image(comparison.values.cpu(),
-                         'results/reconstruction_' + str(epoch) + '.png', nrow=n)
+                comparison = ntorch.cat(
+                    [
+                        data.narrow(0, n, small="batch"),
+                        recon_batch.split(
+                            x=("ch", "height", "width"), height=28, width=28
+                        ).narrow(0, n, small="batch"),
+                    ],
+                    "small",
+                )
+                save_image(
+                    comparison.values.cpu(),
+                    "results/reconstruction_" + str(epoch) + ".png",
+                    nrow=n,
+                )
 
     test_loss /= len(test_loader.dataset)
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print("====> Test set loss: {:.4f}".format(test_loss))
+
 
 if __name__ == "__main__":
     for epoch in range(1, args.epochs + 1):
@@ -132,6 +175,9 @@ if __name__ == "__main__":
         with torch.no_grad():
             sample = ntorch.randn(dict(batch=64, z=20)).to(device)
             sample = model.decode(sample).cpu()
-            save_image(sample.split(x=("ch", "height", "width"),
-                                    height=28, width=28).values,
-                       'results/sample_' + str(epoch) + '.png')
+            save_image(
+                sample.split(
+                    x=("ch", "height", "width"), height=28, width=28
+                ).values,
+                "results/sample_" + str(epoch) + ".png",
+            )

@@ -1,7 +1,10 @@
 import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 
+
 def make_tuple(names):
+    if names is None:
+        return ()
     if isinstance(names, tuple):
         return names
     else:
@@ -67,18 +70,22 @@ class NamedTensor(NamedTensorBase):
         print(self.shape)
         return self
 
+    def augment(self, axis_op, add, dim=None, **kwargs):
+        return self.op(axis_op, dim=dim, _add=add, **kwargs)
+
     def reduce(self, axis_op, reduced, dim=None, **kwargs):
         return self.op(axis_op, dim=dim, _drop=reduced, **kwargs)
 
     def reduce2(self, other, axis_op, reduced, dim=None, **kwargs):
         return self.op2(other, axis_op, dim=dim, _drop=reduced, **kwargs)
 
-
-    def op(self, *axis_ops, dim=None, _drop=None, **kwargs):
+    def op(self, *axis_ops, dim=None, _drop=None, _add=None, **kwargs):
         "Apply ops that may change dimensions sizes "
         func_args = {}
         if dim is not None:
             func_args["dim"] = self._schema.get(dim)
+        for v in make_tuple(_drop):
+            self._schema.get(v)
 
         cur = self._tensor
         for axis_op in axis_ops:
@@ -88,8 +95,14 @@ class NamedTensor(NamedTensorBase):
             for v in make_tuple(vs):
                 self._schema.get(v)
 
-        out = self._new(cur,
+        if _add is None and _drop is None:
+            assert len(cur.shape) == len(self._tensor.shape), \
+                "In shape %s, Out shape %s"%(cur.shape, self._tensor.shape)
+
+        out = self._new(
+            cur,
             drop=_drop,
+            add=make_tuple(_add),
             updates={
                 (v[0] if isinstance(v, tuple) else v): k
                 for k, v in kwargs.items()
@@ -97,15 +110,15 @@ class NamedTensor(NamedTensorBase):
         )
 
         for k, v in self.shape.items():
-            assert (
-                k not in out.shape or v == out.shape[k]
-            ), "name needs to change for updated dimensions" + str(axis_ops)+ str(k)
+            assert k not in out.shape or v == out.shape[k], (
+                "name needs to change for updated dimensions"
+                + str(axis_ops)
+                + str(k)
+            )
         return out
 
     def op2(self, y, axis_op, dim=None, _drop=None, **kwargs):
-        return self.op(lambda x: axis_op(x, y.values),
-                       _drop=_drop, **kwargs)
-
+        return self.op(lambda x: axis_op(x, y.values), _drop=_drop, **kwargs)
 
     def __add__(self, b):
         return self.add(b)
@@ -258,6 +271,8 @@ class NamedTensor(NamedTensorBase):
         "all",
         "any",
         "backward",
+        "numpy",
+        "detach",
         "item",
     }
 
