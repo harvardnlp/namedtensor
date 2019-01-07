@@ -38,9 +38,11 @@ class NamedTensor(NamedTensorBase):
         "Apply softmax over dim `name`"
         return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
 
-    def logsoftmax(self, name):
+    def log_softmax(self, name):
         "Apply log softmax over dim `name`"
-        return self._new(F.logsoftmax(self.tensor, dim=self._schema.get(name)))
+        return self._new(
+            F.log_softmax(self._tensor, dim=self._schema.get(name))
+        )
 
     def get(self, name, idx):
         results = self.access(name)[idx]
@@ -55,13 +57,17 @@ class NamedTensor(NamedTensorBase):
         term = dims.split() + [d for d in self._schema._names if d not in dims]
         return self.transpose(*term)._tensor
 
-    def op(self, axis_op, dim=None, **kwargs):
+    def debug(self):
+        print(self.shape)
+        return self
+
+    def op(self, axis_op, *extra, dim=None, **kwargs):
         "Apply an op that may change dimensions sizes "
         func_args = {}
         if dim is not None:
             func_args["dim"] = self._schema.get(dim)
         out = self._new(
-            axis_op(self._tensor, **func_args),
+            axis_op(self._tensor, *extra, **func_args),
             updates={
                 (v[0] if isinstance(v, tuple) else v): k
                 for k, v in kwargs.items()
@@ -160,9 +166,9 @@ class NamedTensor(NamedTensorBase):
                         return self._new(method(other, *args))
 
             else:
-                assert False, "Method not implemented"
+                assert False, "Method not implemented " + methodname
             return call
-        assert False, "Method does not exist"
+        assert False, "Method does not exist " + methodname
 
     # Torch Ops
     # Return a tensor of the same dimensions
