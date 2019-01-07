@@ -13,9 +13,7 @@ class _Schema:
         return " ".join(self._names)
 
     def ordered_dict(self, size):
-        return OrderedDict(
-            ((d, size[i]) for i, d in self.enum_masked())
-        )
+        return OrderedDict(((d, size[i]) for i, d in self.enum_masked()))
 
     @staticmethod
     def build(names, mask):

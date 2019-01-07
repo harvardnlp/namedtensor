@@ -68,7 +68,11 @@ jinja_contexts = {
           'ntorch': {
               'build': namedtensor.ntorch._build,
               'noshift': namedtensor.ntorch._noshift,
+              },
+          'ndistributions': {
+              'build': namedtensor.ndistributions._build,
               }
+
       }
 
 # Add any paths that contain templates here, relative to this directory.

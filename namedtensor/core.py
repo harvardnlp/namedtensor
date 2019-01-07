@@ -1,6 +1,5 @@
 from .schema import _Schema
 from einops import rearrange
-from collections import OrderedDict
 
 
 def assert_match(*tensors):
