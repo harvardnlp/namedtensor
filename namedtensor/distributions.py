@@ -102,13 +102,18 @@ class NamedDistribution:
 class NDistributions(type):
     def __getattr__(cls, name):
         if name in cls._build:
-
             def call(*args, **kwargs):
                 return NamedDistribution.build(
                     getattr(torch.distributions, name), *args, **kwargs
                 )
 
             return call
+        elif name in cls._other:
+            def call(*args, **kwargs):
+                new_args = [arg._dist for arg in args]
+                return getattr(torch.distributions, name)(*new_args, **kwargs)
+            return call
+
         assert False, "Function does not exist"
 
     _build = {
@@ -145,6 +150,10 @@ class NDistributions(type):
         "TransformedDistribution",
         "Uniform",
         "Weibull",
+    }
+
+    _other = {
+        "kl_divergence"
     }
 
 

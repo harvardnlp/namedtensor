@@ -24,7 +24,7 @@ class NTorch(type):
                 return getattr(ntensor, name)(*args, **kwargs)
 
             return call
-        assert False, "Function does not exist"
+        raise NotImplementedError(name)
 
     @classmethod
     def dot(cls, names, *tensors):
@@ -47,11 +47,20 @@ class NTorch(type):
 
     @staticmethod
     def narrow(tensor1, start, end, **kwargs):
-        key, value = next(iter(kwargs.items()))
+        value, key = next(iter(kwargs.items()))
         return tensor1._new(
             tensor1._tensor.narrow(tensor1._schema.get(key), start, end),
-            updates=kwargs,
+            updates={v:k for k,v in kwargs.items()}
         )
+
+
+    @staticmethod
+    def cat(tensors, dim):
+        dim = tensors[0]._schema.get(dim)
+        for t in tensors[1:]:
+            assert t._schema._names == tensors[0]._schema._names
+        return tensors[0]._new(torch.cat([t.values for t in tensors],
+                                         dim=dim))
 
     @staticmethod
     def build(init, names, *args, **kwargs):

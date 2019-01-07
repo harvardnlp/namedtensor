@@ -23,7 +23,7 @@ class _Schema:
 
     def get(self, name):
         if name not in self._axes:
-            raise RuntimeError("Dimension " + name + " does not exist")
+            raise RuntimeError("Dimension " + name + " does not exist. Available dimensions are " + str(self._names))
         i = self._axes[name]
         if i < self._masked:
             raise RuntimeError("Dimension " + name + " is masked")

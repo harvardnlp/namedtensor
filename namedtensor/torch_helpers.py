@@ -1,6 +1,12 @@
 import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 
+def make_tuple(names):
+    if isinstance(names, tuple):
+        return names
+    else:
+        return (names,)
+
 
 class NamedTensor(NamedTensorBase):
     def index_select(self, name, index):
@@ -78,6 +84,10 @@ class NamedTensor(NamedTensorBase):
         for axis_op in axis_ops:
             cur = axis_op(cur, **func_args)
 
+        for k, vs in kwargs.items():
+            for v in make_tuple(vs):
+                self._schema.get(v)
+
         out = self._new(cur,
             drop=_drop,
             updates={
@@ -89,7 +99,7 @@ class NamedTensor(NamedTensorBase):
         for k, v in self.shape.items():
             assert (
                 k not in out.shape or v == out.shape[k]
-            ), "name needs to change for updated dimensions"
+            ), "name needs to change for updated dimensions" + str(axis_ops)+ str(k)
         return out
 
     def op2(self, y, axis_op, dim=None, _drop=None, **kwargs):
@@ -183,9 +193,9 @@ class NamedTensor(NamedTensorBase):
                         return self._new(method(other, *args))
 
             else:
-                assert False, "Method not implemented " + methodname
+                raise NotImplementedError(methodname)
             return call
-        assert False, "Method does not exist " + methodname
+        raise NotImplementedError(methodname)
 
     # Torch Ops
     # Return a tensor of the same dimensions
