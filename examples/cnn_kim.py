@@ -83,20 +83,16 @@ class CNN(nn.Module):
         self.fc = nn.Linear(num_filters * len(kernel_sizes), num_classes)
 
     def forward(self, x):  # x: (batch, slen)
-        x = x.augment(self.embedding, "embedding").transpose(
-            "embedding", "slen"
-        )
+        x = x.augment(self.embedding, "h").transpose("h", "slen")
         x_list = [
-            x.op(conv_block, F.relu, slen2="slen", filters="embedding").max(
-                "slen2"
-            )[0]
+            x.op(conv_block, F.relu).max("slen")[0]
             for conv_block in self.conv_blocks
         ]
-        out = ntorch.cat(x_list, "filters")
+        out = ntorch.cat(x_list, "h")
         feature_extracted = out
         out = (
             out.op(lambda x: F.dropout(x, p=0.5, training=self.training))
-            .op(self.fc, classes="filters")
+            .op(self.fc, classes="h")
             .softmax("classes")
         )
         return out, feature_extracted
@@ -107,10 +103,7 @@ def evaluate(model, x_test, y_test):
     y_test = NamedTensor(y_test, ("batch",))
     preds, vector = model(inputs)
     preds = preds.max("classes")[1]
-
-    eval_acc = (preds == y_test).sum("batch").item() / len(
-        y_test
-    )  # pytorch 0.4
+    eval_acc = (preds == y_test).sum("batch").item() / len(y_test)
     return eval_acc, vector.cpu().detach().numpy()
 
 

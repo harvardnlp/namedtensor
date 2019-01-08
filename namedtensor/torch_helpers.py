@@ -37,11 +37,11 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.dot(names, *((self,) + others))
 
-    def narrow(self, start, end, **kwargs):
+    def narrow(self, name, start, end):
         "Narrow into the `kwargs` dimension and rename it"
         from .torch_base import ntorch
 
-        return ntorch.narrow(self, start, end, **kwargs)
+        return ntorch.narrow(self, name, start, end)
 
     def softmax(self, name):
         "Apply softmax over dim `name`"
@@ -110,12 +110,12 @@ class NamedTensor(NamedTensorBase):
             },
         )
 
-        for k, v in self.shape.items():
-            assert k not in out.shape or v == out.shape[k], (
-                "name needs to change for updated dimensions"
-                + str(axis_ops)
-                + str(k)
-            )
+        # for k, v in self.shape.items():
+        #     assert k not in out.shape or v == out.shape[k], (
+        #         "name needs to change for updated dimensions"
+        #         + str(axis_ops)
+        #         + str(k)
+        #     )
         return out
 
     def op2(self, y, axis_op, dim=None, _drop=None, **kwargs):

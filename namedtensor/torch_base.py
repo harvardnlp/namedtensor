@@ -49,11 +49,9 @@ class NTorch(type):
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
     @staticmethod
-    def narrow(tensor1, start, end, **kwargs):
-        value, key = next(iter(kwargs.items()))
+    def narrow(tensor1, name, start, end):
         return tensor1._new(
-            tensor1._tensor.narrow(tensor1._schema.get(key), start, end),
-            updates={v: k for k, v in kwargs.items()},
+            tensor1._tensor.narrow(tensor1._schema.get(name), start, end)
         )
 
     @staticmethod

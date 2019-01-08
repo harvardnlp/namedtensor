@@ -73,15 +73,15 @@ class VAE(nn.Module):
         self.fc4 = nn.Linear(400, 784)
 
     def encode(self, x):
-        h1 = x.op(self.fc1, F.relu, h="x")
-        return h1.op(self.fc21, z="h"), h1.op(self.fc22, z="h")
+        h1 = x.op(self.fc1, F.relu)
+        return h1.op(self.fc21, z="x"), h1.op(self.fc22, z="x")
 
     def reparameterize(self, mu, logvar):
         normal = ndistributions.Normal(mu, logvar.exp())
         return normal.rsample(), normal
 
     def decode(self, z):
-        return z.op(self.fc3, F.relu, h="z").op(self.fc4, x="h").sigmoid()
+        return z.op(self.fc3, F.relu).op(self.fc4, x="z").sigmoid()
 
     def forward(self, x):
         mu, logvar = self.encode(x.stack(x=("ch", "height", "width")))
@@ -148,15 +148,14 @@ def test(epoch):
             test_loss += loss_function(recon_batch, data, normal).item()
             if i == 0:
                 n = min(data.size("batch"), 8)
-                comparison = ntorch.cat(
-                    [
-                        data.narrow(0, n, small="batch"),
-                        recon_batch.split(
-                            x=("ch", "height", "width"), height=28, width=28
-                        ).narrow(0, n, small="batch"),
-                    ],
-                    "small",
-                )
+                group = [
+                    data.narrow("batch", 0, n),
+                    recon_batch.split(
+                        x=("ch", "height", "width"), height=28, width=28
+                    ).narrow("batch", 0, n),
+                ]
+
+                comparison = ntorch.cat(group, "batch")
                 save_image(
                     comparison.values.cpu(),
                     "results/reconstruction_" + str(epoch) + ".png",

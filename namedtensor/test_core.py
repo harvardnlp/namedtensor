@@ -148,9 +148,9 @@ def test_narrow():
     base1 = torch.randn(10, 2, 50)
 
     ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
-    narrowed = ntensor1.narrow(0, 25, ngamma="gamma")
+    narrowed = ntensor1.narrow("gamma", 0, 25)
     assert narrowed.shape == OrderedDict(
-        [("alpha", 10), ("beta", 2), ("ngamma", 25)]
+        [("alpha", 10), ("beta", 2), ("gamma", 25)]
     )
 
 
