@@ -183,11 +183,11 @@
 
         <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="o">*</span><span class="p">((</span><span class="bp">self</span><span class="p">,)</span> <span class="o">+</span> <span class="n">others</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="NamedTensor.narrow"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.narrow">[docs]</a>    <span class="k">def</span> <span class="nf">narrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensor.narrow"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.narrow">[docs]</a>    <span class="k">def</span> <span class="nf">narrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
         <span class="s2">&quot;Narrow into the `kwargs` dimension and rename it&quot;</span>
         <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
 
-        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NamedTensor.softmax"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.softmax">[docs]</a>    <span class="k">def</span> <span class="nf">softmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="s2">&quot;Apply softmax over dim `name`&quot;</span>
@@ -256,12 +256,12 @@
             <span class="p">},</span>
         <span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">assert</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">v</span> <span class="o">==</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="p">(</span>
-                <span class="s2">&quot;name needs to change for updated dimensions&quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">axis_ops</span><span class="p">)</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="p">)</span>
+        <span class="c1"># for k, v in self.shape.items():</span>
+        <span class="c1">#     assert k not in out.shape or v == out.shape[k], (</span>
+        <span class="c1">#         &quot;name needs to change for updated dimensions&quot;</span>
+        <span class="c1">#         + str(axis_ops)</span>
+        <span class="c1">#         + str(k)</span>
+        <span class="c1">#     )</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
     <span class="k">def</span> <span class="nf">op2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">axis_op</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_drop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
