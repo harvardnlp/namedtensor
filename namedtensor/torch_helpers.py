@@ -31,6 +31,14 @@ class NamedTensor(NamedTensorBase):
             new_names,
         )
 
+    def gather(self, index, **kwargs):
+        from .torch_base import ntorch
+        return ntorch.gather(index, **kwargs)
+    
+    def scatter_(self, index, src, **kwargs):
+        from .torch_base import ntorch
+        ntorch.scatter_(self, index, src, **kwargs)
+    
     def dot(self, names, *others):
         "Contract dimension `names` with each of the other tensors"
         from .torch_base import ntorch
@@ -40,9 +48,15 @@ class NamedTensor(NamedTensorBase):
     def narrow(self, name, start, end):
         "Narrow into the `kwargs` dimension and rename it"
         from .torch_base import ntorch
-
         return ntorch.narrow(self, name, start, end)
 
+
+    def masked_select(self, mask, dim):
+        "Applies `mask` and returns a 1D tensor with name `dim`"
+        from .torch_base import ntorch
+        return ntorch.masked_select(self, mask)
+
+    
     def softmax(self, name):
         "Apply softmax over dim `name`"
         return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
@@ -155,28 +169,28 @@ class NamedTensor(NamedTensorBase):
         if methodname in dir(self._tensor):
             method = getattr(self._tensor, methodname)
             if methodname in self._noshift:
-                # Call and wrap
                 def call(*args, **kwargs):
                     return self._new(method(*args, **kwargs))
 
             elif methodname in self._noshift_dim:
-
                 def call(dim, *args, **kwargs):
                     return self._new(
                         method(self._schema.get(dim), *args, **kwargs)
                     )
 
+            elif methodname in self._inline:
+                def call(*args, **kwargs):
+                    return method(*args, **kwargs)
+                    
             elif methodname in self._info:
-                # Call and return
                 call = method
 
             elif methodname in self._reduce:
-                # Call, replace, and wrap
                 def call(dim=None, *args, **kwargs):
                     cur = self
+                    method = getattr(cur._tensor, methodname)
                     if dim is None:
-                        method = getattr(self._tensor, methodname)
-                        return method(*args, **kwargs)
+                        return NamedTensor(method(*args, **kwargs), ())
                     if not isinstance(dim, tuple):
                         dim = (dim,)
                     method = getattr(self._tensor, methodname)
@@ -312,4 +326,34 @@ class NamedTensor(NamedTensorBase):
         "le",
         "ge",
         "type_as",
+    }
+
+    
+    # Inline.
+    _inline = {
+        "fill_",
+        "random_",
+        "abs_",
+        "acos_",
+        "asin_",
+        "atan_",
+        "ceil_",
+        "clamp_",
+        "cos_",
+        "cosh_",
+        "exp_",
+        "floor_",
+        "fmod_",
+        "log_",
+        "pow_",
+        "round_",
+        "rsqrt_",
+        "sigmoid_",
+        "sign_",
+        "sin_",
+        "sinh_",
+        "sqrt_",
+        "sub_",
+        "tan_",
+        "tanh_"
     }
