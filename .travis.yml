@@ -1,0 +1,37 @@
+language: python
+python:
+  - "3.6"
+cache: pip
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
+  - pip install -r requirements.txt
+
+install:
+  - python setup.py install
+
+script:
+  - pytest .
+
+
+env:
+  global:
+    # Doctr deploy key for harvardnlp/namedtensor
+    - secure: "PBk+cjNuILzRnBR7lXTki3P32yTjeFh8q4QYoGdRRldTKj3i5FkHFGj8/Py59GkMJgYzqh0t8jfZZn51yL5x92qhxItMM4uHeiJfRuPe0l3LufwbnPiG2cUYVLR9+6VZk2ma4wyOVTbJIjqmc54e+DRjwwa1VoIMR5x9zaIqZBzckgQGH40OsRfmQ6h5rA8ZFmNI5PlZnG1SVRW57+01iwWZ4UEXf0eJuf4oU2k+8WxuqITUjlIKNN53DCxB/nP1wVaQl/LB+CS6l2TwkkNe8QYm+oR4qzxMd31jgmVb+yFc1qF3GC4jYE6M8hNKWxM2ZbYv6NLlKKHqTKFkJHC+HCsMHyRVeEH+f8xQyjRlzCtz6RRGn4PkjdfIyuAPDnme0US5vKKUfLdihxnrQn/EjACUPBW0ZgYTGSrbY+qXdxI+5kmlP7mEITdS+cOsgPtWpVVJaCdvb5YOYPid6WrajiU5Q1yHIFUufmGTwcuRz4L3wQAbe59G3lZPKkSoWxXIWuKRYD7ElZY00KChLnTMvTQWIlCTdh90RWw72OLi6uYQ178RO8sHYTPdA9UHqyRppmp/IIS2pzv2xWV2u1JEPyNwC+U1ruMbDII+vjZvvx/EgiMSmgcGx1WUD5pNdAbmnKLPvyxTm1IcGpKEANNSSfMUEvX9z4H6SREmGrLmixs="
+
+
+matrix:
+  include:
+    - env: LINT_CHECK
+      python: "3.6"
+      install: pip install flake8 pep8-naming
+      script: cd namedtensor/;flake8 --ignore "N801, E203, E266, E501, W503" namedtensor
+    - python: "3.6"
+      install:
+        - python setup.py install
+        - pip install doctr
+      script:
+        - pip install -r docs/requirements.txt
+        - cd docs/; make html; cd ..
+        - set -e
+        - doctr deploy --built-docs docs/build/html/ .

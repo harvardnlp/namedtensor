@@ -6,9 +6,11 @@ from namedtensor import NamedTensor
 
 class SimpleAttention(nn.module):
     def forward(self, query, key, value):
-        return  key.contract("hidden", query) \
-                   .apply(F.softmax, "keys") \
-                   .contract("keys", values)
+        return (
+            key.contract("hidden", query)
+            .apply(F.softmax, "keys")
+            .contract("keys", values)
+        )
 
 
 # class FullAttention(nn.module):
@@ -55,7 +57,6 @@ class SimpleAttention(nn.module):
 #                    .contract("keys", values) \
 #                    .shift("(heads d_hid) - > hidden")
 #                    .contract("hidden", self.out_projection)
-
 
 
 # class Attention(nn.module):
