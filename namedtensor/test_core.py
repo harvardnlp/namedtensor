@@ -53,7 +53,7 @@ def test_sum():
     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
     s = ntensor.sum()
     assert s.values == base.sum()
-    
+
 
 def test_fill():
     base = torch.zeros([10, 2, 50])
@@ -63,34 +63,39 @@ def test_fill():
 
 
 def test_mask():
-    t = ntorch.tensor(torch.Tensor([[1,2], [3,4]]), ("a", "b"))
-    mask = ntorch.tensor(torch.Tensor([[0,1], [1,0]]), ("a", "b"))
+    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
+    mask = ntorch.tensor(torch.Tensor([[0, 1], [1, 0]]), ("a", "b"))
     ntensor = t.masked_select(mask, "c")
     assert ntensor.shape == OrderedDict([("c", 2)])
-    
+
+
 def test_gather():
-    t = torch.Tensor([[1,2], [3,4]])
-    base = torch.gather(t, 1, torch.LongTensor([[0,0],[1,0]]))
+    t = torch.Tensor([[1, 2], [3, 4]])
+    base = torch.gather(t, 1, torch.LongTensor([[0, 0], [1, 0]]))
 
-
-    t = ntorch.tensor(torch.Tensor([[1,2], [3,4]]), ("a", "b"))
-    index = ntorch.tensor(torch.LongTensor([[0,0], [1,0]]), ("a", "c"))
+    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
+    index = ntorch.tensor(torch.LongTensor([[0, 0], [1, 0]]), ("a", "c"))
     ntensor = ntorch.gather(t, index, c="b")
     assert (ntensor.values == base).all()
 
     x = ntorch.tensor(torch.rand(2, 5), ("c", "b"))
     y = ntorch.tensor(torch.rand(3, 5), ("a", "b"))
-    z = y.scatter_(ntorch.tensor(torch.LongTensor([[0, 1, 2, 0, 0], [2, 0, 0, 1, 2]]),
-                                 ("c", "b")
-                   ), x, a="c")
-    
-    
+    z = y.scatter_(
+        ntorch.tensor(
+            torch.LongTensor([[0, 1, 2, 0, 0], [2, 0, 0, 1, 2]]), ("c", "b")
+        ),
+        x,
+        a="c",
+    )
+    assert z.shape == OrderedDict([("a", 3), ("b", 5)])
+
+
 def test_unbind():
     base = torch.zeros([10, 2, 50])
     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
     out = ntensor.unbind("beta")
     assert len(out) == 2
-    assert out[0].shape == OrderedDict([("alpha", 10), ("gamma", 50)])    
+    assert out[0].shape == OrderedDict([("alpha", 10), ("gamma", 50)])
 
     base = torch.zeros([10])
     ntensor = ntorch.tensor(base, ("alpha"))
@@ -98,7 +103,8 @@ def test_unbind():
     c = ntensor.unbind("alpha")
     assert len(c) == 10
     assert c == 20
-    
+
+
 @pytest.mark.xfail
 def test_fail():
     for base1, base2 in zip(
@@ -163,7 +169,7 @@ def test_contract():
 #                                             ("beta", 2)])
 
 
-def test_unbind():
+def test_unbind2():
     base1 = torch.randn(10, 2, 50)
     ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
     a, b = ntensor1.unbind("beta")
@@ -212,7 +218,7 @@ def test_narrow():
 
 
 @pytest.mark.xfail
-def test_mask():
+def test_mask2():
     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
     base2 = base1.mask_to("alpha")
     print(base2._schema._masked)
