@@ -48,6 +48,13 @@ def test_apply2():
     assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
 
 
+def test_sum():
+    base = torch.zeros([10, 2, 50])
+    ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
+    s = ntensor.sum()
+    assert s == base.sum()
+
+
 @pytest.mark.xfail
 def test_fail():
     for base1, base2 in zip(
@@ -82,7 +89,7 @@ def test_contract():
     ntensor2 = ntorch.tensor(base2, ("alpha", "delta", "beta"))
     assert_match(ntensor1, ntensor2)
 
-    base3 = torch.einsum("abg,adb->a", base1, base2)
+    base3 = torch.einsum("abg,adb->a", (base1, base2))
 
     ntensor3 = ntorch.dot(("beta", "gamma", "delta"), ntensor1, ntensor2)
     assert ntensor3.shape == OrderedDict([("alpha", 10)])

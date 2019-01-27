@@ -172,8 +172,11 @@ class NamedTensor(NamedTensorBase):
 
             elif methodname in self._reduce:
                 # Call, replace, and wrap
-                def call(dim, *args, **kwargs):
+                def call(dim=None, *args, **kwargs):
                     cur = self
+                    if dim is None:
+                        method = getattr(self._tensor, methodname)
+                        return method(*args, **kwargs)
                     if not isinstance(dim, tuple):
                         dim = (dim,)
                     method = getattr(self._tensor, methodname)
