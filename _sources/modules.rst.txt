@@ -71,6 +71,17 @@ These methods apply broadcasting before operating between two tensors.
 
       {% for k in binop_methods %} :py:meth:`torch.Tensor.{{k}}`  {% endfor %}
 
+Inline Methods
+-----------------
+
+These methods modify the tensor inline.
+
+         .. method:: _operate(*args)
+
+
+.. jinja:: tensor
+
+      {% for k in inline_methods %} :py:meth:`torch.Tensor.{{k}}`  {% endfor %}
 
 
 Named Torch
@@ -123,6 +134,70 @@ These functions return a named tensor of the same form as the original.
       {% for k in noshift %} :py:func:`torch.{{k}}`  {% endfor %}
 
 
+Named NN
+=============
+
+Named nn `ntorch.nn` is a module that wraps the core nn operations
+with named variants.
+
+
+Basic Modules
+----------------
+
+These modules constructors are like NN and they behave identically.
+
+         .. method:: Module(*args)
+
+
+.. jinja:: ntorch_nn
+
+      {% for k in wrap %} :py:func:`torch.nn.{{k}}`  {% endfor %}
+
+Update Modules
+----------------
+
+These modules constructors are like NN. 
+
+         .. method:: Module(*args)
+
+They have an extra method that allows for renaming the main named dimension.
+
+         .. method:: rename(*kwargs)
+                     
+.. jinja:: ntorch_nn
+
+      {% for k in standard %} :py:func:`torch.nn.{{k}}`  {% endfor %}
+
+Augment Modules
+----------------
+
+These modules constructors are like NN. 
+
+         .. method:: Module(*args)
+
+They have an extra method that allows you to name an extra appended dimension.
+
+         .. method:: augment(name)
+                     
+.. jinja:: ntorch_nn
+
+      {% for k in augment %} :py:func:`torch.nn.{{k}}`  {% endfor %}
+
+      
+Loss Modules
+----------------
+
+These modules constructors are like NN losses. (They must be called with reduction='none'.)
+
+         .. method:: Module(*args)
+
+                     
+.. jinja:: ntorch_nn
+
+      {% for k in loss %} :py:func:`torch.nn.{{k}}`  {% endfor %}
+
+
+      
 
 Distributions
 ===============

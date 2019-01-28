@@ -80,6 +80,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Named Tensor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html#named-torch">Named Torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#named-nn">Named NN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html#distributions">Distributions</a></li>
 </ul>
 
@@ -185,7 +186,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Return the dim names for the tensor&quot;</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vshape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
