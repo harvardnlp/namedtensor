@@ -32,13 +32,22 @@ class NamedTensor(NamedTensorBase):
         )
 
     def gather(self, index, **kwargs):
+        """
+        Apply gather with `index_dim='self_dim'` where self_dim is reduced out 
+        based on index_dim. 
+        """
         from .torch_base import ntorch
 
         return ntorch.gather(index, **kwargs)
 
     def scatter_(self, index, src, **kwargs):
-        from .torch_base import ntorch
+        """
+        Apply gather with `self_dim='index_dim'` where self_dim gets the 
+        scattered values of `src` based in `index`.
+        """
 
+        from .torch_base import ntorch
+        
         ntorch.scatter_(self, index, src, **kwargs)
 
     def dot(self, names, *others):

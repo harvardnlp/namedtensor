@@ -64,11 +64,20 @@ jinja_contexts = {
               'multi_reduce_methods': namedtensor.NamedTensor._reduce_multi,
               'info_methods': namedtensor.NamedTensor._info,
               'binop_methods': namedtensor.NamedTensor._binop,
+              'inline_methods': namedtensor.NamedTensor._inline,
           },
           'ntorch': {
               'build': namedtensor.ntorch._build,
               'noshift': namedtensor.ntorch._noshift,
               },
+          'ntorch_nn': {
+              'standard': namedtensor.ntorch.nn._update,
+              'wrap': namedtensor.ntorch.nn._wrap,
+              'augment': namedtensor.ntorch.nn._augment,
+              'loss': namedtensor.ntorch.nn._loss,
+              },
+    
+    
           'ndistributions': {
               'build': namedtensor.ndistributions._build,
               }

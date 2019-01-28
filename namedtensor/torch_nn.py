@@ -28,6 +28,9 @@ class _Loss:
         )
 
 
+
+
+    
 class _Augment:
     def augment(self, name):
         self._augment = name
@@ -40,7 +43,16 @@ class _Augment:
 
         return input.augment(super(self.__class__, self).forward, augment)
 
+_wrap = ["Dropout"]
 
+
+class Dropout(_Flat, nn.Dropout):
+    pass
+
+    
+_update = ["Linear", "Conv1d", "Conv2d", "Conv3d", "MaxPool1d",
+           "MaxPool2d", "MaxPool3d"]
+    
 class Linear(_Update, nn.Linear):
     pass
 
@@ -69,9 +81,7 @@ class MaxPool3d(_Update, nn.MaxPool2d):
     pass
 
 
-class Dropout(_Flat, nn.Dropout):
-    pass
-
+_loss = ["CrossEntropyLoss", "NLLLoss"]
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
     pass
@@ -80,6 +90,8 @@ class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
 class NLLLoss(_Loss, nn.NLLLoss):
     pass
 
+
+_augment = ["Embedding"]
 
 class Embedding(_Augment, nn.Embedding):
     pass
