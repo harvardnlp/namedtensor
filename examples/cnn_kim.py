@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import KFold
 
 import data_helpers
-from namedtensor import NamedTensor, ntorch
+from namedtensor import NamedTensor, ntorch, nnn
 
 # for obtaining reproducible results
 np.random.seed(0)
@@ -63,7 +63,7 @@ class CNN(nn.Module):
     ):
         super(CNN, self).__init__()
         self.kernel_sizes = kernel_sizes
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.embedding = nnn.Embedding(vocab_size, embedding_dim).augment("h")
         self.embedding.weight.data.copy_(
             torch.from_numpy(pretrained_embeddings)
         )
@@ -71,7 +71,7 @@ class CNN(nn.Module):
 
         conv_blocks = []
         for kernel_size in kernel_sizes:
-            conv1d = nn.Conv1d(
+            conv1d = nnn.Conv1d(
                 in_channels=embedding_dim,
                 out_channels=num_filters,
                 kernel_size=kernel_size,
@@ -80,21 +80,19 @@ class CNN(nn.Module):
 
             conv_blocks.append(conv1d)
         self.conv_blocks = nn.ModuleList(conv_blocks)
-        self.fc = nn.Linear(num_filters * len(kernel_sizes), num_classes)
+        self.fc = nnn.Linear(num_filters * len(kernel_sizes), num_classes) \
+                    .rename("h", "classes")
+        self.dropout = nnn.Dropout(0.5)
 
-    def forward(self, x):  # x: (batch, slen)
-        x = x.augment(self.embedding, "h").transpose("h", "slen")
+    def forward(self, x):
+        x = self.embedding(x).transpose("h", "slen")
         x_list = [
-            x.op(conv_block, F.relu).max("slen")[0]
+            conv_block(x).relu().max("slen")[0]
             for conv_block in self.conv_blocks
         ]
         out = ntorch.cat(x_list, "h")
         feature_extracted = out
-        out = (
-            out.op(lambda x: F.dropout(x, p=0.5, training=self.training))
-            .op(self.fc, classes="h")
-            .softmax("classes")
-        )
+        out = self.fc(self.dropout(out)).softmax("classes")
         return out, feature_extracted
 
 
