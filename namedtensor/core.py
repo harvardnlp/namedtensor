@@ -39,7 +39,7 @@ class NamedTensorBase:
     @property
     def dims(self):
         "Return the dim names for the tensor"
-        return tuple(self._schema.names)
+        return tuple(self._schema._names)
 
     @property
     def vshape(self):

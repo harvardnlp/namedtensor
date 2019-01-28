@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import KFold
 
 import data_helpers
-from namedtensor import NamedTensor, ntorch, nnn
+from namedtensor import NamedTensor, ntorch
 
 # for obtaining reproducible results
 np.random.seed(0)
@@ -63,7 +63,9 @@ class CNN(nn.Module):
     ):
         super(CNN, self).__init__()
         self.kernel_sizes = kernel_sizes
-        self.embedding = nnn.Embedding(vocab_size, embedding_dim).augment("h")
+        self.embedding = ntorch.nn.Embedding(
+            vocab_size, embedding_dim
+        ).augment("h")
         self.embedding.weight.data.copy_(
             torch.from_numpy(pretrained_embeddings)
         )
@@ -71,7 +73,7 @@ class CNN(nn.Module):
 
         conv_blocks = []
         for kernel_size in kernel_sizes:
-            conv1d = nnn.Conv1d(
+            conv1d = ntorch.nn.Conv1d(
                 in_channels=embedding_dim,
                 out_channels=num_filters,
                 kernel_size=kernel_size,
@@ -80,10 +82,10 @@ class CNN(nn.Module):
 
             conv_blocks.append(conv1d)
         self.conv_blocks = nn.ModuleList(conv_blocks)
-        self.fc = nnn.Linear(
+        self.fc = ntorch.nn.Linear(
             num_filters * len(kernel_sizes), num_classes
         ).rename("h", "classes")
-        self.dropout = nnn.Dropout(0.5)
+        self.dropout = ntorch.nn.Dropout(0.5)
 
     def forward(self, x):
         x = self.embedding(x).transpose("h", "slen")
