@@ -5,6 +5,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from namedtensor import ntorch
 
+
 class Net(ntorch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -13,7 +14,7 @@ class Net(ntorch.nn.Module):
         self.fc1 = ntorch.nn.Linear(4 * 4 * 50, 500)
         self.fc2 = ntorch.nn.Linear(500, 10).rename(classes="fc")
         self.pool = ntorch.nn.MaxPool2d(2, 2)
-        
+
     def forward(self, x):
         x = x.transpose("c", "h", "w")
         x = self.pool(self.conv1(x).relu())
@@ -58,7 +59,7 @@ def test(args, model, device, test_loader):
             target = ntorch.tensor(target, ("b",))
             output = model(data)
             test_loss = lmod(output, target).sum("b").item()
-            pred = output.max("classes")[1]  
+            pred = output.max("classes")[1]
             correct += (pred == target).sum("b").item()
 
     test_loss /= len(test_loader.dataset)

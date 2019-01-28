@@ -64,7 +64,8 @@ class CNN(nn.Module):
         super(CNN, self).__init__()
         self.kernel_sizes = kernel_sizes
         self.embedding = ntorch.nn.Embedding(
-            vocab_size, embedding_dim).augment("h")
+            vocab_size, embedding_dim
+        ).augment("h")
         self.embedding.weight.data.copy_(
             torch.from_numpy(pretrained_embeddings)
         )

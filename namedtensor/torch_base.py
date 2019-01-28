@@ -152,5 +152,5 @@ class NTorch(type):
 
 
 class ntorch(metaclass=NTorch):
-    nn = nnn    
+    nn = nnn
     pass
