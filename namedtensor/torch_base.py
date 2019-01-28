@@ -1,5 +1,7 @@
 import torch
 from .torch_helpers import NamedTensor
+
+import namedtensor.torch_nn as nnn
 import opt_einsum as oe
 
 
@@ -150,5 +152,5 @@ class NTorch(type):
 
 
 class ntorch(metaclass=NTorch):
-
+    nn = nnn    
     pass

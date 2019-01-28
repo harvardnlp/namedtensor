@@ -1,5 +1,8 @@
 import torch.nn as nn
 
+Module = nn.Module
+ModuleList = nn.ModuleList
+
 
 class _Update:
     def rename(self, **kwargs):

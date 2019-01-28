@@ -1,49 +1,37 @@
 from __future__ import print_function
 import argparse
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-from namedtensor import NamedTensor
+from namedtensor import ntorch
 
-
-class Net(nn.Module):
+class Net(ntorch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 20, 5, 1)
-        self.conv2 = nn.Conv2d(20, 50, 5, 1)
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
-
+        self.conv1 = ntorch.nn.Conv2d(1, 20, 5, 1)
+        self.conv2 = ntorch.nn.Conv2d(20, 50, 5, 1)
+        self.fc1 = ntorch.nn.Linear(4 * 4 * 50, 500)
+        self.fc2 = ntorch.nn.Linear(500, 10).rename(classes="fc")
+        self.pool = ntorch.nn.MaxPool2d(2, 2)
+        
     def forward(self, x):
-        def pool(x):
-            return F.max_pool2d(x, 2, 2)
-
-        return (
-            x.transpose("c", "h", "w")
-            .op(self.conv1, F.relu)
-            .assert_size(c=20)
-            .op(pool)
-            .op(self.conv2, F.relu)
-            .assert_size(c=50)
-            .op(pool)
-            .stack(fc=("c", "h", "w"))
-            .op(self.fc1, F.relu)
-            .op(self.fc2, classes="fc")
-            .log_softmax("classes")
-        )
+        x = x.transpose("c", "h", "w")
+        x = self.pool(self.conv1(x).relu())
+        x = self.pool(self.conv2(x).relu())
+        x = self.fc1(x.stack(fc=("c", "h", "w"))).relu()
+        return self.fc2(x).log_softmax("classes")
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
+    lmod = ntorch.nn.NLLLoss(reduction="none")
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        data = NamedTensor(data, ("b", "c", "h", "w"))
-        target = NamedTensor(target, ("b",))
+        data = ntorch.tensor(data, ("b", "c", "h", "w"))
+        target = ntorch.tensor(target, ("b",))
         optimizer.zero_grad()
         output = model(data)
-        loss = output.reduce2(target, F.nll_loss, ("b", "classes"))
+        loss = lmod(output, target).mean("b")
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -62,20 +50,15 @@ def test(args, model, device, test_loader):
     model.eval()
     test_loss = 0
     correct = 0
+    lmod = ntorch.nn.NLLLoss(reduction="none")
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
-            data = NamedTensor(data, ("b", "c", "h", "w"))
-            target = NamedTensor(target, ("b",))
+            data = ntorch.tensor(data, ("b", "c", "h", "w"))
+            target = ntorch.tensor(target, ("b",))
             output = model(data)
-            test_loss = output.reduce2(
-                target,
-                lambda x, y: F.nll_loss(x, y, reduction="sum"),
-                ("b", "classes"),
-            ).item()
-            pred = output.max("classes")[
-                1
-            ]  # get the index of the max log-probability
+            test_loss = lmod(output, target).sum("b").item()
+            pred = output.max("classes")[1]  
             correct += (pred == target).sum("b").item()
 
     test_loss /= len(test_loader.dataset)
