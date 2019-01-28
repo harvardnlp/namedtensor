@@ -27,6 +27,8 @@ matrix:
       install: pip install flake8 pep8-naming
       script: cd namedtensor/;flake8 --ignore "N801, E203, E266, E501, W503" namedtensor
     - python: "3.6"
+      script: pytest . 
+    - python: "3.6"
       install:
         - python setup.py install
         - pip install doctr

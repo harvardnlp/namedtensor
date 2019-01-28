@@ -64,7 +64,7 @@ def test_fill():
 
 def test_mask():
     t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
-    mask = ntorch.tensor(torch.Tensor([[0, 1], [1, 0]]), ("a", "b"))
+    mask = ntorch.tensor(torch.ByteTensor([[0, 1], [1, 0]]), ("a", "b"))
     ntensor = t.masked_select(mask, "c")
     assert ntensor.shape == OrderedDict([("c", 2)])
 
@@ -80,14 +80,14 @@ def test_gather():
 
     x = ntorch.tensor(torch.rand(2, 5), ("c", "b"))
     y = ntorch.tensor(torch.rand(3, 5), ("a", "b"))
-    z = y.scatter_(
+    y.scatter_(
         ntorch.tensor(
             torch.LongTensor([[0, 1, 2, 0, 0], [2, 0, 0, 1, 2]]), ("c", "b")
         ),
         x,
         a="c",
     )
-    assert z.shape == OrderedDict([("a", 3), ("b", 5)])
+    assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
 def test_unbind():
@@ -98,11 +98,11 @@ def test_unbind():
     assert out[0].shape == OrderedDict([("alpha", 10), ("gamma", 50)])
 
     base = torch.zeros([10])
-    ntensor = ntorch.tensor(base, ("alpha"))
+    ntensor = ntorch.tensor(base, ("alpha",))
     ntensor.fill_(20)
     c = ntensor.unbind("alpha")
     assert len(c) == 10
-    assert c == 20
+    assert c[0].item() == 20
 
 
 @pytest.mark.xfail

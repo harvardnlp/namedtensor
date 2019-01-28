@@ -57,7 +57,11 @@ class NamedTensor(NamedTensorBase):
         "Applies `mask` and returns a 1D tensor with name `dim`"
         from .torch_base import ntorch
 
-        return ntorch.masked_select(self, mask)
+        return ntorch.masked_select(self, mask, dim)
+
+    def relu(self):
+        "Apply relu"
+        return self._new(F.relu(self._tensor))
 
     def softmax(self, name):
         "Apply softmax over dim `name`"
