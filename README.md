@@ -68,21 +68,22 @@ y = ntorch.randn(dict(batch=10, w=20, c=30))
 x.dot(y, "w")
 ```
 
-Lifting Torch Functions
+NN Modules
 
 ```python
 
-linear = nn.Linear(20, 25)
-x = x.op(linear)
+linear = ntorch.nn.Linear(20, 25)
+x = linear(x)
 
 # or 
 
-x = x.op(linear, wout = "w")
+linear.rename(wout="w")
+x = linear(x)
 
 ```
 
 ## Other Goodies
-
+* Named NN
 * Named Distributions libary
 
 ## Documentation
