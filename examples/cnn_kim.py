@@ -80,8 +80,9 @@ class CNN(nn.Module):
 
             conv_blocks.append(conv1d)
         self.conv_blocks = nn.ModuleList(conv_blocks)
-        self.fc = nnn.Linear(num_filters * len(kernel_sizes), num_classes) \
-                    .rename("h", "classes")
+        self.fc = nnn.Linear(
+            num_filters * len(kernel_sizes), num_classes
+        ).rename("h", "classes")
         self.dropout = nnn.Dropout(0.5)
 
     def forward(self, x):

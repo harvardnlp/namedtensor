@@ -58,7 +58,7 @@ class NamedTensor(NamedTensorBase):
         from .torch_base import ntorch
 
         return ntorch.masked_select(self, mask, dim)
-    
+
     def relu(self):
         "Apply relu"
         return self._new(F.relu(self._tensor))
