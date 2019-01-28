@@ -77,7 +77,7 @@ class NTorch(type):
         order = input._broadcast_order(mask)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
-        return NamedTensor(a1.values.maked_select(b1.values), dim)
+        return NamedTensor(a1.values.masked_select(b1.values), dim)
 
     @staticmethod
     def scatter_(input, index, src, **kwargs):
