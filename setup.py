@@ -5,7 +5,7 @@ setup(
     version="0.0.2",
     author="Alexander Rush",
     author_email="srush@seas.harvard.edu",
-    packages=["namedtensor"],
+    packages=["namedtensor", "namedtensor.text"],
     package_data={"namedtensor": []},
     url="https://github.com/harvardnlp/NamedTensor",
     install_requires=["numpy", "einops"],
