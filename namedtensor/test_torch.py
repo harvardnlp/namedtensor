@@ -9,8 +9,6 @@ def attention(query, key, value):
     )
 
 
-
-
 def random_tensors(shape, num=1, requires_grad=False):
     tensors = [
         torch.randn(shape, requires_grad=requires_grad) for i in range(0, num)

@@ -105,8 +105,9 @@ class NTorch(type):
         if isinstance(args[0], torch.Tensor):
             return NamedTensor(*args, **kwargs)
         else:
-            return NamedTensor(*((torch.tensor(args[0]),)+args[1:]), **kwargs)
-
+            return NamedTensor(
+                *((torch.tensor(args[0]),) + args[1:]), **kwargs
+            )
 
     _build = {"ones", "zeros", "randn", "empty", "rand"}
 

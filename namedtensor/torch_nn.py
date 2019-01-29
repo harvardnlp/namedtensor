@@ -1,15 +1,19 @@
 import torch.nn as nn
 from .torch_helpers import NamedTensor
 
+
 class Module(nn.Module):
     def register_parameter(self, name, tensor):
         if isinstance(tensor, NamedTensor):
             param = nn.Parameter(tensor.values)
-            super(Module, self).register_parameter("_" + name + "_named", param)
+            super(Module, self).register_parameter(
+                "_" + name + "_named", param
+            )
             tensor._tensor = param
             setattr(self, name, tensor)
         else:
             super(Module, self).register_parameter(name, tensor)
+
 
 ModuleList = nn.ModuleList
 
@@ -37,9 +41,8 @@ class _Loss:
     def __call__(self, input, target):
         assert "_reduced" in dir(self), "Must call 'reduce' first."
 
-        return input.reduce2(
-            target, super(_Loss, self).forward, self._reduced
-        )
+        return input.reduce2(target, super(_Loss, self).forward, self._reduced)
+
 
 class _Augment:
     def augment(self, name):

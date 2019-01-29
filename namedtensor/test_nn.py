@@ -1,6 +1,6 @@
 from . import ntorch
-import torch.nn
 from collections import OrderedDict
+
 
 def test_nn():
     lin = ntorch.nn.Linear(20, 10).rename(output="input")
@@ -15,6 +15,7 @@ def test_loss():
     target = ntorch.tensor([2, 2, 3, 4], ["batch"])
     out = loss(predict, target)
     assert out.shape == OrderedDict([])
+
 
 def test_drop():
     drop = ntorch.nn.Dropout()
@@ -34,14 +35,13 @@ class MyModule(ntorch.nn.Module):
         bias = ntorch.randn(dict((out_dim,)))
         self.register_parameter("bias", bias)
 
-
     def forward(self, input):
         return self.weight.dot(self.in_name, input) + self.bias
 
-def test_nn2():
-    lin = MyModule(("input", 20) , ("output", 10))
-    lin(ntorch.randn(dict(input=20)))
 
+def test_nn2():
+    lin = MyModule(("input", 20), ("output", 10))
+    lin(ntorch.randn(dict(input=20)))
 
 
 def test_embedding():
