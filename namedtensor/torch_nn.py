@@ -1,6 +1,20 @@
 import torch.nn as nn
+from .torch_helpers import NamedTensor
 
-Module = nn.Module
+
+class Module(nn.Module):
+    def register_parameter(self, name, tensor):
+        if isinstance(tensor, NamedTensor):
+            param = nn.Parameter(tensor.values)
+            super(Module, self).register_parameter(
+                "_" + name + "_named", param
+            )
+            tensor._tensor = param
+            setattr(self, name, tensor)
+        else:
+            super(Module, self).register_parameter(name, tensor)
+
+
 ModuleList = nn.ModuleList
 
 
@@ -20,15 +34,14 @@ class _Flat:
 
 
 class _Loss:
-    def reduce(self, name):
-        self._reduced = name
+    def reduce(self, dims):
+        self._reduced = dims
         return self
 
-    def __call__(self, inpu, target):
-        #assert self.reduction == "none"
-        return inpu.reduce2(
-            target, super(_Loss, self).forward, self._reduced
-        )
+    def __call__(self, input, target):
+        assert "_reduced" in dir(self), "Must call 'reduce' first."
+
+        return input.reduce2(target, super(_Loss, self).forward, self._reduced)
 
 
 class _Augment:
