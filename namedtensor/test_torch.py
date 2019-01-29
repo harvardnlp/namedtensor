@@ -9,22 +9,6 @@ def attention(query, key, value):
     )
 
 
-# def test_attention():
-#     batch = 50
-#     queries = 20
-#     keys = 15
-#     hidden = 10
-
-#     key_names = dict(batch=batch, key=keys, hidden=hidden)
-#     SimpleAttention().forward(
-#         ntorch.randn(dict(batch=batch, queries=queries, hidden=hidden)),
-#         ntorch.randn(key_names),
-#         ntorch.randn(key_names),
-#     )
-
-
-# Parameters
-# -- [hidden_dimension]
 
 
 def random_tensors(shape, num=1, requires_grad=False):

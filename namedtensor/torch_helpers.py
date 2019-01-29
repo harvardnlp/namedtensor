@@ -7,6 +7,8 @@ def make_tuple(names):
         return ()
     if isinstance(names, tuple):
         return names
+    if isinstance(names, list):
+        return tuple(names)
     else:
         return (names,)
 
@@ -113,7 +115,8 @@ class NamedTensor(NamedTensorBase):
         func_args = {}
         if dim is not None:
             func_args["dim"] = self._schema.get(dim)
-        for v in make_tuple(_drop):
+        _drop = make_tuple(_drop)
+        for v in _drop:
             self._schema.get(v)
 
         cur = self._tensor

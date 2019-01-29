@@ -102,7 +102,11 @@ class NTorch(type):
 
     @staticmethod
     def tensor(*args, **kwargs):
-        return NamedTensor(*args, **kwargs)
+        if isinstance(args[0], torch.Tensor):
+            return NamedTensor(*args, **kwargs)
+        else:
+            return NamedTensor(*((torch.tensor(args[0]),)+args[1:]), **kwargs)
+
 
     _build = {"ones", "zeros", "randn", "empty", "rand"}
 
