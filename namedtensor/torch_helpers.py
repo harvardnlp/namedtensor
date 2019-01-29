@@ -165,6 +165,9 @@ class NamedTensor(NamedTensorBase):
     def __div__(self, b):
         return self.div(b)
 
+    def __truediv__(self, b):
+        return self.div(b)
+
     def __eq__(self, b):
         return self.eq(b)
 
