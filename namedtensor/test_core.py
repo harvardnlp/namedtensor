@@ -231,10 +231,12 @@ def test_unmask():
     base2 = base2.mask_to("")
     base2 = base2.softmax("alpha")
 
+
 def test_division():
-    base1 = NamedTensor(torch.ones(3, 4), ('short', 'long'))
-    expected = NamedTensor(torch.ones(3) / 4, ('short',))
-    assert_match(base1 / base1.sum('long'), expected)
+    base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
+    expected = NamedTensor(torch.ones(3) / 4, ("short",))
+    assert_match(base1 / base1.sum("long"), expected)
+
 
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))

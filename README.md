@@ -29,7 +29,7 @@ Transposition:
 ```python
 x = x.transpose("batch", "w", "h")
 
-# or early dim stay in place 
+# or early dim stay in place
 
 x = x.transpose("w", "h")
 ```
@@ -75,7 +75,7 @@ NN Modules
 linear = ntorch.nn.Linear(20, 25)
 x = linear(x)
 
-# or 
+# or
 
 linear.rename(wout="w")
 x = linear(x)
@@ -98,4 +98,4 @@ http://nlp.seas.harvard.edu/namedtensor/
 
 * Yuntian Deng
 * Francisco Rivera
-* Jiafeng Chen 
+* Jiafeng Chen
