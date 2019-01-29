@@ -11,20 +11,23 @@ class _Update:
 
     def __call__(self, input):
         updates = {} if "_updates" not in self.__dict__ else self._updates
-        return input.op(super(self.__class__, self).forward, **updates)
+        return input.op(super(_Update, self).forward, **updates)
 
 
 class _Flat:
     def __call__(self, input):
-        return input.op(super(self.__class__, self).forward)
+        return input.op(super(_Flat, self).forward)
 
 
 class _Loss:
-    def __call__(self, input, target):
-        assert self.reduction == "none"
-        reduced = input.dims[-1]
-        return input.reduce2(
-            target, super(self.__class__, self).forward, (reduced,)
+    def reduce(self, name):
+        self._reduced = name
+        return self
+
+    def __call__(self, inpu, target):
+        #assert self.reduction == "none"
+        return inpu.reduce2(
+            target, super(_Loss, self).forward, self._reduced
         )
 
 
@@ -33,12 +36,12 @@ class _Augment:
         self._augment = name
         return self
 
-    def forward(self, input, target):
+    def forward(self, input):
         augment = (
             "embedding" if "_augment" not in self.__dict__ else self._augment
         )
 
-        return input.augment(super(self.__class__, self).forward, augment)
+        return input.augment(super(_Augment, self).forward, augment)
 
 
 _wrap = ["Dropout"]
