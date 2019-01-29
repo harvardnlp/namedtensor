@@ -90,6 +90,12 @@ x = linear(x)
 
 http://nlp.seas.harvard.edu/namedtensor/
 
-## Authors
+## Author
 
 * Alexander Rush (srush@seas.harvard.edu, @harvardnlp)
+
+## Contributors
+
+* Yuntian Deng
+* Franciso Rivera
+* Jiafeng Chen 
