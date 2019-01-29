@@ -97,5 +97,5 @@ http://nlp.seas.harvard.edu/namedtensor/
 ## Contributors
 
 * Yuntian Deng
-* Franciso Rivera
+* Francisco Rivera
 * Jiafeng Chen 
