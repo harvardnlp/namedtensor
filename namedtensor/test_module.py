@@ -17,9 +17,11 @@ class NTModule(nn.Module):
         super(NTModule, self).__init__()
         self.w = ntorch.randn(dict(inhid=10, outhid=20))
         self.w_param = nn.Parameter(self.w._tensor)
+        self.w._tensor = self.w_param
 
         self.b = ntorch.randn(dict(outhid=20))
         self.b_param = nn.Parameter(self.b._tensor)
+        self.b._tensor = self.b_param
 
     def forward(self, inp):
         return inp.dot("inhid", self.w) + self.b
