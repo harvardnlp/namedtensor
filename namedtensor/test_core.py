@@ -91,8 +91,8 @@ def test_gather():
 
 
 def test_stack():
-    tensor_a = ntorch.ones({"dim1": 2, "dim2": 2})
-    tensor_b = ntorch.ones({"dim1": 2, "dim2": 2})
+    tensor_a = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
+    tensor_b = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
     tensor_c = ntorch.stack([tensor_a, tensor_b], "dim3")
     assert tensor_c.shape == OrderedDict(
         [("dim3", 2), ("dim1", 2), ("dim2", 2)]
