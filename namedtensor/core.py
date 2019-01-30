@@ -94,23 +94,15 @@ class NamedTensorBase:
         else:
             return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
-    def stack(self, **kwargs):
+    def stack(self, dims, name, **kwargs):
         "Stack any number of existing dimensions into a single new dimension."
-        cur = self
-        for k, v in kwargs.items():
-            for dim in v:
-                self._schema.get(dim)
-            cur = cur._merge(v, k)
-        return cur
+        for dim in dims:
+            self._schema.get(dim)
+        return self._merge(name, dims)
 
-    def split(self, **kwargs):
-        "Split any number of existing dimensions into new dimensions."
-        cur = self
-        for k, v in kwargs.items():
-            if isinstance(v, tuple):
-                self._schema.get(k)
-                cur = cur._split(k, v, kwargs)
-        return cur
+    def split(self, dim, names, **kwargs):
+        "Split an of existing dimension into new dimensions."
+        return self._split(dim, names, kwargs)
 
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."

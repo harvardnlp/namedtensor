@@ -4,14 +4,14 @@ from collections import OrderedDict
 
 def test_nn():
     lin = ntorch.nn.Linear(20, 10).rename(output="input")
-    out = lin(ntorch.randn(dict(batch=5, input=20)))
+    out = lin(ntorch.randn(5, 20, names=("batch", "input")))
     assert out.shape == OrderedDict([("batch", 5), ("output", 10)])
 
 
 def test_loss():
     loss = ntorch.nn.NLLLoss().reduce(["batch", "target"])
 
-    predict = ntorch.randn(dict(batch=4, target=20))
+    predict = ntorch.randn(4, 20, names=("batch", "target"))
     target = ntorch.tensor([2, 2, 3, 4], ["batch"])
     out = loss(predict, target)
     assert out.shape == OrderedDict([])
@@ -19,20 +19,19 @@ def test_loss():
 
 def test_drop():
     drop = ntorch.nn.Dropout()
-    n = ntorch.randn(dict(batch=4, target=20))
+    n = ntorch.randn(4, 20, names=("batch", "target"))
     out = drop(n)
     assert n.shape == out.shape
 
 
 class MyModule(ntorch.nn.Module):
-    def __init__(self, in_dim, out_dim):
-        self.in_name = in_dim[0]
-        self.out_name = out_dim[0]
+    def __init__(self, in_dim, out_dim, names):
+        self.in_name, self.out_name = names
 
         super(MyModule, self).__init__()
-        weight = ntorch.randn(dict((in_dim, out_dim)))
+        weight = ntorch.randn(in_dim, out_dim, names=names)
         self.register_parameter("weight", weight)
-        bias = ntorch.randn(dict((out_dim,)))
+        bias = ntorch.randn(out_dim, names=(self.out_name,))
         self.register_parameter("bias", bias)
 
     def forward(self, input):
@@ -40,8 +39,8 @@ class MyModule(ntorch.nn.Module):
 
 
 def test_nn2():
-    lin = MyModule(("input", 20), ("output", 10))
-    lin(ntorch.randn(dict(input=20)))
+    lin = MyModule(20, 10, names=("input", "output"))
+    lin(ntorch.randn(20, names=("input",)))
 
 
 def test_embedding():

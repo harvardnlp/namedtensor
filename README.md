@@ -17,7 +17,7 @@ from namedtensor import ntorch
 Creation and manipulation:
 
 ```python
-x = ntorch.randn(dict(batch=10, h=10, w=20))
+x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
 x = x.log()
 x = x.float()
 x = ntorch.exp(x)
@@ -37,17 +37,16 @@ x = x.transpose("w", "h")
 View replacements:
 
 ```python
-x = x.stack(stacked = ("w", "h"))
+x = x.stack(("w", "h"), "stackdim")
 
 # Roundtrip
 
-x = x.split(stacked = ("w", "h"), w=20)
+x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
 Dim replacements:
 
 ```python
-
 x = x.narrow("w", 0, 10)
 x = x.softmax("w")
 ```
@@ -63,9 +62,9 @@ Matrix Operations / EinSum:
 
 ```python
 
-x = ntorch.randn(dict(batch=10, h=10, w=20))
-y = ntorch.randn(dict(batch=10, w=20, c=30))
-x.dot(y, "w")
+x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
+y = ntorch.randn(10, 20, 30, names=("batch", "w", "c"))
+x.dot("w", y)
 ```
 
 NN Modules
