@@ -59,6 +59,16 @@ class NTorch(type):
         )
 
     @staticmethod
+    def stack(tensors, name):
+        old_names = tensors[0]._schema._names
+        for t in tensors[1:]:
+            assert t._schema._names == old_names
+        to_stack = [tensor.values for tensor in tensors]
+        old_names = list(old_names)
+        old_names.insert(0, name)
+        return ntorch.tensor(torch.stack(to_stack, dim=0), old_names)
+
+    @staticmethod
     def cat(tensors, dim):
         dim = tensors[0]._schema.get(dim)
         for t in tensors[1:]:
