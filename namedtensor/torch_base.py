@@ -46,8 +46,9 @@ class NTorch(type):
             args.append(group)
         names = make_tuple(names)
         keep = [n for n in seen_names if n not in names]
-        if keep == seen_names:
-            raise RuntimeError("No dimension to contract")
+        for n in names:
+            if n not in seen_names:
+                raise RuntimeError("No dimension %s to contract along" % n)
         args.append([ids[n] for n in keep])
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
