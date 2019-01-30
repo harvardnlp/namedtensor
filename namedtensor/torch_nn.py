@@ -64,15 +64,7 @@ class Dropout(_Flat, nn.Dropout):
     pass
 
 
-_update = [
-    "Linear",
-    "Conv1d",
-    "Conv2d",
-    "Conv3d",
-    "MaxPool1d",
-    "MaxPool2d",
-    "MaxPool3d",
-]
+Dropout.__doc__ = nn.Dropout.__doc__
 
 
 class Linear(_Update, nn.Linear):
@@ -103,7 +95,24 @@ class MaxPool3d(_Update, nn.MaxPool2d):
     pass
 
 
-_loss = ["CrossEntropyLoss", "NLLLoss"]
+_update = [
+    "Linear",
+    "Conv1d",
+    "Conv2d",
+    "Conv3d",
+    "MaxPool1d",
+    "MaxPool2d",
+    "MaxPool3d",
+]
+
+
+Linear.__doc__ = nn.Linear.__doc__
+Conv1d.__doc__ = nn.Conv1d.__doc__
+Conv2d.__doc__ = nn.Conv2d.__doc__
+Conv3d.__doc__ = nn.Conv3d.__doc__
+MaxPool1d.__doc__ = nn.MaxPool1d.__doc__
+MaxPool2d.__doc__ = nn.MaxPool2d.__doc__
+MaxPool3d.__doc__ = nn.MaxPool3d.__doc__
 
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
@@ -114,8 +123,15 @@ class NLLLoss(_Loss, nn.NLLLoss):
     pass
 
 
-_augment = ["Embedding"]
+_loss = ["CrossEntropyLoss", "NLLLoss"]
+
+CrossEntropyLoss.__doc__ = nn.CrossEntropyLoss.__doc__
+NLLLoss.__doc__ = nn.NLLLoss.__doc__
 
 
 class Embedding(_Augment, nn.Embedding):
     pass
+
+
+_augment = ["Embedding"]
+Embedding.__doc__ = nn.Embedding.__doc__

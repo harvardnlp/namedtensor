@@ -85,6 +85,7 @@ class NamedTensor(NamedTensorBase):
         )
 
     def get(self, name, idx):
+        "Returns a namedtensor by indexing into dim name"
         results = self.access(name)[idx]
         return self._new(results, name)
 
@@ -197,6 +198,7 @@ class NamedTensor(NamedTensorBase):
                 def call(*args, **kwargs):
                     return self._new(method(*args, **kwargs))
 
+                call.__doc__ = method.__doc__
             elif methodname in self._noshift_dim:
 
                 def call(dim, *args, **kwargs):
@@ -204,14 +206,17 @@ class NamedTensor(NamedTensorBase):
                         method(self._schema.get(dim), *args, **kwargs)
                     )
 
+                call.__doc__ = method.__doc__
+
             elif methodname in self._inline:
 
                 def call(*args, **kwargs):
                     return method(*args, **kwargs)
 
+                call.__doc__ = method.__doc__
+
             elif methodname in self._info:
                 call = method
-
             elif methodname in self._reduce:
 
                 def call(dim=None, *args, **kwargs):
@@ -229,12 +234,15 @@ class NamedTensor(NamedTensorBase):
                         method = getattr(cur._tensor, methodname)
                     return cur
 
+                call.__doc__ = self._reduce_doc + method.__doc__
             elif methodname in self._reduce_multi:
 
                 def call(dim, *args, **kwargs):
                     method = getattr(self._tensor, methodname)
                     results = method(self._schema.get(dim), *args, **kwargs)
                     return tuple((self._new(r, dim) for r in results))
+
+                call.__doc__ = self._reduce_doc + method.__doc__
 
             elif methodname in self._binop:
 
@@ -251,10 +259,23 @@ class NamedTensor(NamedTensorBase):
                         method = getattr(self._tensor, methodname)
                         return self._new(method(other, *args))
 
+                call.__doc__ = method.__doc__
             else:
                 raise NotImplementedError(methodname)
+
             return call
         raise NotImplementedError(methodname)
+
+    def __dir__(self):
+        return (
+            set(self.__class__.__dict__.keys())
+            | self._noshift
+            | self._info
+            | self._reduce
+            | self._reduce_multi
+            | self._binop
+            | self._inline
+        )
 
     # Torch Ops
     # Return a tensor of the same dimensions
@@ -321,6 +342,14 @@ class NamedTensor(NamedTensorBase):
         "detach",
         "item",
     }
+
+    _reduce_doc = """
+NamedTensor modifies this method to take a named `dim` as
+the argument instead of a dimension index. Otherwise
+doc is the same as below.
+
+====================
+    """
 
     # Takes a dim arg and reduces it.
     _reduce = {
