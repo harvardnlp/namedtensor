@@ -86,7 +86,7 @@ class NTorch(type):
 
     @staticmethod
     def masked_select(input, mask, name):
-        order = mask._try_broadcast_order(input)
+        order = mask._mask_broadcast_order(input)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
         return NamedTensor(a1.values.masked_select(b1.values), name)

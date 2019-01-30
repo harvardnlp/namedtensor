@@ -196,10 +196,10 @@ class NamedTensorBase:
             order.append(d)
         return order
 
-    def _try_broadcast_order(self, main):
+    def _mask_broadcast_order(self, main):
         """
-        if broadcasting possible from self to main, outputs a shared order
-        otherwise errors and prints dimensions that exist in self but not main
+        if broadcasting possible from self (mask) to main, outputs a shared order
+        otherwise errors and prints dimensions that exist in mask but not main
         """
 
         to_be_broadcasted = set(self._schema._names)
@@ -209,7 +209,7 @@ class NamedTensorBase:
         diff_string = ", ".join(diff)
 
         assert len(diff) == 0, (
-            "Attemped to broadcast but unable to broadcast dimensions %s"
+            "Attemped to broadcast mask but unable to broadcast dimensions %s"
             % diff_string
         )
 
