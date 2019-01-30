@@ -99,3 +99,5 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Yuntian Deng
 * Francisco Rivera
 * Jiafeng Chen
+* Celine Liang
+* Miro Furtado
