@@ -1,7 +1,7 @@
 import torch
 from .torch_helpers import NamedTensor
 from . import torch_nn
-
+import warnings
 import opt_einsum as oe
 
 
@@ -47,6 +47,8 @@ class NTorch(type):
             args.append(group)
         names = make_tuple(names)
         keep = [n for n in seen_names if n not in names]
+        if(keep==seen_names):
+            warnings.warn("No dimension to contract")
         args.append([ids[n] for n in keep])
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
