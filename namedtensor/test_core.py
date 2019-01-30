@@ -6,27 +6,33 @@ import pytest
 import torch.nn.functional as F
 
 
-def make_tensors(sizes):
-    return [ntorch.randn(sizes)]
+def make_tensors(sizes, names):
+    return [ntorch.randn(sizes, names=names)]
 
 
 def test_shift():
-    for ntensor in make_tensors(OrderedDict(alpha=10, beta=2, gamma=50)):
+    for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
         # Split
-        ntensor = ntensor.split(alpha=("delta", "epsilon"), delta=2)
+        ntensor = ntensor.split("alpha", ("delta", "epsilon"), delta=2)
         assert ntensor.vshape == (2, 5, 2, 50)
 
         # Merge
-        ntensor = ntensor.stack(alpha=("delta", "epsilon"))
+        ntensor = ntensor.stack(("delta", "epsilon"), "alpha")
         assert ntensor.vshape == (10, 2, 50)
 
         # Transpose
         ntensor = ntensor.transpose("beta", "alpha", "gamma")
         assert ntensor.vshape == (2, 10, 50)
 
+        # Transpose
+        ntensor = ntensor.rename("beta", "beta2")
+        assert ntensor.shape == OrderedDict(
+            [("beta2", 2), ("alpha", 10), ("gamma", 50)]
+        )
+
 
 def test_reduce():
-    for ntensor in make_tensors(dict(alpha=10, beta=2, gamma=50)):
+    for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
         ntensora = ntensor.mean("alpha")
         assert ntensora.shape == OrderedDict([("beta", 2), ("gamma", 50)])
 
@@ -219,14 +225,14 @@ def test_narrow():
 
 @pytest.mark.xfail
 def test_mask2():
-    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base1 = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
     base2 = base1.mask_to("alpha")
     print(base2._schema._masked)
     base2 = base2.softmax("alpha")
 
 
 def test_unmask():
-    base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
+    base1 = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
     base2 = base1.mask_to("alpha")
     base2 = base2.mask_to("")
     base2 = base2.softmax("alpha")
@@ -239,14 +245,14 @@ def test_division():
 
 
 def test_subtraction():
-    base1 = ntorch.ones(dict(short=3, long=4))
-    base2 = ntorch.ones(dict(short=3, long=4))
-    expect = ntorch.zeros(dict(short=3, long=4))
+    base1 = ntorch.ones(3, 4, names=("short", "long"))
+    base2 = ntorch.ones(3, 4, names=("short", "long"))
+    expect = ntorch.zeros(3, 4, names=("short", "long"))
     assert_match(base1 - base2, expect)
 
 
 def test_neg():
-    base = ntorch.ones(dict(short=3))
+    base = ntorch.ones(3, names=("short",))
     expected = NamedTensor(-1 * torch.ones(3), ("short",))
     assert_match(-base, expected)
 

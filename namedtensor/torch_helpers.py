@@ -14,8 +14,9 @@ def make_tuple(names):
 
 
 class NamedTensor(NamedTensorBase):
-    def index_select(self, name, index):
+    def index_select(self, dim, index):
         "Index into dimension names with the `index` named tensors."
+        name = dim
         new_names = []
         sizes = []
         for n in self._schema._names:

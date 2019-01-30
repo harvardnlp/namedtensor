@@ -18,7 +18,10 @@ class NTorch(type):
     def __getattr__(cls, name):
         if name in cls._build:
 
-            def call(names, *args, **kwargs):
+            def call(*args, **kwargs):
+                assert "names" in kwargs, "Need `names` kwarg."
+                names = kwargs["names"]
+                del kwargs["names"]
                 return cls.build(getattr(torch, name), names, *args, **kwargs)
 
             call.__doc__ = getattr(torch, name).__doc__
@@ -33,7 +36,8 @@ class NTorch(type):
         raise NotImplementedError(name)
 
     @classmethod
-    def dot(cls, names, *tensors):
+    def dot(cls, dims, *tensors):
+        names = dims
         args = []
         ids = {}
         seen_names = []
@@ -55,7 +59,8 @@ class NTorch(type):
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
     @staticmethod
-    def narrow(tensor1, name, start, end):
+    def narrow(tensor1, dim, start, end):
+        name = dim
         return tensor1._new(
             tensor1._tensor.narrow(tensor1._schema.get(name), start, end)
         )
@@ -101,8 +106,7 @@ class NTorch(type):
 
     @staticmethod
     def build(init, names, *args, **kwargs):
-        tensor = init(*tuple(names.values()), *args, **kwargs)
-        names = tuple(names.keys())
+        tensor = init(*args, **kwargs)
         return NamedTensor(tensor, names)
 
     @staticmethod

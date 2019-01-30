@@ -42,20 +42,18 @@ class NamedDistribution:
         "Named event shape as an ordered dict"
         return self._event_schema.ordered_dict(self._dist.event_shape)
 
-    def _sample(self, fn, size_dict):
-        tensor = fn(torch.Size(size_dict.values()))
+    def _sample(self, fn, sizes, names):
+        tensor = fn(torch.Size(sizes))
         return NamedTensor(
             tensor,
-            tuple(size_dict.keys())
-            + self._batch_schema._names
-            + self._event_schema._names,
+            names + self._batch_schema._names + self._event_schema._names,
         )
 
-    def sample(self, **size_dict):
-        return self._sample(self._dist.sample, size_dict)
+    def sample(self, sizes=(), names=()):
+        return self._sample(self._dist.sample, sizes, names)
 
-    def rsample(self, **size_dict):
-        return self._sample(self._dist.rsample, size_dict)
+    def rsample(self, sizes=(), names=()):
+        return self._sample(self._dist.rsample, sizes, names)
 
     def __getattr__(self, name):
         if name in self._batch_methods:
