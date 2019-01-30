@@ -236,6 +236,18 @@ def test_division():
     expected = NamedTensor(torch.ones(3) / 4, ('short',))
     assert_match(base1 / base1.sum('long'), expected)
 
+def test_subtraction():
+    base1 = ntorch.ones(dict(short=3, long=4))
+    base2 = ntorch.ones(dict(short=3, long=4))
+    expect = ntorch.zeros(dict(short=3, long=4))
+    assert_match(base1 - base2, expect)
+
+def test_neg():
+    base = ntorch.ones(dict(short=3))
+    expected = NamedTensor(-1 * torch.ones(3), ('short',))
+    assert_match(-base, expected)
+
+
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
 #     base2 = base1 + 10
