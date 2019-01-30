@@ -65,11 +65,11 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.narrow(self, name, start, end)
 
-    def masked_select(self, mask, dim):
-        "Applies `mask` and returns a 1D tensor with name `dim`"
+    def masked_select(self, mask, name):
+        "Applies `mask` and returns a 1D tensor with name `name`"
         from .torch_base import ntorch
 
-        return ntorch.masked_select(self, mask, dim)
+        return ntorch.masked_select(self, mask, name)
 
     def relu(self):
         "Apply relu"
