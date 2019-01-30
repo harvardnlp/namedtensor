@@ -94,15 +94,20 @@ class NamedTensorBase:
         else:
             return self._new(self._tensor, mask=self._schema.get(name) + 1)
 
-    def stack(self, dims, name, **kwargs):
+    def stack(self, dims, name):
         "Stack any number of existing dimensions into a single new dimension."
         for dim in dims:
             self._schema.get(dim)
-        return self._merge(name, dims)
+        return self._merge(dims, name)
 
-    def split(self, dim, names, **kwargs):
+    def split(self, dim, names, **dim_sizes):
         "Split an of existing dimension into new dimensions."
-        return self._split(dim, names, kwargs)
+        return self._split(dim, names, dim_sizes)
+
+    def rename(self, dim, name):
+        "Rename a dimension."
+        return self._split(dim, (name,), {})
+
 
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."
@@ -115,6 +120,7 @@ class NamedTensorBase:
         tensor = rearrange(self._tensor, recipe)
         return self.__class__(tensor, to_dims)
 
+    # Todo: fix arg names
     def _merge(self, names, dim):
         s = ""
         ex = []

@@ -14,14 +14,38 @@ Currently the library targets the PyTorch ecosystem and Python >= 3.6.
 from namedtensor import ntorch
 ```
 
-Creation and manipulation:
+### Building tensors.
+
+All pytorch builders have an extra keyword argument names.
 
 ```python
 x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
+x = ntorch.ones(10, 10, 20, names=("batch", "h", "w"))
+```
+
+
+### Standard functions
+
+All functions that keep dimensionality work in the same way.
+
+```python
 x = x.log()
 x = x.float()
 x = ntorch.exp(x)
-x.shape
+```
+
+### View and Tranposition
+
+View, tranpose, and friends are deprecated in favor of named
+access and movement.
+
+
+```python
+x = x.stack(("w", "h"), "stackdim")
+
+# Roundtrip
+
+x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
 Transposition:
@@ -34,31 +58,28 @@ x = x.transpose("batch", "w", "h")
 x = x.transpose("w", "h")
 ```
 
-View replacements:
+### Dim replacements:
 
-```python
-x = x.stack(("w", "h"), "stackdim")
-
-# Roundtrip
-
-x = x.split("stackdim", ("w", "h"), w=20)
-```
-
-Dim replacements:
+Any function with a `dim` argument now can be accessed based on the
+dimension name.
 
 ```python
 x = x.narrow("w", 0, 10)
 x = x.softmax("w")
 ```
 
-Reduction:
+This is true of reductions functions as well, where the named
+dimension is eliminated.
 
 ```python
 x = x.mean("w")
 x, argmax = x.max("w")
 ```
 
-Matrix Operations / EinSum:
+### Tensor contractions
+
+Matrix operations also use the dimension arguments.
+We can replace einsum based on persistent names.
 
 ```python
 
@@ -67,7 +88,20 @@ y = ntorch.randn(10, 20, 30, names=("batch", "w", "c"))
 x.dot("w", y)
 ```
 
-NN Modules
+This also makes indexing much easier to read.
+
+```python
+
+x = ntorch.ones(10, 10, 20, names=("batch", "time", "vocab"))
+y = ntorch.randn(20, 30, names=("vocab", "embsize"))
+y.index_select("vocab", x)
+```
+
+
+### NN Modules
+
+This api part is a work in progress. But many units are implemented to
+work with named tensor.
 
 ```python
 

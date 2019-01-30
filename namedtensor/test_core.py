@@ -13,16 +13,21 @@ def make_tensors(sizes, names):
 def test_shift():
     for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
         # Split
-        ntensor = ntensor.split(alpha=("delta", "epsilon"), delta=2)
+        ntensor = ntensor.split("alpha", ("delta", "epsilon"), delta=2)
         assert ntensor.vshape == (2, 5, 2, 50)
 
         # Merge
-        ntensor = ntensor.stack(alpha=("delta", "epsilon"))
+        ntensor = ntensor.stack(("delta", "epsilon"), "alpha")
         assert ntensor.vshape == (10, 2, 50)
 
         # Transpose
         ntensor = ntensor.transpose("beta", "alpha", "gamma")
         assert ntensor.vshape == (2, 10, 50)
+
+        # Transpose
+        ntensor = ntensor.rename("beta", "beta2")
+        assert ntensor.shape == OrderedDict([("beta2", 2), ("alpha", 10), ("gamma", 50)])
+
 
 
 def test_reduce():
