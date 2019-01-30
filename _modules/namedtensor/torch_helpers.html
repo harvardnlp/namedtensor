@@ -161,8 +161,9 @@
 
 
 <div class="viewcode-block" id="NamedTensor"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor">[docs]</a><span class="k">class</span> <span class="nc">NamedTensor</span><span class="p">(</span><span class="n">NamedTensorBase</span><span class="p">):</span>
-<div class="viewcode-block" id="NamedTensor.index_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_select">[docs]</a>    <span class="k">def</span> <span class="nf">index_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensor.index_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_select">[docs]</a>    <span class="k">def</span> <span class="nf">index_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="s2">&quot;Index into dimension names with the `index` named tensors.&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">dim</span>
         <span class="n">new_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">sizes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
