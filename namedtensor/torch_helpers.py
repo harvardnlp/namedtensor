@@ -153,6 +153,9 @@ class NamedTensor(NamedTensorBase):
     def op2(self, y, axis_op, dim=None, _drop=None, **kwargs):
         return self.op(lambda x: axis_op(x, y.values), _drop=_drop, **kwargs)
 
+    def __neg__(self):
+        return self.neg()
+
     def __add__(self, b):
         return self.add(b)
 
@@ -290,7 +293,7 @@ class NamedTensor(NamedTensorBase):
         "sin",
         "sinh",
         "sqrt",
-        "sub",
+        "neg",
         "to",
         "tan",
         "tanh",
