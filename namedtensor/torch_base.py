@@ -22,12 +22,14 @@ class NTorch(type):
             def call(names, *args, **kwargs):
                 return cls.build(getattr(torch, name), names, *args, **kwargs)
 
+            call.__doc__ = getattr(torch, name).__doc__
             return call
         elif name in cls._noshift:
 
             def call(ntensor, *args, **kwargs):
                 return getattr(ntensor, name)(*args, **kwargs)
 
+            call.__doc__ = getattr(torch, name).__doc__
             return call
         raise NotImplementedError(name)
 
@@ -58,6 +60,7 @@ class NTorch(type):
 
     @staticmethod
     def cat(tensors, dim):
+        "Concate a list of named tensors along dim."
         dim = tensors[0]._schema.get(dim)
         for t in tensors[1:]:
             assert t._schema._names == tensors[0]._schema._names
@@ -108,6 +111,10 @@ class NTorch(type):
             return NamedTensor(
                 *((torch.tensor(args[0]),) + args[1:]), **kwargs
             )
+
+    @classmethod
+    def __dir__(cls):
+        return set(cls.__dict__.keys()) | cls._build | cls._noshift
 
     _build = {"ones", "zeros", "randn", "empty", "rand"}
 

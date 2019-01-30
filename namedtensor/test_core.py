@@ -244,9 +244,10 @@ def test_subtraction():
     expect = ntorch.zeros(dict(short=3, long=4))
     assert_match(base1 - base2, expect)
 
+
 def test_neg():
     base = ntorch.ones(dict(short=3))
-    expected = NamedTensor(-1 * torch.ones(3), ('short',))
+    expected = NamedTensor(-1 * torch.ones(3), ("short",))
     assert_match(-base, expected)
 
 
