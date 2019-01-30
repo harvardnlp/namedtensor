@@ -46,9 +46,7 @@ class NamedDistribution:
         tensor = fn(torch.Size(sizes))
         return NamedTensor(
             tensor,
-            names
-            + self._batch_schema._names
-            + self._event_schema._names,
+            names + self._batch_schema._names + self._event_schema._names,
         )
 
     def sample(self, sizes=(), names=()):

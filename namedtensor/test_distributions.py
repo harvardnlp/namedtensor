@@ -31,7 +31,9 @@ def test_build():
     assert dist.batch_shape == OrderedDict([("batch1", 10), ("batch2", 20)])
 
     out = dist.log_prob(
-        ntorch.randn(10, 25, 1, 1, names=("sample1", "sample2", "batch1", "batch2"))
+        ntorch.randn(
+            10, 25, 1, 1, names=("sample1", "sample2", "batch1", "batch2")
+        )
     )
     assert out.shape == OrderedDict(
         [("sample1", 10), ("sample2", 25), ("batch1", 10), ("batch2", 20)]

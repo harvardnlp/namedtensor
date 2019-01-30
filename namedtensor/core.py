@@ -108,7 +108,6 @@ class NamedTensorBase:
         "Rename a dimension."
         return self._split(dim, (name,), {})
 
-
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."
         for dim in dims:

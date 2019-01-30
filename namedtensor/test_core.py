@@ -26,8 +26,9 @@ def test_shift():
 
         # Transpose
         ntensor = ntensor.rename("beta", "beta2")
-        assert ntensor.shape == OrderedDict([("beta2", 2), ("alpha", 10), ("gamma", 50)])
-
+        assert ntensor.shape == OrderedDict(
+            [("beta2", 2), ("alpha", 10), ("gamma", 50)]
+        )
 
 
 def test_reduce():
