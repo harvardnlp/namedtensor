@@ -94,11 +94,10 @@ class NTorch(type):
     @staticmethod
     def nonzero(tensor):
         indices = torch.nonzero(tensor.values)
-        names = ['nonzero_el']
+        names = ["nonzero_el"]
         if indices.numel() > 0:
-            names.append('input_dims')
+            names.append("input_dims")
         return NamedTensor(tensor=indices, names=tuple(names))
-
 
     @staticmethod
     def scatter_(input, index, src, **kwargs):
