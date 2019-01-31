@@ -173,7 +173,7 @@ class NamedTensorBase:
         return self._rearrange(term)
 
     def _force_order(self, names):
-        """ forces self to take order in names, adds 1-size dims if needed """
+        """ Forces self to take order in names, adds 1-size dims if needed """
         s = ""
         ex = []
         for d in names:
@@ -187,7 +187,7 @@ class NamedTensorBase:
         return self.__class__(tensor, ex)
 
     def _broadcast_order(self, other):
-        """ outputs a shared order (list) that works for self and other """
+        """ Outputs a shared order (list) that works for self and other """
         order = []
         for d in other._schema._names:
             if d not in self._schema._names:
@@ -198,8 +198,8 @@ class NamedTensorBase:
 
     def _mask_broadcast_order(self, main):
         """
-        if broadcasting possible from self (mask) to main, outputs a shared order
-        otherwise errors and prints dimensions that exist in mask but not main
+        If broadcasting possible from self (mask) to main, outputs a shared order.
+        Otherwise errors and prints dimensions that exist in mask but not in main.
         """
 
         to_be_broadcasted = set(self._schema._names)
@@ -213,10 +213,4 @@ class NamedTensorBase:
             % diff_string
         )
 
-        order = []
-        for d in main._schema._names:
-            if d not in self._schema._names:
-                order.append(d)
-        for d in self._schema._names:
-            order.append(d)
-        return order
+        return self._broadcast_order(main)
