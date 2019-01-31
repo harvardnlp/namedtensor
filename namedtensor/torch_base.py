@@ -98,6 +98,7 @@ class NTorch(type):
 
         Parameters
         ----------
+        tensor: NamedTensor
         names : tuple, optional
             Names for the output dimensions
             default value: ("elements_dim", "input_dims")
