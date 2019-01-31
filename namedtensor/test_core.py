@@ -265,7 +265,7 @@ def test_nonzero():
     assert 0 == y.size("elements_dim")
     assert x.shape == OrderedDict([("alpha", 10)])
     assert y.shape == OrderedDict([("elements_dim", 0), ("input_dims", 1)])
-    
+
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
     assert 0 == y.size("a")
@@ -277,7 +277,7 @@ def test_nonzero():
     assert 3 == y.size("elements_dim")
     assert x.shape == OrderedDict([("dim", 5)])
     assert y.shape == OrderedDict([("elements_dim", 3), ("input_dims", 1)])
-    
+
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
     assert 3 == y.size("a")
@@ -305,10 +305,12 @@ def test_nonzero_names():
     # `names` length must be 2
     x = ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
     y = x.nonzero(names=("a",))
+    assert 2 == len(y.shape)
 
     # `names` length must be 2
     x = ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
     y = x.nonzero(names=("a", "b", "c"))
+    assert 2 == len(y.shape)
 
 
 # def test_scalar():

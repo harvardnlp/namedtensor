@@ -95,13 +95,13 @@ class NTorch(type):
     def nonzero(tensor, names=("elements_dim", "input_dims")):
         """
         Returns a tensor containing the indices of all non-zero elements.
-        
+
         Parameters
         ----------
         names : tuple, optional
             Names for the output dimensions
             default value: ("elements_dim", "input_dims")
-            default output shape: OrderedDict([("elements_dim", number of non-zero elements), 
+            default output shape: OrderedDict([("elements_dim", number of non-zero elements),
                                                  ("input_dims", input tensor's number of dimensions)])
         """
 
