@@ -96,6 +96,15 @@ def test_gather():
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
+def test_stack():
+    tensor_a = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
+    tensor_b = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
+    tensor_c = ntorch.stack([tensor_a, tensor_b], "dim3")
+    assert tensor_c.shape == OrderedDict(
+        [("dim3", 2), ("dim1", 2), ("dim2", 2)]
+    )
+
+
 def test_unbind():
     base = torch.zeros([10, 2, 50])
     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
