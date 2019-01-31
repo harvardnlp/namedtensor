@@ -92,6 +92,15 @@ class NTorch(type):
         return NamedTensor(a1.values.masked_select(b1.values), dim)
 
     @staticmethod
+    def nonzero(tensor):
+        indices = torch.nonzero(tensor.values)
+        names = ['nonzero_el']
+        if indices.numel() > 0:
+            names.append('input_dims')
+        return NamedTensor(tensor=indices, names=tuple(names))
+
+
+    @staticmethod
     def scatter_(input, index, src, **kwargs):
         indim = tuple(kwargs.keys())[0]
         outdim = kwargs[indim]

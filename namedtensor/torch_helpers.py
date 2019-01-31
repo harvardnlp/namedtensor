@@ -71,6 +71,11 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.masked_select(self, mask, dim)
 
+    def nonzero(self):
+        "Returns a tensor containing the indices of all non-zero elements"
+        from .torch_base import ntorch
+        return ntorch.nonzero(self)
+
     def relu(self):
         "Apply relu"
         return self._new(F.relu(self._tensor))

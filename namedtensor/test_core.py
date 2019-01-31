@@ -257,6 +257,37 @@ def test_neg():
     assert_match(-base, expected)
 
 
+def test_nonzero():
+
+    # only zeros
+    x = ntorch.zeros(10, names=("alpha",))
+    y = x.nonzero()
+    assert 0 == y.size('nonzero_el')
+    assert x.shape == OrderedDict([("alpha", 10)])
+    assert y.shape == OrderedDict([("nonzero_el", 0)])
+
+    # 1d tensor
+    x = ntorch.tensor([0,1,2,0,5], names=('dim',))
+    y = x.nonzero()
+    assert 3 == y.size('nonzero_el')
+    assert x.shape == OrderedDict([("dim", 5)])
+    assert y.shape == OrderedDict([("nonzero_el", 3), ('input_dims', 1)])
+
+
+    # 2d tensor
+    x = ntorch.tensor([[0.6, 0.0, 0.0, 0.0],
+                       [0.0, 0.4, 0.0, 0.0],
+                       [0.0, 0.0, 1.2, 0.0],
+                       [2.0, 0.0, 0.0,-0.4]], names=('alpha','beta'))
+    y = x.nonzero()
+    assert 5 == y.size('nonzero_el')
+    assert x.shape == OrderedDict([('alpha', 4), ('beta', 4)])
+    assert y.shape == OrderedDict([('nonzero_el', 5), ('input_dims', 2)])
+
+
+
+
+
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
 #     base2 = base1 + 10
