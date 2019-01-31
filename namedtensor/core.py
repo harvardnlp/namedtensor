@@ -51,11 +51,6 @@ class NamedTensorBase:
         "The ordered dict of available dimensions."
         return self._schema.ordered_dict(self._tensor.size())
 
-    @property
-    def type(self):
-        "Return the type of the tensor"
-        return self._tensor.type()
-
     def __repr__(self):
         return "NamedTensor(\n\t%s,\n\t%s)" % (
             self._tensor,
