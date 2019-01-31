@@ -218,6 +218,22 @@
 
         <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="NamedTensor.nonzero"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.nonzero">[docs]</a>    <span class="k">def</span> <span class="nf">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;elements_dim&quot;</span><span class="p">,</span> <span class="s2">&quot;input_dims&quot;</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a tensor containing the indices of all non-zero elements.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        names : tuple, optional</span>
+<span class="sd">            Names for the output dimensions</span>
+<span class="sd">            default value: (&quot;elements_dim&quot;, &quot;input_dims&quot;)</span>
+<span class="sd">            default output shape: OrderedDict([(&quot;elements_dim&quot;, number of non-zero elements),</span>
+<span class="sd">                                                 (&quot;input_dims&quot;, input tensor&#39;s number of dimensions)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
+        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="NamedTensor.relu"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.relu">[docs]</a>    <span class="k">def</span> <span class="nf">relu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Apply relu&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">))</span></div>
