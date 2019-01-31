@@ -75,6 +75,21 @@ def test_mask():
     assert ntensor.shape == OrderedDict([("c", 2)])
 
 
+@pytest.mark.xfail
+def test_maskfail():
+    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
+    mask = ntorch.tensor(torch.ByteTensor([[0, 1], [1, 0]]), ("a", "banana"))
+    ntensor = t.masked_select(mask, "c")
+    assert ntensor.shape == OrderedDict([("c", 2)])
+
+
+def test_maskbroadcast():
+    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
+    mask = ntorch.tensor(torch.ByteTensor([0, 1]), ("a"))
+    ntensor = t.masked_select(mask, "c")
+    assert ntensor.shape == OrderedDict([("c", 2)])
+
+
 def test_gather():
     t = torch.Tensor([[1, 2], [3, 4]])
     base = torch.gather(t, 1, torch.LongTensor([[0, 0], [1, 0]]))

@@ -96,11 +96,11 @@ class NTorch(type):
         return input._new(input.values.gather(dim, b1.values), updates=kwargs)
 
     @staticmethod
-    def masked_select(input, mask, dim):
-        order = input._broadcast_order(mask)
+    def masked_select(input, mask, name):
+        order = mask._mask_broadcast_order(input)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
-        return NamedTensor(a1.values.masked_select(b1.values), dim)
+        return NamedTensor(a1.values.masked_select(b1.values), name)
 
     @staticmethod
     def nonzero(tensor, names=("elements_dim", "input_dims")):
