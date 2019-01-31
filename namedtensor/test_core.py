@@ -260,18 +260,18 @@ def test_neg():
 def test_nonzero():
 
     # only zeros
-    x = ntorch.zeros(10, names=("alpha", "beta"))
+    x = ntorch.zeros(10, names=("alpha",))
     y = x.nonzero()
-    assert 0 == y.size("nonzero_el")
-    assert x.shape == OrderedDict([("alpha", 10), ("beta", 1)])
-    assert y.shape == OrderedDict([("nonzero_el", 0), ("input_dims", 1)])
+    assert 0 == y.size("elements_dim")
+    assert x.shape == OrderedDict([("alpha", 10)])
+    assert y.shape == OrderedDict([("elements_dim", 0), ("input_dims", 1)])
 
     # 1d tensor
     x = ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
     y = x.nonzero()
-    assert 3 == y.size("nonzero_el")
+    assert 3 == y.size("elements_dim")
     assert x.shape == OrderedDict([("dim", 5)])
-    assert y.shape == OrderedDict([("nonzero_el", 3), ("input_dims", 1)])
+    assert y.shape == OrderedDict([("elements_dim", 3), ("input_dims", 1)])
 
     # 2d tensor
     x = ntorch.tensor([[0.6, 0.0, 0.0, 0.0],
@@ -279,9 +279,9 @@ def test_nonzero():
                        [0.0, 0.0, 1.2, 0.0],
                        [2.0, 0.0, 0.0, -0.4]], names=("alpha", "beta"))
     y = x.nonzero()
-    assert 5 == y.size("nonzero_el")
+    assert 5 == y.size("elements_dim")
     assert x.shape == OrderedDict([("alpha", 4), ("beta", 4)])
-    assert y.shape == OrderedDict([("nonzero_el", 5), ("input_dims", 2)])
+    assert y.shape == OrderedDict([("elements_dim", 5), ("input_dims", 2)])
 
 
 # def test_scalar():

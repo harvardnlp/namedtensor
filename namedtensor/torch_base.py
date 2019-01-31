@@ -92,9 +92,9 @@ class NTorch(type):
         return NamedTensor(a1.values.masked_select(b1.values), dim)
 
     @staticmethod
-    def nonzero(tensor):
+    def nonzero(tensor, elements_dim="elements_dim"):
         indices = torch.nonzero(tensor.values)
-        names = ["nonzero_el"]
+        names = [elements_dim]
         if indices.numel() > 0:
             names.append("input_dims")
         return NamedTensor(tensor=indices, names=tuple(names))
