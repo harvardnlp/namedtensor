@@ -342,6 +342,7 @@ class NamedTensor(NamedTensorBase):
         "numpy",
         "detach",
         "item",
+        "type"
     }
 
     _reduce_doc = """
