@@ -96,18 +96,17 @@ def test_gather():
 
     t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
     index = ntorch.tensor(torch.LongTensor([[0, 0], [1, 0]]), ("a", "c"))
-    ntensor = ntorch.gather(t, index, c="b")
+    ntensor = ntorch.gather(t, "b", index, "c")
     assert (ntensor.values == base).all()
 
     x = ntorch.tensor(torch.rand(2, 5), ("c", "b"))
     y = ntorch.tensor(torch.rand(3, 5), ("a", "b"))
     y.scatter_(
+        "a",
         ntorch.tensor(
             torch.LongTensor([[0, 1, 2, 0, 0], [2, 0, 0, 1, 2]]), ("c", "b")
         ),
-        x,
-        a="c",
-    )
+        x, "c")
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
