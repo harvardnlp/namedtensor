@@ -35,7 +35,7 @@ class NamedTensor(NamedTensorBase):
 
     def scatter_(self, dim, index, src, index_dim):
         """
-        Apply scatter with where `dim` gets the
+        Apply scatter where `dim` gets the
         scattered values of `src` based in `index` along `index_dim`.
         """
 
