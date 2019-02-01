@@ -75,6 +75,7 @@ class NamedTensor(NamedTensorBase):
         """
 
         from .torch_base import ntorch
+
         return ntorch.nonzero(self, names)
 
     def relu(self):
@@ -348,7 +349,7 @@ class NamedTensor(NamedTensorBase):
         "numpy",
         "detach",
         "item",
-        "type"
+        "type",
     }
 
     _reduce_doc = """
