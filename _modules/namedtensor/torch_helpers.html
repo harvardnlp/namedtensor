@@ -171,24 +171,24 @@
             <span class="n">new_names</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="NamedTensor.gather"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.gather">[docs]</a>    <span class="k">def</span> <span class="nf">gather</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensor.gather"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.gather">[docs]</a>    <span class="k">def</span> <span class="nf">gather</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Apply gather with `index_dim=&#39;self_dim&#39;` where self_dim is reduced out</span>
-<span class="sd">        based on index_dim.</span>
+<span class="sd">        Apply gather where `self_dim` is reduced out</span>
+<span class="sd">        based on `index` from `index_dim`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
 
-        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NamedTensor.scatter_"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.scatter_">[docs]</a>    <span class="k">def</span> <span class="nf">scatter_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensor.scatter_"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.scatter_">[docs]</a>    <span class="k">def</span> <span class="nf">scatter_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Apply gather with `self_dim=&#39;index_dim&#39;` where self_dim gets the</span>
-<span class="sd">        scattered values of `src` based in `index`.</span>
+<span class="sd">        Apply scatter where `dim` gets the</span>
+<span class="sd">        scattered values of `src` based in `index` along `index_dim`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
 
-        <span class="n">ntorch</span><span class="o">.</span><span class="n">scatter_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">ntorch</span><span class="o">.</span><span class="n">scatter_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NamedTensor.dot"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.dot">[docs]</a>    <span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">):</span>
         <span class="s2">&quot;Contract dimension `names` with each of the other tensors&quot;</span>
@@ -222,6 +222,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
+
         <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NamedTensor.relu"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.relu">[docs]</a>    <span class="k">def</span> <span class="nf">relu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -495,7 +496,7 @@
         <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
         <span class="s2">&quot;detach&quot;</span><span class="p">,</span>
         <span class="s2">&quot;item&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">_reduce_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
