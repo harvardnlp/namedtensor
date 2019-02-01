@@ -1,11 +1,12 @@
 from collections import OrderedDict
+from .utils import make_tuple
 
 
 class _Schema:
     "Dimension names and order"
 
     def __init__(self, names, mask=0):
-        self._names = tuple(names)
+        self._names = make_tuple(names)
         for n in self._names:
             assert n is not None
         self._masked = mask
@@ -21,6 +22,7 @@ class _Schema:
     def build(names, mask):
         if isinstance(names, _Schema):
             return _Schema(names._names, mask)
+        names = make_tuple(names)
         return _Schema(names, mask)
 
     def get(self, name):
@@ -35,8 +37,7 @@ class _Schema:
         return i
 
     def drop(self, names):
-        if not isinstance(names, tuple):
-            names = (names,)
+        names = make_tuple(names)
         return _Schema(
             [n for n in self._names if n not in names], self._masked
         )

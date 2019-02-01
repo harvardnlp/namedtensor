@@ -32,7 +32,7 @@ class NamedTensorBase:
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
         assert len(self._tensor.shape) == len(self._schema._names), (
-            "Tensor has  %d dim, but only %d names"
+            "Tensor has %d dim, but only %d names"
             % (len(self._tensor.shape), len(self._schema._names))
         )
 
