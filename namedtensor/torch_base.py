@@ -27,7 +27,7 @@ class NTorch(type):
 
     @classmethod
     def dot(cls, dims, *tensors):
-        names = dims
+        names = make_tuple(dims)
         args = []
         ids = {}
         seen_names = []
@@ -40,7 +40,6 @@ class NTorch(type):
                 group.append(ids[name])
             args.append(t._tensor)
             args.append(group)
-        names = make_tuple(names)
         keep = [n for n in seen_names if n not in names]
         for n in names:
             if n not in seen_names:
