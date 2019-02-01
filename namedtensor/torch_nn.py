@@ -96,7 +96,7 @@ class Linear(_Update, nn.Linear):
 
 
 class Conv1d(_Update, nn.Conv1d):
-    def spec(self, dim_in, dim_conv, name_out):
+    def spec(self, dim_in, dim_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in, dim_conv)
         self._output_update = {dim_in: name_out if name_out else dim_in}
@@ -104,7 +104,7 @@ class Conv1d(_Update, nn.Conv1d):
 
 
 class Conv2d(_Update, nn.Conv2d):
-    def spec(self, dim_in, dims_conv, name_out):
+    def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
@@ -112,7 +112,7 @@ class Conv2d(_Update, nn.Conv2d):
 
 
 class Conv3d(_Update, nn.Conv2d):
-    def spec(self, dim_in, dims_conv, name_out):
+    def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
@@ -120,7 +120,7 @@ class Conv3d(_Update, nn.Conv2d):
 
 
 class MaxPool1d(_Update, nn.MaxPool1d):
-    def spec(self, dim_in, dim_conv, name_out):
+    def spec(self, dim_in, dim_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in, dim_conv)
         self._output_update = {dim_in: name_out if name_out else dim_in}
@@ -128,7 +128,7 @@ class MaxPool1d(_Update, nn.MaxPool1d):
 
 
 class MaxPool2d(_Update, nn.MaxPool2d):
-    def spec(self, dim_in, dims_conv, name_out):
+    def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
@@ -136,7 +136,7 @@ class MaxPool2d(_Update, nn.MaxPool2d):
 
 
 class MaxPool3d(_Update, nn.MaxPool2d):
-    def spec(self, dim_in, dims_conv, name_out):
+    def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
