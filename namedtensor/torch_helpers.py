@@ -40,6 +40,7 @@ class NamedTensor(NamedTensorBase):
         """
 
         from .torch_base import ntorch
+
         ntorch.scatter_(self, dim, index, src, index_dim)
 
     def dot(self, names, *others):
@@ -74,6 +75,7 @@ class NamedTensor(NamedTensorBase):
         """
 
         from .torch_base import ntorch
+
         return ntorch.nonzero(self, names)
 
     def relu(self):
@@ -347,7 +349,7 @@ class NamedTensor(NamedTensorBase):
         "numpy",
         "detach",
         "item",
-        "type"
+        "type",
     }
 
     _reduce_doc = """

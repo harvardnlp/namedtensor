@@ -106,7 +106,9 @@ def test_gather():
         ntorch.tensor(
             torch.LongTensor([[0, 1, 2, 0, 0], [2, 0, 0, 1, 2]]), ("c", "b")
         ),
-        x, "c")
+        x,
+        "c",
+    )
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
@@ -307,10 +309,15 @@ def test_nonzero():
     assert y.shape == OrderedDict([("a", 3), ("b", 1)])
 
     # 2d tensor
-    x = ntorch.tensor([[0.6, 0.0, 0.0, 0.0],
-                       [0.0, 0.4, 0.0, 0.0],
-                       [0.0, 0.0, 1.2, 0.0],
-                       [2.0, 0.0, 0.0, -0.4]], names=("alpha", "beta"))
+    x = ntorch.tensor(
+        [
+            [0.6, 0.0, 0.0, 0.0],
+            [0.0, 0.4, 0.0, 0.0],
+            [0.0, 0.0, 1.2, 0.0],
+            [2.0, 0.0, 0.0, -0.4],
+        ],
+        names=("alpha", "beta"),
+    )
     y = x.nonzero()
     assert 5 == y.size("elements_dim")
     assert x.shape == OrderedDict([("alpha", 4), ("beta", 4)])

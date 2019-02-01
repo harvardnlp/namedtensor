@@ -60,7 +60,9 @@ class NTorch(type):
         old_names = tensors[0]._schema._names
         for t in tensors[1:]:
             if t._schema._names != old_names:
-                raise RuntimeError("Tensors to stack don't have matching dimension names")
+                raise RuntimeError(
+                    "Tensors to stack don't have matching dimension names"
+                )
         to_stack = [tensor.values for tensor in tensors]
         old_names = list(old_names)
         old_names.insert(0, name)
@@ -83,7 +85,9 @@ class NTorch(type):
         ]
         b1 = index._force_order(index_order)
         dim = input._schema.get(indim)
-        return input._new(input.values.gather(dim, b1.values), updates=kwargs)
+        return input._new(
+            input.values.gather(dim, b1.values), updates={index_dim: index}
+        )
 
     @staticmethod
     def masked_select(input, mask, name):
