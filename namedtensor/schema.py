@@ -1,5 +1,5 @@
 from collections import OrderedDict
-
+from .utils import make_tuple
 
 class _Schema:
     "Dimension names and order"
