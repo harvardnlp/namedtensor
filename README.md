@@ -6,7 +6,7 @@ A proposal for a named tensor for PyTorch described in the blog post:
 
 http://nlp.seas.harvard.edu/NamedTensor
 
-Currently the library targets the PyTorch ecosystem and Python >= 3.6.
+Currently the library targets the PyTorch ecosystem.
 
 ## Usage
 
