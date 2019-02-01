@@ -4,6 +4,7 @@ from .utils import make_tuple
 from . import torch_nn
 import opt_einsum as oe
 
+
 class NTorch(type):
     def __getattr__(cls, name):
         if name in cls._build:

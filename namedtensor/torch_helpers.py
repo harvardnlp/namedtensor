@@ -2,6 +2,7 @@ import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 from .utils import make_tuple
 
+
 class NamedTensor(NamedTensorBase):
     def index_select(self, dim, index):
         "Index into dimension names with the `index` named tensors."
