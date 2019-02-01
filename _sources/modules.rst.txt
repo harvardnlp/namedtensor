@@ -162,7 +162,7 @@ These modules constructors are like NN.
 
 They have an extra method that allows for renaming the main named dimension.
 
-         .. method:: rename(*kwargs)
+         .. method:: spec()
                      
 .. jinja:: ntorch_nn
 
@@ -177,7 +177,7 @@ These modules constructors are like NN.
 
 They have an extra method that allows you to name an extra appended dimension.
 
-         .. method:: augment(name)
+         .. method:: spec()
                      
 .. jinja:: ntorch_nn
 
@@ -187,7 +187,7 @@ They have an extra method that allows you to name an extra appended dimension.
 Loss Modules
 ----------------
 
-These modules constructors are like NN losses. (They must be called with reduction='none'.)
+These modules constructors are like NN losses.
 
          .. method:: Module(*args)
 
