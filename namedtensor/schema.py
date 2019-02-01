@@ -35,8 +35,7 @@ class _Schema:
         return i
 
     def drop(self, names):
-        if not isinstance(names, tuple):
-            names = (names,)
+        names = make_tuple(names)
         return _Schema(
             [n for n in self._names if n not in names], self._masked
         )

@@ -1,18 +1,8 @@
 import torch
 from .torch_helpers import NamedTensor
+from .utils import make_tuple
 from . import torch_nn
 import opt_einsum as oe
-
-
-def make_tuple(names):
-    if names is None:
-        return ()
-
-    if isinstance(names, tuple):
-        return names
-    else:
-        return (names,)
-
 
 class NTorch(type):
     def __getattr__(cls, name):

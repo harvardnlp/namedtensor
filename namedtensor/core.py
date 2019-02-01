@@ -1,4 +1,5 @@
 from .schema import _Schema
+from .utils import make_tuple
 from einops import rearrange
 
 
@@ -29,10 +30,9 @@ class NamedTensorBase:
     """
 
     def __init__(self, tensor, names, mask=0):
+        names = make_tuple(names)
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
-        if not isinstance(names, tuple):
-            names = (names,)
         assert len(self._tensor.shape) == len(self._schema._names), (
             "Tensor has %d dim, but only %d names"
             % (len(self._tensor.shape), len(self._schema._names))
