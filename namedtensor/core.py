@@ -31,8 +31,10 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
+        if not isinstance(names, tuple):
+            names = (names,)
         assert len(self._tensor.shape) == len(self._schema._names), (
-            "Tensor has  %d dim, but only %d names"
+            "Tensor has %d dim, but only %d names"
             % (len(self._tensor.shape), len(self._schema._names))
         )
 
