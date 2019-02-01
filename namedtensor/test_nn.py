@@ -3,15 +3,15 @@ from collections import OrderedDict
 
 
 def test_nn():
-    lin = ntorch.nn.Linear(20, 10).rename(output="input")
-    out = lin(ntorch.randn(5, 20, names=("batch", "input")))
+    lin = ntorch.nn.Linear(20, 10).spec("input", "output")
+    out = lin(ntorch.randn(20, 5, names=("input", "batch")))
     assert out.shape == OrderedDict([("batch", 5), ("output", 10)])
 
 
 def test_loss():
-    loss = ntorch.nn.NLLLoss().reduce(["batch", "target"])
+    loss = ntorch.nn.NLLLoss().spec("target")
 
-    predict = ntorch.randn(4, 20, names=("batch", "target"))
+    predict = ntorch.randn(20, 4, names=("target", "batch"))
     target = ntorch.tensor([2, 2, 3, 4], ["batch"])
     out = loss(predict, target)
     assert out.shape == OrderedDict([])
@@ -44,9 +44,10 @@ def test_nn2():
 
 
 def test_embedding():
-    embedding = ntorch.nn.Embedding(20, 10).augment("extra")
+    embedding = ntorch.nn.Embedding(20, 10).spec("start", "extra")
 
     input = ntorch.tensor([1, 2, 3], ("start",))
 
     out = embedding(input)
+    print(out.shape)
     assert out.shape == OrderedDict([("start", 3), ("extra", 10)])

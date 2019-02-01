@@ -25,8 +25,8 @@ class _Update:
 
     def __call__(self, input):
         if "_spec" in self.__dict__:
-            input = input.transpose(self._input_order).contiguous()
-            updates = self._output_update
+            input = input.transpose(*self._input_order).contiguous()
+            updates = {k:v for (v, k) in self._output_update.items()}
             return input.op(super(_Update, self).forward, **updates)
         else:
             updates = {} if "_updates" not in self.__dict__ else self._updates
@@ -46,9 +46,9 @@ class _Loss:
     def __call__(self, input, target):
         if "_spec" in self.__dict__:
             reduced = list(self._input_order)
-            if self._reduce != "none":
+            if self.reduction != "none":
                 reduced = input._schema._names
-            input = input.transpose(self._input_order).contiguous()
+            input = input.transpose(*self._input_order).contiguous()
             return input.reduce2(target, super(_Loss, self).forward, reduced)
         else:
             assert "_reduced" in dir(self), "Must call 'reduce' first."
@@ -61,7 +61,7 @@ class _Augment:
 
     def forward(self, input):
         if "_spec" in self.__dict__:
-            input = input.transpose(self._input_order).contiguous()
+            input = input.transpose(*self._input_order).contiguous()
             return input.augment(super(_Augment, self).forward, self._output_augment )
         else:
             augment = (
@@ -86,6 +86,7 @@ class Linear(_Update, nn.Linear):
         self._input_order = (dim_in,)
         self._output_update = {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 class Conv1d(_Update, nn.Conv1d):
     def spec(self, dim_in, dim_conv, name_out):
@@ -93,6 +94,7 @@ class Conv1d(_Update, nn.Conv1d):
         self._input_order = (dim_in, dim_conv)
         self._output_update = {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 class Conv2d(_Update, nn.Conv2d):
     def spec(self, dim_in, dims_conv, name_out):
@@ -100,6 +102,7 @@ class Conv2d(_Update, nn.Conv2d):
         self._input_order = (dim_in,) + dims_conv
         self._output_update =  {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 
 class Conv3d(_Update, nn.Conv2d):
@@ -108,6 +111,7 @@ class Conv3d(_Update, nn.Conv2d):
         self._input_order = (dim_in,) + dims_conv
         self._output_update =  {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 
 class MaxPool1d(_Update, nn.MaxPool1d):
@@ -116,6 +120,7 @@ class MaxPool1d(_Update, nn.MaxPool1d):
         self._input_order = (dim_in, dim_conv)
         self._output_update =  {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 
 
@@ -126,6 +131,7 @@ class MaxPool2d(_Update, nn.MaxPool2d):
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 
 
@@ -136,6 +142,7 @@ class MaxPool3d(_Update, nn.MaxPool2d):
         self._input_order = (dim_in,) + dims_conv
         self._output_update =  {dim_in:
             name_out if name_out else dim_in}
+        return self
 
 _update = [
     "Linear",
@@ -159,11 +166,15 @@ MaxPool3d.__doc__ = nn.MaxPool3d.__doc__
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
     def spec(self, dim_target):
+        self._spec = True
         self._input_order = (dim_target,)
+        return self
 
 class NLLLoss(_Loss, nn.NLLLoss):
     def spec(self, dim_target):
+        self._spec = True
         self._input_order = (dim_target,)
+        return self
 
 _loss = ["CrossEntropyLoss", "NLLLoss"]
 
@@ -173,8 +184,10 @@ NLLLoss.__doc__ = nn.NLLLoss.__doc__
 
 class Embedding(_Augment, nn.Embedding):
     def spec(self, dim_index, name_embedding):
+        self._spec = True
         self._input_order = (dim_index,)
         self._output_augment = name_embedding
+        return self
 
 
 _augment = ["Embedding"]
