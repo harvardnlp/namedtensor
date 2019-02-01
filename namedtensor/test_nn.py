@@ -15,6 +15,7 @@ def test_loss():
     target = ntorch.tensor([2, 2, 3, 4], ["batch"])
     out = loss(predict, target)
     assert out.shape == OrderedDict([])
+    ntorch.nn.Conv1d(5, 10, 2).spec("input", "time", "output")
 
 
 def test_drop():
@@ -22,6 +23,17 @@ def test_drop():
     n = ntorch.randn(4, 20, names=("batch", "target"))
     out = drop(n)
     assert n.shape == out.shape
+    ntorch.nn.Conv1d(5, 10, 2).spec("input", "time", "output")
+
+
+def test_cnn():
+    conv = ntorch.nn.Conv1d(5, 10, 2).spec("input", "time", "output")
+    n = ntorch.randn(20, 30, 5, names=("batch", "time", "input"))
+    out = conv(n)
+    print(out)
+    assert out.shape == OrderedDict(
+        [("batch", 20), ("output", 10), ("time", 29)]
+    )
 
 
 class MyModule(ntorch.nn.Module):
