@@ -129,8 +129,14 @@ http://nlp.seas.harvard.edu/namedtensor/
 
 ## Contributors
 
+(NamedTensor is being collectively developed by Harvard CS 287)
+
 * Yuntian Deng
 * Francisco Rivera
 * Jiafeng Chen
 * Celine Liang
 * Miro Furtado
+* Roshan Padaki
+* Mirac Suzgun
+* Belén Saldías
+* Jason Ren
