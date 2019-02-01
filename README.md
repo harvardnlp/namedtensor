@@ -101,18 +101,28 @@ y.index_select("vocab", x)
 ## NN Modules
 
 This api part is a work in progress. But many units are implemented to
-work with named tensor.
+work with named tensor. They each have a required additional method `spec`
+that specifies the input and output dimensions of the object. 
+
+Examples
 
 ```python
+  conv = ntorch.nn.Conv1d(5, 10, 2).spec("input", "time", "output")
+  n = ntorch.randn(20, 30, 5, names=("batch", "time", "input"))
+  out = conv(n)
+```
 
-linear = ntorch.nn.Linear(20, 25)
-x = linear(x)
+```python
+  drop = ntorch.nn.Dropout()
+  n = ntorch.randn(4, 20, names=("batch", "target"))
+  out = drop(n)
+```
 
-# or
-
-linear.rename(wout="w")
-x = linear(x)
-
+```python
+  loss = ntorch.nn.NLLLoss().spec("target")
+  predict = ntorch.randn(20, 4, names=("target", "batch"))
+  target = ntorch.tensor([2, 2, 3, 4], ["batch"])
+  out = loss(predict, target)
 ```
 
 ## Other Goodies

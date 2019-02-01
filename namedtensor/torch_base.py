@@ -60,7 +60,9 @@ class NTorch(type):
         old_names = tensors[0]._schema._names
         for t in tensors[1:]:
             if t._schema._names != old_names:
-                raise RuntimeError("Tensors to stack don't have matching dimension names")
+                raise RuntimeError(
+                    "Tensors to stack don't have matching dimension names"
+                )
         to_stack = [tensor.values for tensor in tensors]
         old_names = list(old_names)
         old_names.insert(0, name)
@@ -75,15 +77,17 @@ class NTorch(type):
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
-    def gather(input, index, **kwargs):
-        outdim = tuple(kwargs.keys())[0]
-        indim = kwargs[outdim]
+    def gather(input, dim, index, index_dim):
+        outdim = index_dim
+        indim = dim
         index_order = [
             (n if n != indim else outdim) for n in input._schema._names
         ]
         b1 = index._force_order(index_order)
         dim = input._schema.get(indim)
-        return input._new(input.values.gather(dim, b1.values), updates=kwargs)
+        return input._new(
+            input.values.gather(dim, b1.values), updates={index_dim: index}
+        )
 
     @staticmethod
     def masked_select(input, mask, name):
@@ -111,9 +115,9 @@ class NTorch(type):
         return NamedTensor(tensor=indices, names=names)
 
     @staticmethod
-    def scatter_(input, index, src, **kwargs):
-        indim = tuple(kwargs.keys())[0]
-        outdim = kwargs[indim]
+    def scatter_(input, dim, index, src, index_dim):
+        indim = dim
+        outdim = index_dim
         index_order = [
             (n if n != indim else outdim) for n in input._schema._names
         ]

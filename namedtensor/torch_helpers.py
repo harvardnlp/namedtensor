@@ -24,24 +24,24 @@ class NamedTensor(NamedTensorBase):
             new_names,
         )
 
-    def gather(self, index, **kwargs):
+    def gather(self, dim, index, index_dim):
         """
-        Apply gather with `index_dim='self_dim'` where self_dim is reduced out
-        based on index_dim.
+        Apply gather where `self_dim` is reduced out
+        based on `index` from `index_dim`.
         """
         from .torch_base import ntorch
 
-        return ntorch.gather(index, **kwargs)
+        return ntorch.gather(self, dim, index, index_dim)
 
-    def scatter_(self, index, src, **kwargs):
+    def scatter_(self, dim, index, src, index_dim):
         """
-        Apply gather with `self_dim='index_dim'` where self_dim gets the
-        scattered values of `src` based in `index`.
+        Apply scatter where `dim` gets the
+        scattered values of `src` based in `index` along `index_dim`.
         """
 
         from .torch_base import ntorch
 
-        ntorch.scatter_(self, index, src, **kwargs)
+        ntorch.scatter_(self, dim, index, src, index_dim)
 
     def dot(self, names, *others):
         "Contract dimension `names` with each of the other tensors"
@@ -75,6 +75,7 @@ class NamedTensor(NamedTensorBase):
         """
 
         from .torch_base import ntorch
+
         return ntorch.nonzero(self, names)
 
     def relu(self):
@@ -348,7 +349,7 @@ class NamedTensor(NamedTensorBase):
         "numpy",
         "detach",
         "item",
-        "type"
+        "type",
     }
 
     _reduce_doc = """
