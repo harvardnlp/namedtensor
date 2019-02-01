@@ -48,7 +48,7 @@ x = x.stack(("w", "h"), "stackdim")
 x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
-Transposition:
+Transposition (discouraged in the API):
 
 ```python
 x = x.transpose("batch", "w", "h")
@@ -98,7 +98,7 @@ y.index_select("vocab", x)
 ```
 
 
-### NN Modules
+## NN Modules
 
 This api part is a work in progress. But many units are implemented to
 work with named tensor.
@@ -116,7 +116,7 @@ x = linear(x)
 ```
 
 ## Other Goodies
-* Named NN
+
 * Named Distributions libary
 
 ## Documentation
