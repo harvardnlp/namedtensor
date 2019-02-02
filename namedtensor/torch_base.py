@@ -154,7 +154,7 @@ class NTorch(type):
                 remaining_names.append(name)
 
         # permute tensor values to match dims
-        permute_idx = match_dims+remaining_dims
+        permute_idx = match_dims + remaining_dims
         values = values.permute(*permute_idx)
 
         # find values by idx element in indices

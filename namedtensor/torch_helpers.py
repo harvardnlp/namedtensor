@@ -61,11 +61,11 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.masked_select(self, mask, name)
 
-    def multi_index_select(tensor, dims, indices):
+    def multi_index_select(self, dims, indices):
         "Index into dims names with the `indices` named tensors."
         from .torch_base import ntorch
 
-        return ntorch.multi_index_select(tensor, dims, indices)
+        return ntorch.multi_index_select(self, dims, indices)
 
     def nonzero(self, names=("elementsdim", "inputdims")):
         """
