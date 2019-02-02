@@ -182,6 +182,10 @@
             <span class="s2">&quot;Tensor has </span><span class="si">%d</span><span class="s2"> dim, but only </span><span class="si">%d</span><span class="s2"> names&quot;</span>
             <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">))</span>
         <span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">name</span><span class="o">.</span><span class="n">isalnum</span><span class="p">(),</span> <span class="p">(</span>
+                <span class="s2">&quot;dim name </span><span class="si">%s</span><span class="s2"> must be alphanumeric&quot;</span> <span class="o">%</span> <span class="n">name</span>
+            <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
