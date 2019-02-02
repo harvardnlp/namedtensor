@@ -9,14 +9,17 @@ import torch.nn.functional as F
 def make_tensors(sizes, names):
     return [ntorch.randn(sizes, names=names)]
 
+
 def test_names():
     base = torch.zeros([10, 2, 50])
     assert ntorch.tensor(base, ("alpha", "beta", "gamma"))
+
 
 @pytest.mark.xfail
 def test_old_nonzero_names():
     base = torch.zeros([10, 2])
     assert ntorch.tensor(base, ("elements_dim", "input_dims"))
+
 
 def test_shift():
     for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
@@ -295,7 +298,7 @@ def test_nonzero():
     # only zeros
     x = ntorch.zeros(10, names=("alpha",))
     y = x.nonzero()
-    assert 0 == y.size("elements_dim")
+    assert 0 == y.size("elementsdim")
     assert x.shape == OrderedDict([("alpha", 10)])
     assert y.shape == OrderedDict([("elementsdim", 0), ("inputdims", 1)])
 
