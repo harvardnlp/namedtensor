@@ -35,7 +35,7 @@ class NamedTensorBase:
             "Tensor has %d dim, but only %d names"
             % (len(self._tensor.shape), len(self._schema._names))
         )
-        for name in names:
+        for name in self._schema._names:
             assert name.isalnum(), (
                 "dim name %s must be alphanumeric" % name
             )
