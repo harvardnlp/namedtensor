@@ -10,6 +10,17 @@ def make_tensors(sizes, names):
     return [ntorch.randn(sizes, names=names)]
 
 
+def test_names():
+    base = torch.zeros([10, 2, 50])
+    assert ntorch.tensor(base, ("alpha", "beta", "gamma"))
+
+
+@pytest.mark.xfail
+def test_old_nonzero_names():
+    base = torch.zeros([10, 2])
+    assert ntorch.tensor(base, ("elements_dim", "input_dims"))
+
+
 def test_shift():
     for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
         # Split
@@ -287,9 +298,9 @@ def test_nonzero():
     # only zeros
     x = ntorch.zeros(10, names=("alpha",))
     y = x.nonzero()
-    assert 0 == y.size("elements_dim")
+    assert 0 == y.size("elementsdim")
     assert x.shape == OrderedDict([("alpha", 10)])
-    assert y.shape == OrderedDict([("elements_dim", 0), ("input_dims", 1)])
+    assert y.shape == OrderedDict([("elementsdim", 0), ("inputdims", 1)])
 
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
@@ -299,9 +310,9 @@ def test_nonzero():
     # 1d tensor
     x = ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
     y = x.nonzero()
-    assert 3 == y.size("elements_dim")
+    assert 3 == y.size("elementsdim")
     assert x.shape == OrderedDict([("dim", 5)])
-    assert y.shape == OrderedDict([("elements_dim", 3), ("input_dims", 1)])
+    assert y.shape == OrderedDict([("elementsdim", 3), ("inputdims", 1)])
 
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
@@ -319,9 +330,9 @@ def test_nonzero():
         names=("alpha", "beta"),
     )
     y = x.nonzero()
-    assert 5 == y.size("elements_dim")
+    assert 5 == y.size("elementsdim")
     assert x.shape == OrderedDict([("alpha", 4), ("beta", 4)])
-    assert y.shape == OrderedDict([("elements_dim", 5), ("input_dims", 2)])
+    assert y.shape == OrderedDict([("elementsdim", 5), ("inputdims", 2)])
 
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
