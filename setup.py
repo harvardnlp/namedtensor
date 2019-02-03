@@ -9,4 +9,7 @@ setup(
     package_data={"namedtensor": []},
     url="https://github.com/harvardnlp/NamedTensor",
     install_requires=["numpy", "einops"],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest"]
+
 )

@@ -6,6 +6,7 @@ before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update
   - pip install -r requirements.txt
+  - pip install coveralls
 
 install:
   - python setup.py install
@@ -27,7 +28,9 @@ matrix:
       install: pip install flake8 pep8-naming
       script: cd namedtensor/;flake8 --ignore "N801, E203, E266, E501, W503, N812" .
     - python: "3.6"
-      script: pytest . 
+      script: 
+	- coverage run --source=namedtensor setup.py test
+	- coveralls
     - python: "3.6"
       install:
         - python setup.py install
