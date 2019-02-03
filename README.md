@@ -1,5 +1,8 @@
 # NamedTensor
 
+
+[![Coverage Status](https://coveralls.io/repos/github/harvardnlp/namedtensor/badge.svg?branch=master)](https://coveralls.io/github/harvardnlp/namedtensor?branch=master)
+
 ## Introduction
 
 A proposal for a named tensor for PyTorch described in the blog post:
