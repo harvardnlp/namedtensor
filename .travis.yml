@@ -29,8 +29,8 @@ matrix:
       script: cd namedtensor/;flake8 --ignore "N801, E203, E266, E501, W503, N812" .
     - python: "3.6"
       script: 
-	- coverage run --source=namedtensor setup.py test
-	- coveralls
+        - coverage run --source=namedtensor setup.py test
+        - coveralls
     - python: "3.6"
       install:
         - python setup.py install
