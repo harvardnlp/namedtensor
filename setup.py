@@ -8,7 +8,7 @@ setup(
     packages=["namedtensor", "namedtensor.text"],
     package_data={"namedtensor": []},
     url="https://github.com/harvardnlp/NamedTensor",
-    install_requires=["numpy", "einops"],
+    install_requires=["torch", "torchtext", "numpy", "einops", "opt-einsum"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"]
 
