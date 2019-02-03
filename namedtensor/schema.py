@@ -11,7 +11,7 @@ class _Schema:
         for n in self._names:
             assert n is not None
             assert n.isalnum(), (
-                "dim name %s must be alphanumeric" % name
+                "dim name %s must be alphanumeric" % n
             )
             assert n not in s, (
                 "Tensor must have unique dims, dim \'%s\' is non-unique" % n
