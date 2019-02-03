@@ -112,8 +112,10 @@ class NTorch(type):
         """
 
         indices = torch.nonzero(tensor.values)
-        return NamedTensor(tensor=indices,
-                           names= (names[0],) + ((names[1],) if indices.dim() > 1 else ()))
+        return NamedTensor(
+            tensor=indices,
+            names=(names[0],) + ((names[1],) if indices.dim() > 1 else ()),
+        )
 
     @staticmethod
     def scatter_(input, dim, index, src, index_dim):

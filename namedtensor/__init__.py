@@ -6,11 +6,7 @@ import numpy as np
 version = "0.0.2"
 
 # For flake8 compatibility.
-__all__ = [
-    assert_match,
-    ntorch,
-    NamedTensor
-]
+__all__ = [assert_match, ntorch, NamedTensor]
 
 
 # (Just for the blog post)
