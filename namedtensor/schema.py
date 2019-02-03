@@ -7,8 +7,17 @@ class _Schema:
 
     def __init__(self, names, mask=0):
         self._names = make_tuple(names)
+        s = set()
         for n in self._names:
             assert n is not None
+            assert n.isalnum(), (
+                "dim name %s must be alphanumeric" % name
+            )
+            assert n not in s, (
+                "Tensor must have unique dims, dim \'%s\' is non-unique" % n
+            )
+            s.add(n)
+
         self._masked = mask
         self._axes = OrderedDict(((d, i) for i, d in enumerate(self._names)))
 

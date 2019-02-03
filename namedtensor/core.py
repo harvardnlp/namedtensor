@@ -22,7 +22,7 @@ class NamedTensorBase:
     """
     Attributes:
         tensor: The raw tensor data
-        dims: Tuple of dimension names associated with this array.
+        dims: Tuple of unique dimension names associated with this array.
         ndim: Number of dimensions
         sizes: The raw dimension sizes
         shape: Ordered mapping from dimension names to lengths.
@@ -35,10 +35,7 @@ class NamedTensorBase:
             "Tensor has %d dim, but only %d names"
             % (len(self._tensor.shape), len(self._schema._names))
         )
-        for name in self._schema._names:
-            assert name.isalnum(), (
-                "dim name %s must be alphanumeric" % name
-            )
+
 
     @property
     def dims(self):
