@@ -143,6 +143,31 @@ class MaxPool3d(_Update, nn.MaxPool2d):
         return self
 
 
+class AvgPool1d (_Update, nn.AvgPool1d):
+    pass
+
+
+class AvgPool2d (_Update, nn.AvgPool2d):
+    pass
+
+
+class AvgPool3d (_Update, nn.AvgPool3d):
+    pass
+
+
+class MaxUnpool1d (_Update, nn.MaxUnpool1d):
+    pass
+
+
+class MaxUnpool2d (_Update, nn.MaxUnpool2d):
+    pass
+
+
+class MaxUnpool3d (_Update, nn.MaxUnpool3d):
+    pass
+
+
+
 _update = [
     "Linear",
     "Conv1d",
@@ -151,6 +176,12 @@ _update = [
     "MaxPool1d",
     "MaxPool2d",
     "MaxPool3d",
+    "AvgPool1d",
+    "AvgPool2d",
+    "AvgPool3d",
+    "MaxUnpool1d",
+    "MaxUnpool2d",
+    "MaxUnpool3d",
 ]
 
 
@@ -161,7 +192,12 @@ Conv3d.__doc__ = nn.Conv3d.__doc__
 MaxPool1d.__doc__ = nn.MaxPool1d.__doc__
 MaxPool2d.__doc__ = nn.MaxPool2d.__doc__
 MaxPool3d.__doc__ = nn.MaxPool3d.__doc__
-
+AvgPool1d.__doc__ = nn.AvgPool1d.__doc__
+AvgPool2d.__doc__ = nn.AvgPool2d.__doc__
+AvgPool3d.__doc__ = nn.AvgPool3d.__doc__
+MaxUnpool1d.__doc__ = nn.MaxUnpool1d.__doc__
+MaxUnpool2d.__doc__ = nn.MaxUnpool2d.__doc__
+MaxUnpool3d.__doc__ = nn.MaxUnpool3d.__doc__
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
     def spec(self, dim_target):
