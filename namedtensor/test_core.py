@@ -305,11 +305,11 @@ def test_nonzero():
     x = ntorch.zeros(10, names=("alpha",))
     y = x.nonzero()
     assert x.shape == OrderedDict([("alpha", 10)])
-    assert y.shape == OrderedDict([("elements", 0)])
+    assert y.shape == OrderedDict([("elements", 0), ("inputdims", 1)])
 
     # `names` length must be 2
     y = x.nonzero(names=("a", "b"))
-    assert y.shape == OrderedDict([("a", 0)])
+    assert y.shape == OrderedDict([("a", 0), ("b", 1)])
 
     # 1d tensor
     x = ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
