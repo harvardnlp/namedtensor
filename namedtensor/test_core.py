@@ -279,7 +279,7 @@ def test_division():
     expected = NamedTensor(torch.ones(3) / 4, ("short",))
     assert_match(base1 / base1.sum("long"), expected)
 
-def test_multiplication():
+def test_scalar_mult():
     base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
     rmul = 3 * base1
     lmul = base1 * 3
