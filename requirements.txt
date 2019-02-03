@@ -3,3 +3,4 @@ numpy
 pytest
 einops
 opt-einsum
+torchtext
