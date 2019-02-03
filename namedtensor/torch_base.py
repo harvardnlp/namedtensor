@@ -97,7 +97,7 @@ class NTorch(type):
         return NamedTensor(a1.values.masked_select(b1.values), name)
 
     @staticmethod
-    def nonzero(tensor, names=("elementsdim", "inputdims")):
+    def nonzero(tensor, names=("elements", "inputdims")):
         """
         Returns a tensor containing the indices of all non-zero elements.
 
@@ -106,13 +106,14 @@ class NTorch(type):
         tensor: NamedTensor
         names : tuple, optional
             Names for the output dimensions
-            default value: ("elementsdim", "inputdims")
-            default output shape: OrderedDict([("elementsdim", number of non-zero elements),
-                                                 ("inputdims", input tensor's number of dimensions)])
+            default value: ("elements", "inputdims")
+            default output shape: OrderedDict([("elements", number of non-zero elements),
+                                               ("inputdims", input tensor's number of dimensions)])
         """
 
         indices = torch.nonzero(tensor.values)
-        return NamedTensor(tensor=indices, names=names)
+        return NamedTensor(tensor=indices,
+                           names= (names[0],) + ((names[1],) if indices.dim() > 1 else ()))
 
     @staticmethod
     def scatter_(input, dim, index, src, index_dim):
