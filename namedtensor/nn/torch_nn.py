@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .torch_helpers import NamedTensor
+from ..torch_helpers import NamedTensor
 
 
 class Module(nn.Module):

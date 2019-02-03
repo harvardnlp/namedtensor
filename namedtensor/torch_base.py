@@ -1,7 +1,7 @@
 import torch
 from .torch_helpers import NamedTensor
 from .utils import make_tuple
-from . import torch_nn
+from .nn import nn
 import opt_einsum as oe
 
 
@@ -193,5 +193,5 @@ class NTorch(type):
 
 
 class ntorch(metaclass=NTorch):
-    nn = torch_nn
+    nn = nn
     pass

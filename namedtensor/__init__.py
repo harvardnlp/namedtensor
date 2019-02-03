@@ -1,8 +1,6 @@
 from .core import assert_match
 from .torch_base import ntorch
 from .torch_helpers import NamedTensor
-from .distributions import NamedDistribution, ndistributions
-import namedtensor.torch_nn as nnn
 import numpy as np
 
 version = "0.0.2"
@@ -11,10 +9,7 @@ version = "0.0.2"
 __all__ = [
     assert_match,
     ntorch,
-    nnn,
-    NamedTensor,
-    ndistributions,
-    NamedDistribution,
+    NamedTensor
 ]
 
 
