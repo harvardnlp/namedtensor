@@ -354,6 +354,93 @@ def test_nonzero_names():
     assert 2 == len(y.shape)
 
 
+def test_multi_index_select():
+
+    def _check_output(tensor, dims, indices, output):
+        names = tensor._schema._names
+        index_names = indices._schema._names
+
+        output_names = output._schema._names
+        assert len(names) - len(dims) + 1 == len(output_names)
+
+        input_elements = indices.shape[index_names[0]]
+        output_elements = output.shape[index_names[0]]
+        assert input_elements == output_elements
+
+        remaining_dims = set(names) - set(dims)
+        for name in remaining_dims:
+            assert name in output_names
+
+        output_element_dims = []
+        remaining_element_dims = []
+        for name in output_names[1:]:
+            output_element_dims.append(output.shape[name])
+            remaining_element_dims.append(tensor.shape[name])
+        assert output_element_dims == remaining_element_dims
+
+    # 1d tensor, nonzero test
+    tensor = ntorch.tensor([0.6, 0.4, 0.0], names=('alpha',))
+    indices = tensor.nonzero()
+    dims = ('alpha',)
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    # 3d tensor
+    base = torch.cat([torch.tensor([[[0.6, 0.4, 0.0],
+                                     [2.0, 0.0, 1.2]]])] * 4, 0)
+    tensor = ntorch.tensor(base, names=('alpha', 'beta', 'gamma'))
+
+    # nonzero test
+    indices = tensor.nonzero()
+    dims = ('alpha', 'beta', 'gamma')
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    # one dimension
+    indices = ntorch.tensor(torch.tensor([[0], [1], [1]]),
+                            names=('elementsdim', 'inputdims'))
+    dims = ('gamma',)
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    # one dimension
+    indices = ntorch.tensor([[1], [2]],
+                            names=('elementsdim', 'inputdims'))
+    dims = ('alpha',)
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    # two transposed dimensions
+    indices = ntorch.tensor(torch.tensor([[0, 0], [0, 1]]),
+                            names=('elementsdim', 'inputdims'))
+    dims = ('gamma', 'beta')
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    # 4d tensor
+    base = torch.tensor([[0.6, 0.0, 0.0],
+                         [0.0, 0.4, 0.0],
+                         [0.0, 0.0, 1.2],
+                         [2.0, 0.0, 0.9]])
+    base = torch.cat([base.unsqueeze(0)] * 5, 0)
+    base = torch.cat([base.unsqueeze(0)] * 7, 0)
+    tensor = ntorch.tensor(base, names=('dim0', 'dim1', 'dim2', 'dim3'))
+
+    # nonzero test
+    indices = tensor.nonzero()
+    dims = ('dim0', 'dim1', 'dim2', 'dim3')
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+    indices = ntorch.tensor(indices.values[:, :2],
+                            names=('elements', 'indims'))
+    dims = ('dim0', 'dim1')
+
+    # two dimensions
+    selected_values = tensor.multi_index_select(dims, indices)
+    _check_output(tensor, dims, indices, selected_values)
+
+
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
 #     base2 = base1 + 10

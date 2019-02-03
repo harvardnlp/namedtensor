@@ -107,12 +107,67 @@ class NTorch(type):
         names : tuple, optional
             Names for the output dimensions
             default value: ("elementsdim", "inputdims")
-            default output shape: OrderedDict([("elementsdim", number of non-zero elements),
-                                                 ("inputdims", input tensor's number of dimensions)])
+            default output shape:
+                OrderedDict([("elementsdim", number of non-zero elements),
+                            ("inputdims", input tensor's number of dimensions)])
         """
 
         indices = torch.nonzero(tensor.values)
         return NamedTensor(tensor=indices, names=names)
+
+    @staticmethod
+    def multi_index_select(tensor, dims, indices):
+        indices_names = indices._schema._names
+        index_dim = indices_names[1]
+        if len(dims) != indices.shape[index_dim]:
+            raise RuntimeError(
+                "Size of elements in 'indices' should be %d, got %d"
+                % (len(dims), indices.shape[index_dim])
+            )
+        if len(tensor.shape) < len(dims):
+            raise RuntimeError(
+                "Size of 'dims' must be <= tensor dims (%d), got %d"
+                % (len(tensor.shape), len(dims))
+            )
+        if len(set(dims)) < len(dims):
+            raise RuntimeError("Tuple 'dims' must contain unique names")
+        names = tensor._schema._names
+        for dim in dims:
+            if dim not in names:
+                raise RuntimeError("%s is not a dimension name in tensor" % dim)
+
+        values = tensor.values
+        names = tensor._schema._names
+
+        # find names index in dims
+        match_dims = []
+        for dim in dims:
+            dim_idx = names.index(dim)
+            match_dims.append(dim_idx)
+
+        # find remaining tensor dims
+        remaining_dims = []
+        remaining_names = []
+        for i, name in enumerate(names):
+            if i not in match_dims:
+                remaining_dims.append(i)
+                remaining_names.append(name)
+
+        # permute tensor values to match dims
+        permute_idx = match_dims + remaining_dims
+        values = values.permute(*permute_idx)
+
+        # find values by idx element in indices
+        tensors = []
+        for idx in indices.values:
+            indexed_value = values[tuple(idx)].unsqueeze(0)
+            tensors.append(indexed_value)
+        tensors = torch.cat(tensors)
+
+        elements_dim = indices_names[0]
+        new_names = tuple([elements_dim] + remaining_names)
+        selecte_values = ntorch.tensor(tensors, names=new_names)
+        return selecte_values
 
     @staticmethod
     def scatter_(input, dim, index, src, index_dim):
