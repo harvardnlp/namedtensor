@@ -36,7 +36,6 @@ class NamedTensorBase:
             % (len(self._tensor.shape), len(self._schema._names))
         )
 
-
     @property
     def dims(self):
         "Return the dim names for the tensor"
