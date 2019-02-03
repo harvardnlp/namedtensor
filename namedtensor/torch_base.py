@@ -2,6 +2,7 @@ import torch
 from .torch_helpers import NamedTensor
 from .utils import make_tuple
 from .nn import nn
+from .distributions import ndistributions
 import opt_einsum as oe
 
 
@@ -194,4 +195,5 @@ class NTorch(type):
 
 class ntorch(metaclass=NTorch):
     nn = nn
+    distributions = ndistributions
     pass
