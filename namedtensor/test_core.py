@@ -6,6 +6,12 @@ import pytest
 import torch.nn.functional as F
 
 
+@pytest.mark.xfail
+def test_unique_names():
+    base = torch.zeros([10, 2])
+    assert ntorch.tensor(base, ("alpha", "beta", "alpha"))
+
+
 def make_tensors(sizes, names):
     return [ntorch.randn(sizes, names=names)]
 
