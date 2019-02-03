@@ -174,6 +174,9 @@ class NamedTensor(NamedTensorBase):
     def __mul__(self, b):
         return self.mul(b)
 
+    def __rmul__(self, b):
+        return self.mul(b)
+
     def __div__(self, b):
         return self.div(b)
 
