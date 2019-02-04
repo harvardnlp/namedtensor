@@ -1,4 +1,5 @@
-from . import ntorch, NamedDistribution, ndistributions
+from .. import ntorch
+from . import NamedDistribution, ndistributions
 import torch
 from collections import OrderedDict
 import torch.distributions as ds

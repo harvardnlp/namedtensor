@@ -10,11 +10,9 @@ class _Schema:
         s = set()
         for n in self._names:
             assert n is not None
-            assert n.isalnum(), (
-                "dim name %s must be alphanumeric" % n
-            )
+            assert n.isalnum(), "dim name %s must be alphanumeric" % n
             assert n not in s, (
-                "Tensor must have unique dims, dim \'%s\' is non-unique" % n
+                "Tensor must have unique dims, dim '%s' is non-unique" % n
             )
             s.add(n)
 

@@ -1,7 +1,8 @@
 import torch
 from .torch_helpers import NamedTensor
 from .utils import make_tuple
-from . import torch_nn
+from .nn import nn
+from .distributions import ndistributions
 import opt_einsum as oe
 
 
@@ -97,7 +98,7 @@ class NTorch(type):
         return NamedTensor(a1.values.masked_select(b1.values), name)
 
     @staticmethod
-    def nonzero(tensor, names=("elementsdim", "inputdims")):
+    def nonzero(tensor, names=("elements", "inputdims")):
         """
         Returns a tensor containing the indices of all non-zero elements.
 
@@ -106,9 +107,9 @@ class NTorch(type):
         tensor: NamedTensor
         names : tuple, optional
             Names for the output dimensions
-            default value: ("elementsdim", "inputdims")
-            default output shape: OrderedDict([("elementsdim", number of non-zero elements),
-                                                 ("inputdims", input tensor's number of dimensions)])
+            default value: ("elements", "inputdims")
+            default output shape: OrderedDict([("elements", number of non-zero elements),
+                                               ("inputdims", input tensor's number of dimensions)])
         """
 
         indices = torch.nonzero(tensor.values)
@@ -193,5 +194,6 @@ class NTorch(type):
 
 
 class ntorch(metaclass=NTorch):
-    nn = torch_nn
+    nn = nn
+    distributions = ndistributions
     pass

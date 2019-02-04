@@ -36,6 +36,8 @@ from recommonmark.parser import CommonMarkParser
 import sphinx_rtd_theme
 from recommonmark.transform import AutoStructify
 import namedtensor
+from namedtensor.distributions import ndistributions
+from namedtensor import ntorch
 import torch
 
 source_parsers = {
@@ -67,19 +69,19 @@ jinja_contexts = {
               'inline_methods': namedtensor.NamedTensor._inline,
           },
           'ntorch': {
-              'build': namedtensor.ntorch._build,
-              'noshift': namedtensor.ntorch._noshift,
+              'build': ntorch._build,
+              'noshift': ntorch._noshift,
               },
           'ntorch_nn': {
-              'standard': namedtensor.ntorch.nn._update,
-              'wrap': namedtensor.ntorch.nn._wrap,
-              'augment': namedtensor.ntorch.nn._augment,
-              'loss': namedtensor.ntorch.nn._loss,
+              'standard': ntorch.nn._update,
+              'wrap': ntorch.nn._wrap,
+              'augment': ntorch.nn._augment,
+              'loss': ntorch.nn._loss,
               },
     
     
           'ndistributions': {
-              'build': namedtensor.ndistributions._build,
+              'build': ndistributions._build,
               }
 
       }

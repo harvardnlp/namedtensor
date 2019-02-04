@@ -61,7 +61,7 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.masked_select(self, mask, name)
 
-    def nonzero(self, names=("elementsdim", "inputdims")):
+    def nonzero(self, names=("elements", "inputdims")):
         """
         Returns a tensor containing the indices of all non-zero elements.
 
@@ -69,9 +69,9 @@ class NamedTensor(NamedTensorBase):
         ----------
         names : tuple, optional
             Names for the output dimensions
-            default value: ("elementsdim", "inputdims")
-            default output shape: OrderedDict([("elementsdim", number of non-zero elements),
-                                                 ("inputdims", input tensor's number of dimensions)])
+            default value: ("elements", "inputdims")
+            default output shape: OrderedDict([("elements", number of non-zero elements),
+                                               ("inputdims", input tensor's number of dimensions)])
         """
 
         from .torch_base import ntorch

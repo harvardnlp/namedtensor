@@ -1,4 +1,4 @@
-from . import ntorch
+from .. import ntorch
 from collections import OrderedDict
 
 
