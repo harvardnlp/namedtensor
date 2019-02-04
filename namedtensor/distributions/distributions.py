@@ -1,5 +1,5 @@
 from ..schema import _Schema
-from .. import NamedTensor
+from ..torch_helpers import NamedTensor
 import torch
 import torch.distributions
 
