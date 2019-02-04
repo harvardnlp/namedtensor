@@ -365,6 +365,17 @@ def test_nonzero_names():
     assert 2 == len(y.shape)
 
 
+def test_log_softmax():
+    base = (
+        ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
+        .float()
+        .log_softmax("dim")
+    )
+    y = F.log_softmax(torch.tensor([0, 1, 2, 0, 5]).float(), dim=0)
+    expected = ntorch.tensor(y, names=("dim",))
+    assert_match(base, expected)
+
+
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
 #     base2 = base1 + 10
