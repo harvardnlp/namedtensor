@@ -369,7 +369,8 @@
             <span class="k">elif</span> <span class="n">methodname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inline</span><span class="p">:</span>
 
                 <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span>
 
                 <span class="n">call</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__doc__</span>
 
@@ -481,7 +482,10 @@
         <span class="s2">&quot;trunc&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="n">_noshift_dim</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_noshift_dim</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cumprod&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cumsum&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="c1"># Return a non-tensor info object</span>
     <span class="n">_info</span> <span class="o">=</span> <span class="p">{</span>
@@ -514,8 +518,6 @@
     <span class="n">_reduce</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;argmax&quot;</span><span class="p">,</span>
         <span class="s2">&quot;argmin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cumprod&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cumsum&quot;</span><span class="p">,</span>
         <span class="s2">&quot;logsumexp&quot;</span><span class="p">,</span>
         <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
         <span class="s2">&quot;median&quot;</span><span class="p">,</span>
