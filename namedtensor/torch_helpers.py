@@ -335,7 +335,10 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_dim = {}
+    _noshift_dim = {
+        "cumprod",
+        "cumsum",
+    }
 
     # Return a non-tensor info object
     _info = {
@@ -368,8 +371,6 @@ doc is the same as below.
     _reduce = {
         "argmax",
         "argmin",
-        "cumprod",
-        "cumsum",
         "logsumexp",
         "mean",
         "median",
