@@ -300,6 +300,18 @@ def test_subtraction():
     assert_match(base1 - base2, expect)
 
 
+def test_rightsubtraction():
+    base1 = ntorch.ones(3, 4, names=("short", "long"))
+    expect = ntorch.zeros(3, 4, names=("short", "long"))
+    assert_match(1 - base1, expect)
+
+
+def test_rightaddition():
+    base1 = ntorch.ones(3, 4, names=("short", "long"))
+    expect = NamedTensor(2 * torch.ones(3, 4), names=("short", "long"))
+    assert_match(1 + base1, expect)
+
+
 def test_neg():
     base = ntorch.ones(3, names=("short",))
     expected = NamedTensor(-1 * torch.ones(3), ("short",))
