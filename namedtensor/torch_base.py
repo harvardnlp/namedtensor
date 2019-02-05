@@ -175,6 +175,7 @@ class NTorch(type):
         "log",
         "pow",
         "reciprical",
+        "relu",
         "round",
         "rsqrt",
         "short",
