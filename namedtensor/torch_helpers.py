@@ -222,7 +222,8 @@ class NamedTensor(NamedTensorBase):
             elif methodname in self._inline:
 
                 def call(*args, **kwargs):
-                    return method(*args, **kwargs)
+                    method(*args, **kwargs)
+                    return self
 
                 call.__doc__ = method.__doc__
 
