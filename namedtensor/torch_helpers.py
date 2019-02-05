@@ -168,7 +168,13 @@ class NamedTensor(NamedTensorBase):
     def __add__(self, b):
         return self.add(b)
 
+    def __radd__(self, b):
+        return self.add(b)
+
     def __sub__(self, b):
+        return self.sub(b)
+
+    def __rsub__(self, b):
         return self.sub(b)
 
     def __mul__(self, b):
