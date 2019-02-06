@@ -35,6 +35,7 @@ def test_cnn():
         [("batch", 20), ("output", 10), ("time", 29)]
     )
 
+
 def test_rnn():
     rnn = ntorch.nn.RNN(5, 10, 3).spec("input", "time", "output")
     n = ntorch.randn(20, 30, 5, names=("batch", "time", "input"))
@@ -47,7 +48,6 @@ def test_rnn():
         [("batch", 20), ("layers", 3), ("output", 10)]
     )
 
-
     out, state = rnn(n, state)
     assert out.shape == OrderedDict(
         [("batch", 20), ("time", 30), ("output", 10)]
@@ -57,7 +57,8 @@ def test_rnn():
         [("batch", 20), ("layers", 3), ("output", 10)]
     )
 
-def test_rnn():
+
+def test_lstm():
     rnn = ntorch.nn.LSTM(5, 10, 3).spec("input", "time", "output")
     n = ntorch.randn(20, 30, 5, names=("batch", "time", "input"))
     out, state = rnn(n)
@@ -69,7 +70,6 @@ def test_rnn():
         [("batch", 20), ("layers", 3), ("output", 10)]
     )
 
-
     out, state = rnn(n, state)
     assert out.shape == OrderedDict(
         [("batch", 20), ("time", 30), ("output", 10)]
@@ -77,8 +77,6 @@ def test_rnn():
     assert state[0].shape == OrderedDict(
         [("batch", 20), ("layers", 3), ("output", 10)]
     )
-
-
 
 
 class MyModule(ntorch.nn.Module):

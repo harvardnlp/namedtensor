@@ -51,7 +51,9 @@ class _Loss:
             input = input.transpose(*self._input_order).contiguous()
             return input.reduce2(target, super(_Loss, self).forward, reduced)
         else:
-            assert "_reduced" in dir(self), "Call 'spec' with target dimension."
+            assert "_reduced" in dir(
+                self
+            ), "Call 'spec' with target dimension."
             return input.reduce2(
                 target, super(_Loss, self).forward, self._reduced
             )
@@ -206,8 +208,7 @@ class _RNN:
         else:
             state_value = state.values
 
-        output, state = super(_RNN, self).forward(input.values,
-                                                  state_value)
+        output, state = super(_RNN, self).forward(input.values, state_value)
         if isinstance(state, tuple):
             state = tuple((s.transpose(0, 1) for s in state))
         else:
@@ -221,6 +222,7 @@ class _RNN:
         else:
             state_ret = input._new(state, updates=updates2)
         return input._new(output, updates=self._output_update), state_ret
+
 
 class RNN(_RNN, nn.RNN):
     def spec(self, dim_in, dim_seq_len, name_out=None, dim_layers="layers"):
