@@ -311,6 +311,7 @@ class NamedTensor(NamedTensorBase):
         "cosh",
         "cpu",
         "cuda",
+        "detach",
         "double",
         "exp",
         "expm1",
@@ -360,7 +361,6 @@ class NamedTensor(NamedTensorBase):
         "any",
         "backward",
         "numpy",
-        "detach",
         "item",
         "type",
     }
