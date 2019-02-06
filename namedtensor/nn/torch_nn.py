@@ -201,26 +201,29 @@ class _RNN:
     def __call__(self, input, state=None):
         input = input.transpose(*self._input_order).contiguous()
 
-        if state is None:
-            state_value = None
-        elif isinstance(state, tuple):
-            state_value = tuple((s.values.transpose(0, 1) for s in state))
-        else:
-            state_value = state.values
+        def run(v, fn):
+            if v is None:
+                return None
+            elif isinstance(v, tuple):
+                return tuple((fn(s) for s in v))
+            else:
+                return fn(v)
 
+
+
+        # For some reason, even with batch_first pytorch returns
+        # the state with batch second. Need to transpose it.
+        state_value = run(state, lambda x: x.values.transpose(0, 1))
         output, state = super(_RNN, self).forward(input.values, state_value)
-        if isinstance(state, tuple):
-            state = tuple((s.transpose(0, 1) for s in state))
-        else:
-            state = state.transpose(0, 1)
+        state = run(state, lambda x: x.transpose(0, 1))
+
         updates = self._output_update
         updates2 = dict(updates)
         updates2[self._input_order[0]] = self._layer_name
 
-        if isinstance(state, tuple):
-            state_ret = tuple((input._new(s, updates=updates2) for s in state))
-        else:
-            state_ret = input._new(state, updates=updates2)
+        # For some reason, even with batch_first pytorch returns
+        # the state with batch second.  Need to transpose it.
+        state_ret = run(state, lambda x: input._new(x, updates=updates2))
         return input._new(output, updates=self._output_update), state_ret
 
 
