@@ -115,6 +115,8 @@ def test_gather():
     index = ntorch.tensor(torch.LongTensor([[0, 0], [1, 0]]), ("a", "c"))
     ntensor = ntorch.gather(t, "b", index, "c")
     assert (ntensor.values == base).all()
+    assert ntensor.shape == OrderedDict(
+        [("a", 2), ("c", 2)])
 
     x = ntorch.tensor(torch.rand(2, 5), ("c", "b"))
     y = ntorch.tensor(torch.rand(3, 5), ("a", "b"))
