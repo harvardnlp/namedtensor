@@ -87,7 +87,7 @@ class NTorch(type):
         b1 = index._force_order(index_order)
         dim = input._schema.get(indim)
         return input._new(
-            input.values.gather(dim, b1.values), updates={index_dim: index}
+            input.values.gather(dim, b1.values), updates={index_dim: dim}
         )
 
     @staticmethod
