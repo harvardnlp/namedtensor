@@ -209,8 +209,6 @@ class _RNN:
             else:
                 return fn(v)
 
-
-
         # For some reason, even with batch_first pytorch returns
         # the state with batch second. Need to transpose it.
         state_value = run(state, lambda x: x.values.transpose(0, 1))
