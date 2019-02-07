@@ -51,7 +51,9 @@ class _Loss:
             input = input.transpose(*self._input_order).contiguous()
             return input.reduce2(target, super(_Loss, self).forward, reduced)
         else:
-            assert "_reduced" in dir(self), "Call 'spec' with target dimension."
+            assert "_reduced" in dir(
+                self
+            ), "Call 'spec' with target dimension."
             return input.reduce2(
                 target, super(_Loss, self).forward, self._reduced
             )
@@ -193,3 +195,53 @@ class Embedding(_Augment, nn.Embedding):
 
 _augment = ["Embedding"]
 Embedding.__doc__ = nn.Embedding.__doc__
+
+
+class _RNN:
+    def __call__(self, input, state=None):
+        input = input.transpose(*self._input_order).contiguous()
+
+        def run(v, fn):
+            if v is None:
+                return None
+            elif isinstance(v, tuple):
+                return tuple((fn(s) for s in v))
+            else:
+                return fn(v)
+
+        # For some reason, even with batch_first pytorch returns
+        # the state with batch second. Need to transpose it.
+        state_value = run(state, lambda x: x.values.transpose(0, 1))
+        output, state = super(_RNN, self).forward(input.values, state_value)
+        state = run(state, lambda x: x.transpose(0, 1))
+
+        updates = self._output_update
+        updates2 = dict(updates)
+        updates2[self._input_order[0]] = self._layer_name
+
+        # For some reason, even with batch_first pytorch returns
+        # the state with batch second.  Need to transpose it.
+        state_ret = run(state, lambda x: input._new(x, updates=updates2))
+        return input._new(output, updates=self._output_update), state_ret
+
+
+class RNN(_RNN, nn.RNN):
+    def spec(self, dim_in, dim_seq_len, name_out=None, dim_layers="layers"):
+        self._layer_name = dim_layers
+        self.batch_first = True
+        self._spec = True
+        self._input_order = (dim_seq_len, dim_in)
+        self._name_out = name_out if name_out else dim_in
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+
+class LSTM(_RNN, nn.LSTM):
+    def spec(self, dim_in, dim_seq_len, name_out=None, dim_layers="layers"):
+        self._layer_name = dim_layers
+        self.batch_first = True
+        self._spec = True
+        self._input_order = (dim_seq_len, dim_in)
+        self._name_out = name_out if name_out else dim_in
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self

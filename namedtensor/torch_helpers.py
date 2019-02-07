@@ -175,7 +175,7 @@ class NamedTensor(NamedTensorBase):
         return self.sub(b)
 
     def __rsub__(self, b):
-        return - self.sub(b)
+        return -self.sub(b)
 
     def __mul__(self, b):
         return self.mul(b)
@@ -342,10 +342,7 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_dim = {
-        "cumprod",
-        "cumsum",
-    }
+    _noshift_dim = {"cumprod", "cumsum"}
 
     # Return a non-tensor info object
     _info = {
