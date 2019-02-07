@@ -322,7 +322,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -489,10 +489,7 @@
         <span class="s2">&quot;trunc&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="n">_noshift_dim</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;cumprod&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cumsum&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="n">_noshift_dim</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cumprod&quot;</span><span class="p">,</span> <span class="s2">&quot;cumsum&quot;</span><span class="p">}</span>
 
     <span class="c1"># Return a non-tensor info object</span>
     <span class="n">_info</span> <span class="o">=</span> <span class="p">{</span>
