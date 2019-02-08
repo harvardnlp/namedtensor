@@ -57,8 +57,8 @@ class NamedTensor(NamedTensorBase):
         if isinstance(index, dict):
             cur = self
             for k, v in index.items():
-                if isinstance(v, tuple):
-                    cur = cur.narrow(k, v[0], v[1] - v[0])
+                if isinstance(v, slice):
+                    cur = cur.narrow(k, v.end, v.end - v.start)
                 elif isinstance(v, NamedTensor):
                     cur = cur.index_select(k, v)
                 else:
@@ -81,8 +81,8 @@ class NamedTensor(NamedTensorBase):
         if isinstance(index, dict):
             cur = self
             for k, v in index.items():
-                if isinstance(v, tuple):
-                    cur = cur.narrow(k, v[0], v[1] - v[0])
+                if isinstance(v, slice):
+                    cur = cur.narrow(k, v.start, v.end - v.start)
                 elif isinstance(v, NamedTensor):
                     assert len(index) == 1
                     if copy:
