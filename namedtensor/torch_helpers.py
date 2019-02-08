@@ -1,10 +1,9 @@
 import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 from .utils import make_tuple
-import torch
+
 
 class NamedTensor(NamedTensorBase):
-
     def _index_base(self, dim, index):
         name = dim
         new_names = []
@@ -32,19 +31,25 @@ class NamedTensor(NamedTensorBase):
     def index_fill_(self, dim, index, val):
         "Index into dimension names with the `index` named tensors."
         self._tensor.index_fill_(
-            self._schema.get(dim), index._tensor.view(-1), val)
+            self._schema.get(dim), index._tensor.view(-1), val
+        )
         return self
 
     def index_copy_(self, dim, index, source):
         "Index into dimension names with the `index` named tensors."
         order = source._mask_broadcast_order(index)
         source = source._force_order(order)
-        print(self.values.shape, index.values.shape, self._schema.get(dim), index.values,
-              source.values
+        print(
+            self.values.shape,
+            index.values.shape,
+            self._schema.get(dim),
+            index.values,
+            source.values,
         )
 
         self.values.index_copy_(
-            self._schema.get(dim), index.values, source.values)
+            self._schema.get(dim), index.values, source.values
+        )
 
         return self
 
@@ -53,7 +58,7 @@ class NamedTensor(NamedTensorBase):
             cur = self
             for k, v in index.items():
                 if isinstance(v, tuple):
-                    cur = cur.narrow(k, v[0], v[1]-v[0])
+                    cur = cur.narrow(k, v[0], v[1] - v[0])
                 elif isinstance(v, NamedTensor):
                     cur = cur.index_select(k, v)
                 else:
@@ -101,7 +106,6 @@ class NamedTensor(NamedTensorBase):
         else:
             raise RuntimeError("Index must be dict or namedtensor.")
         return self
-
 
     def copy_(self, other):
         order = other._mask_broadcast_order(self)
@@ -270,7 +274,7 @@ class NamedTensor(NamedTensorBase):
         return self.sub(b)
 
     def __rsub__(self, b):
-        return - self.sub(b)
+        return -self.sub(b)
 
     def __mul__(self, b):
         return self.mul(b)
@@ -437,10 +441,7 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_dim = {
-        "cumprod",
-        "cumsum",
-    }
+    _noshift_dim = {"cumprod", "cumsum"}
 
     # Return a non-tensor info object
     _info = {

@@ -115,8 +115,7 @@ def test_gather():
     index = ntorch.tensor(torch.LongTensor([[0, 0], [1, 0]]), ("a", "c"))
     ntensor = ntorch.gather(t, "b", index, "c")
     assert (ntensor.values == base).all()
-    assert ntensor.shape == OrderedDict(
-        [("a", 2), ("c", 2)])
+    assert ntensor.shape == OrderedDict([("a", 2), ("c", 2)])
 
     x = ntorch.tensor(torch.rand(2, 5), ("c", "b"))
     y = ntorch.tensor(torch.rand(3, 5), ("a", "b"))
@@ -397,29 +396,29 @@ def test_indexing():
     base1 = base[{"alpha": 2}]
     assert base1.shape == OrderedDict([("beta", 2), ("gamma", 50)])
 
-
     base1 = base[{"beta": 0}]
     assert base1.shape == OrderedDict([("alpha", 10), ("gamma", 50)])
 
     base1 = base[{"alpha": (2, 5)}]
-    assert base1.shape == OrderedDict([("alpha", 3), ("beta", 2), ("gamma", 50)])
+    assert base1.shape == OrderedDict(
+        [("alpha", 3), ("beta", 2), ("gamma", 50)]
+    )
 
 
 def test_index_set():
 
     base = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
-    new = ntorch.randn(2, 50, names=( "beta", "gamma"))
+    new = ntorch.randn(2, 50, names=("beta", "gamma"))
 
     base[{"alpha": 2}] = new
 
-    new = ntorch.randn(3, 2, 50, names=( "alpha", "beta", "gamma"))
+    new = ntorch.randn(3, 2, 50, names=("alpha", "beta", "gamma"))
     base[{"alpha": (0, 3)}] = new
 
 
 def test_tensor_mask():
     base = ntorch.zeros(10, 2, 50, names=("alpha", "beta", "gamma"))
     base[{"alpha": (2, 5), "gamma": (4, 6)}] = 1
-
 
     mask = base > 0.5
     base1 = base[mask]
@@ -431,29 +430,32 @@ def test_tensor_mask():
 
 def test_index_tensor():
     base = ntorch.zeros(10, 2, 50, names=("alpha", "beta", "gamma"))
-    indices = ntorch.tensor([1,2,3,4], names=("indices"))
+    indices = ntorch.tensor([1, 2, 3, 4], names=("indices"))
     base1 = base[{"gamma": indices}]
-    assert base1.shape == OrderedDict([("alpha", 10), ("beta", 2), ("indices", 4)])
+    assert base1.shape == OrderedDict(
+        [("alpha", 10), ("beta", 2), ("indices", 4)]
+    )
 
-    indices = ntorch.tensor([1,2,3,4], names=("indices"))
+    indices = ntorch.tensor([1, 2, 3, 4], names=("indices"))
     base1 = base[{"alpha": 1, "gamma": indices}]
     assert base1.shape == OrderedDict([("beta", 2), ("indices", 4)])
 
-    indices = ntorch.tensor([[1,2,3],[1,2,3]] , names=("d", "indices"))
+    indices = ntorch.tensor([[1, 2, 3], [1, 2, 3]], names=("d", "indices"))
     base1 = base[{"gamma": indices}]
-    assert base1.shape == OrderedDict([("alpha", 10), ("beta", 2),
-                                       ("d", 2), ("indices", 3)])
+    assert base1.shape == OrderedDict(
+        [("alpha", 10), ("beta", 2), ("d", 2), ("indices", 3)]
+    )
+
 
 def test_setindex_tensor():
     base = ntorch.zeros(10, 2, 50, names=("alpha", "beta", "gamma")).float()
-    indices = ntorch.tensor([1,2,3,4], names=("indices")).long()
-    vals = ntorch.tensor([52,23.0,42.9,4.2], names=("indices")).float()
+    indices = ntorch.tensor([1, 2, 3, 4], names=("indices")).long()
+    vals = ntorch.tensor([52, 23.0, 42.9, 4.2], names=("indices")).float()
     b = base[{"alpha": 1, "beta": 1}]
     b[{"gamma": indices}] = vals
     assert base[{"alpha": 1, "beta": 1, "gamma": 1}].values == 52
 
     base[{"gamma": indices}] = 2
-
 
     # mask = base > 0.5
     # base1 = base[mask]

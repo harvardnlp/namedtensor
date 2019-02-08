@@ -97,7 +97,6 @@ class NTorch(type):
         b1 = mask._force_order(order)
         return NamedTensor(a1.values.masked_select(b1.values), name)
 
-
     @staticmethod
     def masked_scatter_(input, mask, source):
         order = mask._mask_broadcast_order(input)
@@ -105,14 +104,12 @@ class NTorch(type):
         input.values.masked_scatter_(b1.values, source.values)
         return input
 
-
     @staticmethod
     def masked_fill_(input, mask, value):
         order = mask._mask_broadcast_order(input)
         b1 = mask._force_order(order)
         input.values.masked_fill_(b1.values, value)
         return input
-
 
     @staticmethod
     def nonzero(tensor, names=("elements", "inputdims")):

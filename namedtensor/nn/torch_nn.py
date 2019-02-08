@@ -51,7 +51,9 @@ class _Loss:
             input = input.transpose(*self._input_order).contiguous()
             return input.reduce2(target, super(_Loss, self).forward, reduced)
         else:
-            assert "_reduced" in dir(self), "Call 'spec' with target dimension."
+            assert "_reduced" in dir(
+                self
+            ), "Call 'spec' with target dimension."
             return input.reduce2(
                 target, super(_Loss, self).forward, self._reduced
             )
