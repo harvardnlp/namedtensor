@@ -37,13 +37,16 @@ x = ntorch.exp(x)
 
 ### Named Indexing
 
-Indexing operation now work by name as opposed to absolute position. 
+Indexing and masking operation work by name as opposed to absolute position. 
 
-```
-x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
+```python
 first_batch = x[{"batch": 1}]
 three_examples = x[{"batch": slice(1, 4)}]
 masked = x[ x > 0.5 ]
+
+Advanced indexing by named tensors.
+
+```python
 select = ntorch.tensor([1, 4, 5], names=("rows",))
 y = x[{"h": select}] 
 # y shape ("batch", "rows", "w")
@@ -67,7 +70,7 @@ There is no need to ever have unsqueeze since broadcasting is done by name overl
 Similar notation can be used for setting values.
 
 
-### Dim replacements:
+### All methods take named args
 
 Any function with a `dim` argument now can be accessed based on the
 dimension name.
