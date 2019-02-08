@@ -42,7 +42,7 @@ Indexing operation now work by name as opposed to absolute position.
 ```
 x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
 first_batch = x[{"batch": 1}]
-three_examples = x[{"batch": (1, 4)}]
+three_examples = x[{"batch": slice(1, 4)}]
 masked = x[ x > 0.5 ]
 select = ntorch.tensor([1, 4, 5], names=("rows",))
 y = x[{"h": select}] 
