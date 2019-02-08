@@ -399,7 +399,7 @@ def test_indexing():
     base1 = base[{"beta": 0}]
     assert base1.shape == OrderedDict([("alpha", 10), ("gamma", 50)])
 
-    base1 = base[{"alpha": (2, 5)}]
+    base1 = base[{"alpha": slice(2, 5)}]
     assert base1.shape == OrderedDict(
         [("alpha", 3), ("beta", 2), ("gamma", 50)]
     )
@@ -413,12 +413,12 @@ def test_index_set():
     base[{"alpha": 2}] = new
 
     new = ntorch.randn(3, 2, 50, names=("alpha", "beta", "gamma"))
-    base[{"alpha": (0, 3)}] = new
+    base[{"alpha": slice(0, 3)}] = new
 
 
 def test_tensor_mask():
     base = ntorch.zeros(10, 2, 50, names=("alpha", "beta", "gamma"))
-    base[{"alpha": (2, 5), "gamma": (4, 6)}] = 1
+    base[{"alpha": slice(2, 5), "gamma": slice(4, 6)}] = 1
 
     mask = base > 0.5
     base1 = base[mask]
