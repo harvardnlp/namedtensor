@@ -35,6 +35,20 @@ x = x.float()
 x = ntorch.exp(x)
 ```
 
+### Named Indexing
+
+Indexing operation now work by name as opposed to absolute position. 
+
+```
+x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
+first_batch = x[{"batch": 1}]
+three_examples = x[{"batch": (1, 4)}]
+masked = x[ x > 0.5 ]
+select = ntorch.tensor([1, 4, 5], names=("rows",))
+y = x[{"h": select}] 
+# y shape ("batch", "rows", "w")
+```
+
 ### No view or unsqueeze
 
 View, tranpose, and friends are deprecated in favor of named
@@ -49,20 +63,6 @@ x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
 There is no need to ever have unsqueeze since broadcasting is done by name overlap. 
-
-## Named Indexing
-
-Indexing operation now work by name as opposed to absolute position. 
-
-```
-x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
-first_batch = x[{"batch": 1}]
-three_examples = x[{"batch": (1, 4)}]
-mask = x[ x > 0.5 ]
-select = ntorch.tensor([1, 4, 5], names=("rows",))
-y = x[{"h": select}] 
-# y shape ("batch", "rows", "w")
-```
 
 Similar notation can be used for setting values.
 
