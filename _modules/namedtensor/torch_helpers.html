@@ -151,8 +151,7 @@
 
 
 <div class="viewcode-block" id="NamedTensor"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor">[docs]</a><span class="k">class</span> <span class="nc">NamedTensor</span><span class="p">(</span><span class="n">NamedTensorBase</span><span class="p">):</span>
-<div class="viewcode-block" id="NamedTensor.index_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_select">[docs]</a>    <span class="k">def</span> <span class="nf">index_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="s2">&quot;Index into dimension names with the `index` named tensors.&quot;</span>
+    <span class="k">def</span> <span class="nf">_index_base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">dim</span>
         <span class="n">new_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">sizes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -164,12 +163,102 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
                 <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">new_names</span><span class="p">,</span> <span class="n">sizes</span>
+
+<div class="viewcode-block" id="NamedTensor.index_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_select">[docs]</a>    <span class="k">def</span> <span class="nf">index_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="s2">&quot;Index into dimension names with the `index` named tensors.&quot;</span>
+        <span class="n">new_names</span><span class="p">,</span> <span class="n">sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_base</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">NamedTensor</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">index</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span> <span class="n">index</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">sizes</span><span class="p">),</span>
             <span class="n">new_names</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="NamedTensor.index_fill_"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_fill_">[docs]</a>    <span class="k">def</span> <span class="nf">index_fill_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="s2">&quot;Index into dimension names with the `index` named tensors.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">index_fill_</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span> <span class="n">index</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">val</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="NamedTensor.index_copy_"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.index_copy_">[docs]</a>    <span class="k">def</span> <span class="nf">index_copy_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="s2">&quot;Index into dimension names with the `index` named tensors.&quot;</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_mask_broadcast_order</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_force_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">index_copy_</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span> <span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">values</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
+                    <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cur</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Masked namedtensor must be long tensor.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Index must be dict or namedtensor.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+                        <span class="n">cur</span><span class="o">.</span><span class="n">index_copy_</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">cur</span><span class="o">.</span><span class="n">index_fill_</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked_scatter_</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Masked namedtensor must be long tensor.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Index must be dict or namedtensor.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">copy_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_mask_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_force_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="NamedTensor.gather"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.gather">[docs]</a>    <span class="k">def</span> <span class="nf">gather</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_dim</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -202,11 +291,21 @@
 
         <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NamedTensor.masked_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.masked_select">[docs]</a>    <span class="k">def</span> <span class="nf">masked_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensor.masked_select"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.masked_select">[docs]</a>    <span class="k">def</span> <span class="nf">masked_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;on&quot;</span><span class="p">):</span>
         <span class="s2">&quot;Applies `mask` and returns a 1D tensor with name `name`&quot;</span>
         <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
 
         <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">masked_fill_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
+
+        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">masked_scatter_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.torch_base</span> <span class="k">import</span> <span class="n">ntorch</span>
+
+        <span class="k">return</span> <span class="n">ntorch</span><span class="o">.</span><span class="n">masked_fill_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NamedTensor.nonzero"><a class="viewcode-back" href="../../modules.html#namedtensor.NamedTensor.nonzero">[docs]</a>    <span class="k">def</span> <span class="nf">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="s2">&quot;inputdims&quot;</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot;</span>
