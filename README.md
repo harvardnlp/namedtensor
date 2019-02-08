@@ -25,7 +25,6 @@ x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
 x = ntorch.ones(10, 10, 20, names=("batch", "h", "w"))
 ```
 
-
 ### Standard functions
 
 All functions that keep dimensionality work in the same way.
@@ -36,11 +35,10 @@ x = x.float()
 x = ntorch.exp(x)
 ```
 
-### View and Tranposition
+### No view or unsqueeze
 
 View, tranpose, and friends are deprecated in favor of named
 access and movement.
-
 
 ```python
 x = x.stack(("w", "h"), "stackdim")
@@ -50,15 +48,24 @@ x = x.stack(("w", "h"), "stackdim")
 x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
-Transposition (discouraged in the API):
+There is no need to ever have unsqueeze since broadcasting is done by name overlap. 
 
-```python
-x = x.transpose("batch", "w", "h")
+## Named Indexing
 
-# or early dim stay in place
+Indexing operation now work by name as opposed to absolute position. 
 
-x = x.transpose("w", "h")
 ```
+x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
+first_batch = x[{"batch": 1}]
+three_examples = x[{"batch": (1, 4)}]
+mask = x[ x > 0.5 ]
+select = ntorch.tensor([1, 4, 5], names=("rows",))
+y = x[{"h": select}] 
+# y shape ("batch", "rows", "w")
+```
+
+Similar notation can be used for setting values.
+
 
 ### Dim replacements:
 
@@ -99,12 +106,10 @@ y = ntorch.randn(20, 30, names=("vocab", "embsize"))
 y.index_select("vocab", x)
 ```
 
-
 ## NN Modules
 
-This api part is a work in progress. But many units are implemented to
-work with named tensor. They each have a required additional method `spec`
-that specifies the input and output dimensions of the object. 
+NN units no longer take ordered tensors. They now have a required additional method `spec`
+that lets the user set the the input and output dimensions of the object. 
 
 Examples
 
