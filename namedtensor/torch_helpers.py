@@ -1,11 +1,11 @@
 import torch.nn.functional as F
 from .core import NamedTensorBase, assert_match
 from .utils import make_tuple
-
+import torch
 
 class NamedTensor(NamedTensorBase):
-    def index_select(self, dim, index):
-        "Index into dimension names with the `index` named tensors."
+
+    def _index_base(self, dim, index):
         name = dim
         new_names = []
         sizes = []
@@ -17,12 +17,97 @@ class NamedTensor(NamedTensorBase):
             else:
                 new_names.append(n)
                 sizes.append(self.size(n))
+        return new_names, sizes
+
+    def index_select(self, dim, index):
+        "Index into dimension names with the `index` named tensors."
+        new_names, sizes = self._index_base(dim, index)
         return NamedTensor(
             self._tensor.index_select(
-                self._schema.get(name), index._tensor.view(-1)
+                self._schema.get(dim), index._tensor.view(-1)
             ).view(*sizes),
             new_names,
         )
+
+    def index_fill_(self, dim, index, val):
+        "Index into dimension names with the `index` named tensors."
+        self._tensor.index_fill_(
+            self._schema.get(dim), index._tensor.view(-1), val)
+        return self
+
+    def index_copy_(self, dim, index, source):
+        "Index into dimension names with the `index` named tensors."
+        order = source._mask_broadcast_order(index)
+        source = source._force_order(order)
+        print(self.values.shape, index.values.shape, self._schema.get(dim), index.values,
+              source.values
+        )
+
+        self.values.index_copy_(
+            self._schema.get(dim), index.values, source.values)
+
+        return self
+
+    def __getitem__(self, index):
+        if isinstance(index, dict):
+            cur = self
+            for k, v in index.items():
+                if isinstance(v, tuple):
+                    cur = cur.narrow(k, v[0], v[1]-v[0])
+                elif isinstance(v, NamedTensor):
+                    cur = cur.index_select(k, v)
+                else:
+                    cur = cur.get(k, v)
+            return cur
+        elif isinstance(index, NamedTensor):
+            if index.type() == "torch.ByteTensor":
+                return self.masked_select(index)
+            raise RuntimeError("Masked namedtensor must be long tensor.")
+        else:
+            raise RuntimeError("Index must be dict or namedtensor.")
+
+    def __setitem__(self, index, val):
+
+        if isinstance(val, NamedTensor):
+            copy = True
+        else:
+            copy = False
+
+        if isinstance(index, dict):
+            cur = self
+            for k, v in index.items():
+                if isinstance(v, tuple):
+                    cur = cur.narrow(k, v[0], v[1] - v[0])
+                elif isinstance(v, NamedTensor):
+                    assert len(index) == 1
+                    if copy:
+                        cur.index_copy_(k, v, val)
+                    else:
+                        cur.index_fill_(k, v, val)
+                    return self
+                else:
+                    cur = cur.get(k, v)
+            if copy:
+                cur.copy_(val)
+            else:
+                cur.fill_(val)
+        elif isinstance(index, NamedTensor):
+            if index.type() == "torch.ByteTensor":
+                if copy:
+                    return self.masked_scatter_(index, val)
+                else:
+                    return self.masked_fill_(index, val)
+            raise RuntimeError("Masked namedtensor must be long tensor.")
+        else:
+            raise RuntimeError("Index must be dict or namedtensor.")
+        return self
+
+
+    def copy_(self, other):
+        order = other._mask_broadcast_order(self)
+        other = other._force_order(order)
+        self.values.copy_(other.values)
+        return self
 
     def gather(self, dim, index, index_dim):
         """
@@ -55,11 +140,21 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.narrow(self, name, start, end)
 
-    def masked_select(self, mask, name):
+    def masked_select(self, mask, name="on"):
         "Applies `mask` and returns a 1D tensor with name `name`"
         from .torch_base import ntorch
 
         return ntorch.masked_select(self, mask, name)
+
+    def masked_fill_(self, mask, val):
+        from .torch_base import ntorch
+
+        return ntorch.masked_fill_(self, mask, val)
+
+    def masked_scatter_(self, mask, source):
+        from .torch_base import ntorch
+
+        return ntorch.masked_fill_(self, mask, source)
 
     def nonzero(self, names=("elements", "inputdims")):
         """
