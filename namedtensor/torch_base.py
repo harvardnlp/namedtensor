@@ -61,7 +61,9 @@ class NTorch(type):
         old_names = tensors[0]._schema._names
         for i in range(1, len(tensors)):
             if tensors[i]._schema._names != old_names:
-                if set(tensors[i]._schema._names) != set(tensors[0]._schema._names):
+                if set(tensors[i]._schema._names) != set(
+                    tensors[0]._schema._names
+                ):
                     raise RuntimeError(
                         "Tensors to stack don't have matching dimension names"
                     )
@@ -77,7 +79,9 @@ class NTorch(type):
         dim = tensors[0]._schema.get(dim)
         for i in range(1, len(tensors)):
             if tensors[i]._schema._names != tensors[0]._schema._names:
-                if set(tensors[i]._schema._names) != set(tensors[0]._schema._names):
+                if set(tensors[i]._schema._names) != set(
+                    tensors[0]._schema._names
+                ):
                     raise RuntimeError(
                         "Tensors to stack don't have matching dimension names"
                     )

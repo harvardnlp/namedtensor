@@ -130,12 +130,24 @@ def test_gather():
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
+def test_cat():
+    x = ntorch.zeros(20, 10, names=("a", "b"))
+    y = ntorch.ones(30, 20, names=("b", "a"))
+    assert ntorch.cat([x, y], dim="b").shape == OrderedDict(
+        [("a", 20), ("b", 40)]
+    )
+
+
 def test_stack():
-    tensor_a = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
-    tensor_b = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
+    tensor_a = ntorch.tensor(
+        torch.Tensor([[1, 2], [3, 4], [5, 6]]), ("dim1", "dim2")
+    )
+    tensor_b = ntorch.tensor(
+        torch.Tensor([[1, 2, 3], [4, 5, 6]]), ("dim2", "dim1")
+    )
     tensor_c = ntorch.stack([tensor_a, tensor_b], "dim3")
     assert tensor_c.shape == OrderedDict(
-        [("dim3", 2), ("dim1", 2), ("dim2", 2)]
+        [("dim3", 2), ("dim1", 3), ("dim2", 2)]
     )
 
 
