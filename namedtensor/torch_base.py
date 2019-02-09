@@ -59,11 +59,13 @@ class NTorch(type):
     @staticmethod
     def stack(tensors, name):
         old_names = tensors[0]._schema._names
-        for t in tensors[1:]:
-            if t._schema._names != old_names:
-                raise RuntimeError(
-                    "Tensors to stack don't have matching dimension names"
-                )
+        for i in range(1, len(tensors)):
+            if tensors[i]._schema._names != old_names:
+                if set(tensors[i]._schema._names) != set(tensors[0]._schema._names):
+                    raise RuntimeError(
+                        "Tensors to stack don't have matching dimension names"
+                    )
+                tensors[i] = tensors[i]._force_order(tensors[0]._schema._names)
         to_stack = [tensor.values for tensor in tensors]
         old_names = list(old_names)
         old_names.insert(0, name)
@@ -71,10 +73,15 @@ class NTorch(type):
 
     @staticmethod
     def cat(tensors, dim):
-        "Concate a list of named tensors along dim."
+        "Concate a list of named tensors along dim"
         dim = tensors[0]._schema.get(dim)
-        for t in tensors[1:]:
-            assert t._schema._names == tensors[0]._schema._names
+        for i in range(1, len(tensors)):
+            if tensors[i]._schema._names != tensors[0]._schema._names:
+                if set(tensors[i]._schema._names) != set(tensors[0]._schema._names):
+                    raise RuntimeError(
+                        "Tensors to stack don't have matching dimension names"
+                    )
+                tensors[i] = tensors[i]._force_order(tensors[0]._schema._names)
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
