@@ -211,9 +211,9 @@ class _RNN:
 
         # For some reason, even with batch_first pytorch returns
         # the state with batch second. Need to transpose it.
-        state_value = run(state, lambda x: x.values.transpose(0, 1))
+        state_value = run(state, lambda x: x.values.transpose(0, 1).contiguous())
         output, state = super(_RNN, self).forward(input.values, state_value)
-        state = run(state, lambda x: x.transpose(0, 1))
+        state = run(state, lambda x: x.transpose(0, 1).contiguous())
 
         updates = self._output_update
         updates2 = dict(updates)
