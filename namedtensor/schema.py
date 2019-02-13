@@ -7,6 +7,7 @@ class _Schema:
 
     def __init__(self, names, mask=0):
         self._names = make_tuple(names)
+
         s = set()
         for n in self._names:
             assert n is not None

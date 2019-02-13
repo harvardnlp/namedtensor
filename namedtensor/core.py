@@ -15,7 +15,7 @@ def assert_match(*tensors):
                 failure = failure or sizes[k] != v
             else:
                 sizes[k] = v
-    assert not failure, " ".join([str(t._sizes) for t in tensors])
+    assert not failure, "Overlapping dim names must match: "+ " ".join([str(t.shape) for t in tensors])
 
 
 class NamedTensorBase:
@@ -32,7 +32,7 @@ class NamedTensorBase:
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
         assert len(self._tensor.shape) == len(self._schema._names), (
-            "Tensor has %d dim, but only %d names"
+            "Tensor has %d dim, but %d names"
             % (len(self._tensor.shape), len(self._schema._names))
         )
 
