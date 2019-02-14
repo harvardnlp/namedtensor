@@ -57,6 +57,12 @@ class NTorch(type):
         )
 
     @staticmethod
+    def topk(tensor, dim, k, largest=True, sorted=True):
+        old_names = tensor._schema._names
+        top_k, arg_top_k = tensor._tensor.topk(k, dim = tensor._schema.get(dim), largest = largest, sorted = True)
+        return ntorch.tensor(top_k, old_names), ntorch.tensor(arg_top_k, old_names)
+
+    @staticmethod
     def stack(tensors, name):
         old_names = tensors[0]._schema._names
         for i in range(1, len(tensors)):
