@@ -518,17 +518,17 @@ def test_indexing_basic():
         [("alpha", 3), ("beta", 2), ("gamma", 50)]
     )
 
+
 def test_topk():
     k = 5
     base_torch = torch.rand([10, 10])
-    dim_names = ("dim1","dim2")
-    base = (
-        ntorch.tensor(base_torch, names=dim_names)
-        .float()
-        .topk("dim2", k)
+    dim_names = ("dim1", "dim2")
+    base = ntorch.tensor(base_torch, names=dim_names).float().topk("dim2", k)
+    topk, argtopk = base_torch.topk(k, dim=1)
+    expected = (
+        ntorch.tensor(topk, names=dim_names),
+        ntorch.tensor(argtopk, names=dim_names),
     )
-    topk, argtopk = base_torch.topk(k, dim = 1)
-    expected = ntorch.tensor(topk, names = dim_names), ntorch.tensor(argtopk, names = dim_names)
     assert_match(base[0], expected[0])
     assert_match(base[1], expected[1])
 
