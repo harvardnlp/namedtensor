@@ -375,7 +375,17 @@ def test_log_softmax():
     expected = ntorch.tensor(y, names=("dim",))
     assert_match(base, expected)
 
-
+def test_topk():
+    k = 5
+    base_torch = torch.rand([10, 10])
+    base = (
+        ntorch.tensor(base_torch, names=("dim1","dim2"))
+        .float()
+        .topk("dim2", k)
+    )
+    expected = base_torch.topk(k, dim = 1))
+    assert_match(base, expected)
+    
 # def test_scalar():
 #     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
 #     base2 = base1 + 10
