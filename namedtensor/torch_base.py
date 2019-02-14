@@ -60,7 +60,7 @@ class NTorch(type):
     def topk(tensor, dim, k, largest=True, sorted=True):
         old_names = tensor._schema._names
         top_k, arg_top_k = tensor._tensor.topk(
-            k, dim=tensor._schema.get(dim), largest=largest, sorted=True
+            k, dim=tensor._schema.get(dim), largest=largest, sorted=sorted
         )
         return (
             ntorch.tensor(top_k, old_names),
