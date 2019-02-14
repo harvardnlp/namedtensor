@@ -1,9 +1,8 @@
-from . import assert_match, ntorch
+from . import ntorch
 from hypothesis.strategies import (
     text,
     composite,
     sampled_from,
-    data,
     lists,
     permutations,
     integers,
@@ -11,6 +10,7 @@ from hypothesis.strategies import (
 )
 from hypothesis.extra.numpy import arrays, array_shapes
 import numpy as np
+
 
 # Setup Hypothesis helpers
 def named_tensor(dtype=np.float, shape=array_shapes(2, 5, max_side=5)):

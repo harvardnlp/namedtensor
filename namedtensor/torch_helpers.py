@@ -19,7 +19,7 @@ class NamedTensor(NamedTensorBase):
         elif isinstance(index, NamedTensor):
             if index.type() == "torch.ByteTensor":
                 return self.masked_select(index)
-            raise RuntimeError("Masked namedtensor must be long tensor.")
+            raise RuntimeError("Masked namedtensor must be byte tensor.")
         else:
             raise RuntimeError("Index must be dict or namedtensor.")
 
@@ -54,7 +54,7 @@ class NamedTensor(NamedTensorBase):
                     return self.masked_scatter_(index, val)
                 else:
                     return self.masked_fill_(index, val)
-            raise RuntimeError("Masked namedtensor must be long tensor.")
+            raise RuntimeError("Masked namedtensor must be byte tensor.")
         else:
             raise RuntimeError("Index must be dict or namedtensor.")
         return self
@@ -65,6 +65,7 @@ class NamedTensor(NamedTensorBase):
     def _setter(self, other, method, vals=[]):
         order = other._mask_broadcast_order(self)
         other = other._force_order(order)
+
         args = [other.values] + vals
         getattr(self.values, method)(*args)
         return self

@@ -1,11 +1,26 @@
 from . import assert_match, ntorch
-import numpy as np
 import torch
 from collections import OrderedDict
 import pytest
 import torch.nn.functional as F
 from hypothesis import given
-from .strategies import *
+from .strategies import (
+    named_tensor,
+    broadcast_named_tensor,
+    mask_named_tensor,
+    dim,
+    dims,
+    name,
+    names,
+)
+from hypothesis.strategies import (
+    sampled_from,
+    lists,
+    data,
+    floats,
+    integers,
+    permutations,
+)
 
 
 ## HYPOTHESIS Tests
@@ -87,8 +102,6 @@ def test_sum(x):
     assert s.values == x.values.sum()
 
 
-
-
 @given(data(), named_tensor())
 def test_mask(data, x):
     mask = data.draw(mask_named_tensor(x))
@@ -123,7 +136,7 @@ def test_all_scalar_ops(data, x, y):
 @given(data(), named_tensor())
 def test_indexing(data, x):
     d = data.draw(dim(x))
-    i = data.draw(integers(min_value=0, max_value=x.shape[d]-1))
+    i = data.draw(integers(min_value=0, max_value=x.shape[d] - 1))
     x2 = x[{d: i}]
     assert set(x2.dims) == set(x.dims) - set([d])
 
@@ -149,14 +162,16 @@ def test_indexing(data, x):
 @given(data(), named_tensor())
 def test_tensor_indexing(data, x):
     d = data.draw(dim(x))
-    indices = data.draw(lists(integers(min_value=0, max_value=x.shape[d]-1), unique=True))
-    names = data.draw(names(x))
-    ind_vector = ntorch.tensor(indices, names=names)
-    x2 = x[ind_vector]
-    assert set(x2.dims) == set(x.dims) + set(names) - set([d])
+    indices = data.draw(
+        lists(integers(min_value=0, max_value=x.shape[d] - 1), unique=True)
+    )
+    n = data.draw(name(x))
+    ind_vector = ntorch.tensor(indices, names=n).long()
+    x2 = x[{d : ind_vector}]
+    assert set(x2.dims) == (set(x.dims) | set([n])) - set([d])
 
-    x[ind_vector] = 5
-    assert (x[ind_vector] == 5).all()
+    x[{d: ind_vector}] = 5
+    assert (x[{d: ind_vector}] == 5).all()
 
 
 @given(data(), named_tensor())
@@ -164,28 +179,30 @@ def test_tensor_mask(data, x):
     mask = data.draw(mask_named_tensor(x))
     x[mask] = 6
     x2 = x[mask]
-    assert x2.dim == ("on",)
-    i = data.draw(integers(min_value=0, max_value=x.shape["on"] - 1))
-    assert x2[{"on": i}] == 6
+    assert x2.dims == ("on",)
+
+
 
 @given(data(), named_tensor())
 def test_cat(data, x):
-    y = data.draw(broadcast_named_tensor(x))
-    for s in set(x.dim) & set(y.dim):
+    perm = data.draw(permutations(x.dims))
+    y = x.transpose(*perm)
+    for s in set(x.dims) & set(y.dims):
         c = ntorch.cat([x, y], dim=s)
+        c = ntorch.cat([x, c], dim=s)
+        c = ntorch.cat([c, x, y], dim=s)
+    print(c)
 
 
 @given(data(), named_tensor())
 def test_stack(data, x):
     perm = data.draw(permutations(x.dims))
-
-    def reorder(ls):
-            return [ls[perm[i]] for i in range(len(ls))]
-
-    y = ntorch.tensor(reorder(x.values), names=reorder(x.dims))
+    print(perm)
+    y = x.transpose(*perm)
     n = data.draw(name(x))
     z = ntorch.stack([x, y], n)
-    assert set(z.dim) == set(x.dim) | set([n])
+    assert set(z.dims) == set(x.dims) | set([n])
+
 
 @given(data(), named_tensor())
 def test_dot(data, x):
@@ -199,6 +216,7 @@ def test_dot(data, x):
 
 
 ## Old style tests
+
 
 def test_apply2():
     base = torch.zeros([10, 2, 50])
@@ -235,8 +253,6 @@ def test_gather():
         "c",
     )
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
-
-
 
 
 def test_unbind():
@@ -295,12 +311,12 @@ def test_multiple():
 #     assert ntensor3.vshape == base3.shape
 #     assert (np.abs(ntensor3._tensor - base3) < 1e-5).all()
 
-    # ntensora = ntensor.reduce("alpha", "mean")
-    # assert ntensora.named_shape == OrderedDict([("beta", 2),
-    #                                        ("gamma", 50)])
+# ntensora = ntensor.reduce("alpha", "mean")
+# assert ntensora.named_shape == OrderedDict([("beta", 2),
+#                                        ("gamma", 50)])
 
-    # ntensorb = ntensor.reduce("alpha gamma", "mean")
-    # assert ntensorb.named_shape == OrderedDict([("beta", 2)])
+# ntensorb = ntensor.reduce("alpha gamma", "mean")
+# assert ntensorb.named_shape == OrderedDict([("beta", 2)])
 
 
 # def test_lift():
@@ -504,15 +520,12 @@ def test_indexing_basic():
     )
 
 
-
 def test_index_set():
     base = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
     new = ntorch.randn(2, 50, names=("beta", "gamma"))
     base[{"alpha": 2}] = new
     new = ntorch.randn(3, 2, 50, names=("alpha", "beta", "gamma"))
     base[{"alpha": slice(0, 3)}] = new
-
-
 
 
 def test_index_tensor():
