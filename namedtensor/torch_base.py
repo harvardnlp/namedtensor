@@ -102,7 +102,7 @@ class NTorch(type):
         )
 
     @staticmethod
-    def masked_select(input, mask, name):
+    def masked_select(input, mask, name="on"):
         order = mask._mask_broadcast_order(input)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
@@ -110,17 +110,55 @@ class NTorch(type):
 
     @staticmethod
     def masked_scatter_(input, mask, source):
-        order = mask._mask_broadcast_order(input)
-        b1 = mask._force_order(order)
-        input.values.masked_scatter_(b1.values, source.values)
-        return input
+        return input._setter(mask, "masked_scatter_", [source])
 
     @staticmethod
     def masked_fill_(input, mask, value):
-        order = mask._mask_broadcast_order(input)
-        b1 = mask._force_order(order)
-        input.values.masked_fill_(b1.values, value)
-        return input
+        return input._setter(mask, "masked_fill_", [value])
+
+    @staticmethod
+    def _index_base(self, dim, index):
+        name = dim
+        new_names = []
+        sizes = []
+        for n in self._schema._names:
+            if n == name:
+                for n2 in index._schema._names:
+                    new_names.append(n2)
+                    sizes.append(index.size(n2))
+            else:
+                new_names.append(n)
+                sizes.append(self.size(n))
+        return new_names, sizes
+
+    @staticmethod
+    def index_select(self, dim, index):
+        "Index into dimension names with the `index` named tensors."
+        new_names, sizes = NTorch._index_base(self, dim, index)
+        return NamedTensor(
+            self._tensor.index_select(
+                self._schema.get(dim), index._tensor.view(-1)
+            ).view(*sizes),
+            new_names,
+        )
+
+    @staticmethod
+    def index_fill_(self, dim, index, val):
+        "Index into dimension names with the `index` named tensors."
+        self._tensor.index_fill_(
+            self._schema.get(dim), index._tensor.view(-1), val
+        )
+        return self
+
+    @staticmethod
+    def index_copy_(self, dim, index, source):
+        "Index into dimension names with the `index` named tensors."
+        order = source._mask_broadcast_order(index)
+        source = source._force_order(order)
+        self.values.index_copy_(
+            self._schema.get(dim), index.values, source.values
+        )
+        return self
 
     @staticmethod
     def nonzero(tensor, names=("elements", "inputdims")):

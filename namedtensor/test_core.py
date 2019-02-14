@@ -1,67 +1,220 @@
-from . import assert_match, ntorch, NamedTensor
-import numpy as np
+from . import assert_match, ntorch
 import torch
 from collections import OrderedDict
 import pytest
 import torch.nn.functional as F
+from hypothesis import given
+from .strategies import (
+    named_tensor,
+    broadcast_named_tensor,
+    mask_named_tensor,
+    dim,
+    dims,
+    name,
+    names,
+)
+from hypothesis.strategies import (
+    sampled_from,
+    lists,
+    data,
+    floats,
+    integers,
+    permutations,
+)
+
+
+## HYPOTHESIS Tests
+@given(data(), named_tensor())
+def test_stack_basic(data, x):
+    s = data.draw(dims(x))
+    n = data.draw(name(x))
+    x = x.stack(list(s), n)
+    assert n in x.dims
+    assert not (x.shape.keys() & s)
+
+
+@given(data(), named_tensor())
+def test_rename(data, x):
+    s = data.draw(dim(x))
+    n = data.draw(name(x))
+    x = x.rename(s, n)
+    assert n in x.dims
+    assert s not in x.dims
+
+
+@given(data(), named_tensor())
+def test_split(data, x):
+    s = data.draw(dim(x))
+    ns = list(data.draw(names(x)))
+    x2 = x.split(s, ns, **{n: 1 for n in ns[:-1]})
+    assert len(set(ns) & set(x2.dims)) == len(ns)
+    assert s not in x2.dims
+    assert torch.prod(torch.tensor([x2.shape[n] for n in ns])) == x.shape[s]
+
+
+@given(data(), named_tensor())
+def test_reduce(data, x):
+    ns = data.draw(dims(x))
+    method = data.draw(sampled_from(sorted(x._reduce)))
+
+    if method not in ["logsumexp"]:
+        y = getattr(x, method)()
+        print(y)
+        # assert y.values == getattr(x.values, method)()
+
+    x2 = getattr(x, method)(tuple(ns))
+    assert set(x2.dims) | set(ns) == set(x.dims)
+
+
+@given(data(), named_tensor())
+def test_binary_op(data, x):
+    y = data.draw(broadcast_named_tensor(x))
+    method = data.draw(sampled_from(sorted(x._binop)))
+    x2 = getattr(x, method)(y)
+    assert set(x2.dims) == set(x.dims) | set(y.dims)
+    x3 = getattr(y, method)(x)
+    assert set(x3.dims) == set(x.dims) | set(y.dims)
+
+
+@given(data(), named_tensor())
+def test_noshift(data, x):
+    method = data.draw(
+        sampled_from(sorted(x._noshift)).filter(lambda a: a not in {"cuda"})
+    )
+    x2 = getattr(x, method)()
+    assert set(x2.dims) == set(x.dims)
+
+
+@given(data(), named_tensor())
+def test_apply(data, x):
+    method = data.draw(
+        sampled_from(sorted(x._noshift_dim | x._noshift_nn_dim))
+    )
+    s = data.draw(dim(x))
+    x2 = getattr(x, method)(s)
+    assert x.shape == x2.shape
+
+
+@given(named_tensor())
+def test_sum(x):
+    s = x.sum()
+    print(x.shape)
+    assert s.values == x.values.sum()
+
+
+@given(data(), named_tensor())
+def test_mask(data, x):
+    mask = data.draw(mask_named_tensor(x))
+    x2 = x.masked_select(mask, "c")
+    x2 = x[mask]
+    print(x2)
 
 
 @pytest.mark.xfail
-def test_unique_names():
-    base = torch.zeros([10, 2])
-    assert ntorch.tensor(base, ("alpha", "beta", "alpha"))
+@given(data(), named_tensor())
+def test_maskfail(data, x):
+    mask = data.draw(broadcast_named_tensor(x))
+    x2 = x.masked_select(mask, "c")
+    x2 = x[mask]
+    print(x2)
 
 
-def make_tensors(sizes, names):
-    return [ntorch.randn(sizes, names=names)]
+@given(data(), named_tensor(), floats(allow_nan=False, allow_infinity=False))
+def test_all_scalar_ops(data, x, y):
+    x = x + y
+    x = x - y
+    x = x * y
+    x = x / y
+
+    x = y + x
+    x = y - x
+    x = y * x
+
+    x = -x
 
 
-def test_names():
-    base = torch.zeros([10, 2, 50])
-    assert ntorch.tensor(base, ("alpha", "beta", "gamma"))
+@given(data(), named_tensor())
+def test_indexing(data, x):
+    d = data.draw(dim(x))
+    i = data.draw(integers(min_value=0, max_value=x.shape[d] - 1))
+    x2 = x[{d: i}]
+    assert set(x2.dims) == set(x.dims) - set([d])
+
+    ds = data.draw(dims(x))
+    index = {}
+    for d in ds:
+        i = data.draw(integers(min_value=0, max_value=x.shape[d] - 1))
+        index[d] = i
+    x2 = x[index]
+    assert set(x2.dims) == set(x.dims) - set(ds)
+
+    ds = data.draw(dims(x))
+    index = {}
+    for d in ds:
+        i = data.draw(integers(min_value=0, max_value=x.shape[d] - 1))
+        j = data.draw(integers(min_value=i + 1, max_value=x.shape[d]))
+        index[d] = slice(i, j)
+    x2 = x[index]
+    assert set(x2.dims) == set(x.dims)
+    x[index] = 6
 
 
-@pytest.mark.xfail
-def test_old_nonzero_names():
-    base = torch.zeros([10, 2])
-    assert ntorch.tensor(base, ("elements_dim", "input_dims"))
+@given(data(), named_tensor())
+def test_tensor_indexing(data, x):
+    d = data.draw(dim(x))
+    indices = data.draw(
+        lists(integers(min_value=0, max_value=x.shape[d] - 1), unique=True)
+    )
+    n = data.draw(name(x))
+    ind_vector = ntorch.tensor(indices, names=n).long()
+    x2 = x[{d: ind_vector}]
+    assert set(x2.dims) == (set(x.dims) | set([n])) - set([d])
+
+    x[{d: ind_vector}] = 5
+    assert (x[{d: ind_vector}] == 5).all()
 
 
-def test_shift():
-    for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
-        # Split
-        ntensor = ntensor.split("alpha", ("delta", "epsilon"), delta=2)
-        assert ntensor.vshape == (2, 5, 2, 50)
-
-        # Merge
-        ntensor = ntensor.stack(("delta", "epsilon"), "alpha")
-        assert ntensor.vshape == (10, 2, 50)
-
-        # Transpose
-        ntensor = ntensor.transpose("beta", "alpha", "gamma")
-        assert ntensor.vshape == (2, 10, 50)
-
-        # Transpose
-        ntensor = ntensor.rename("beta", "beta2")
-        assert ntensor.shape == OrderedDict(
-            [("beta2", 2), ("alpha", 10), ("gamma", 50)]
-        )
+@given(data(), named_tensor())
+def test_tensor_mask(data, x):
+    mask = data.draw(mask_named_tensor(x))
+    x[mask] = 6
+    x2 = x[mask]
+    assert x2.dims == ("on",)
 
 
-def test_reduce():
-    for ntensor in make_tensors((10, 2, 50), ("alpha", "beta", "gamma")):
-        ntensora = ntensor.mean("alpha")
-        assert ntensora.shape == OrderedDict([("beta", 2), ("gamma", 50)])
+@given(data(), named_tensor())
+def test_cat(data, x):
+    perm = data.draw(permutations(x.dims))
+    y = x.transpose(*perm)
+    for s in set(x.dims) & set(y.dims):
+        c = ntorch.cat([x, y], dim=s)
+        c = ntorch.cat([x, c], dim=s)
+        c = ntorch.cat([c, x, y], dim=s)
+    print(c)
 
-        ntensorb = ntensor.sum(("alpha", "gamma"))
-        assert ntensorb.shape == OrderedDict([("beta", 2)])
+
+@given(data(), named_tensor())
+def test_stack(data, x):
+    perm = data.draw(permutations(x.dims))
+    print(perm)
+    y = x.transpose(*perm)
+    n = data.draw(name(x))
+    z = ntorch.stack([x, y], n)
+    assert set(z.dims) == set(x.dims) | set([n])
 
 
-def test_apply():
-    base = torch.zeros([10, 2, 50])
-    ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
-    ntensor = ntensor.softmax("alpha")
-    assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
+@given(data(), named_tensor())
+def test_dot(data, x):
+    y = data.draw(broadcast_named_tensor(x))
+    dsx = data.draw(dims(x))
+    dsy = data.draw(dims(x))
+    x.dot(dsx, y)
+    x.dot(dsy, y)
+    y.dot(dsx, x)
+    y.dot(dsy, x)
+
+
+## Old style tests
 
 
 def test_apply2():
@@ -71,40 +224,11 @@ def test_apply2():
     assert (ntorch.abs(ntensor.sum("alpha") - 1.0) < 1e-5).all()
 
 
-def test_sum():
-    base = torch.zeros([10, 2, 50])
-    ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
-    s = ntensor.sum()
-    assert s.values == base.sum()
-
-
-def test_fill():
-    base = torch.zeros([10, 2, 50])
-    ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
-    ntensor.fill_(20)
-    assert (ntensor == 20).all()
-
-
-def test_mask():
-    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
-    mask = ntorch.tensor(torch.ByteTensor([[0, 1], [1, 0]]), ("a", "b"))
-    ntensor = t.masked_select(mask, "c")
-    assert ntensor.shape == OrderedDict([("c", 2)])
-
-
-@pytest.mark.xfail
-def test_maskfail():
-    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
-    mask = ntorch.tensor(torch.ByteTensor([[0, 1], [1, 0]]), ("a", "banana"))
-    ntensor = t.masked_select(mask, "c")
-    assert ntensor.shape == OrderedDict([("c", 2)])
-
-
-def test_maskbroadcast():
-    t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
-    mask = ntorch.tensor(torch.ByteTensor([0, 1]), ("a"))
-    ntensor = t.masked_select(mask, "c")
-    assert ntensor.shape == OrderedDict([("c", 2)])
+# def test_fill():
+#     base = torch.zeros([10, 2, 50])
+#     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
+#     ntensor.fill_(20)
+#     assert (ntensor == 20).all()
 
 
 def test_gather():
@@ -130,27 +254,6 @@ def test_gather():
     assert y.shape == OrderedDict([("a", 3), ("b", 5)])
 
 
-def test_cat():
-    x = ntorch.zeros(20, 10, names=("a", "b"))
-    y = ntorch.ones(30, 20, names=("b", "a"))
-    assert ntorch.cat([x, y], dim="b").shape == OrderedDict(
-        [("a", 20), ("b", 40)]
-    )
-
-
-def test_stack():
-    tensor_a = ntorch.tensor(
-        torch.Tensor([[1, 2], [3, 4], [5, 6]]), ("dim1", "dim2")
-    )
-    tensor_b = ntorch.tensor(
-        torch.Tensor([[1, 2, 3], [4, 5, 6]]), ("dim2", "dim1")
-    )
-    tensor_c = ntorch.stack([tensor_a, tensor_b], "dim3")
-    assert tensor_c.shape == OrderedDict(
-        [("dim3", 2), ("dim1", 3), ("dim2", 2)]
-    )
-
-
 def test_unbind():
     base = torch.zeros([10, 2, 50])
     ntensor = ntorch.tensor(base, ("alpha", "beta", "gamma"))
@@ -166,14 +269,14 @@ def test_unbind():
     assert c[0].item() == 20
 
 
-@pytest.mark.xfail
-def test_fail():
-    for base1, base2 in zip(
-        make_tensors([10, 2, 50]), make_tensors([10, 20, 2])
-    ):
-        ntensor1 = NamedTensor(base1, ("alpha", "beta", "gamma"))
-        ntensor2 = NamedTensor(base2, ("alpha", "beat", "gamma"))
-        assert_match(ntensor1, ntensor2)
+# @pytest.mark.xfail
+# def test_fail():
+#     for base1, base2 in zip(
+#         make_tensors([10, 2, 50]), make_tensors([10, 20, 2])
+#     ):
+#         ntensor1 = NamedTensor(base1, ("alpha", "beta", "gamma"))
+#         ntensor2 = NamedTensor(base2, ("alpha", "beat", "gamma"))
+#         assert_match(ntensor1, ntensor2)
 
 
 def test_multiple():
@@ -193,26 +296,26 @@ def test_multiple():
     assert (base3 == ntensor3.values).all()
 
 
-def test_contract():
-    base1 = torch.randn(10, 2, 50)
-    ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
-    base2 = torch.randn(10, 20, 2)
-    ntensor2 = ntorch.tensor(base2, ("alpha", "delta", "beta"))
-    assert_match(ntensor1, ntensor2)
+# def test_contract():
+#     base1 = torch.randn(10, 2, 50)
+#     ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
+#     base2 = torch.randn(10, 20, 2)
+#     ntensor2 = ntorch.tensor(base2, ("alpha", "delta", "beta"))
+#     assert_match(ntensor1, ntensor2)
 
-    base3 = torch.einsum("abg,adb->a", (base1, base2))
+#     base3 = torch.einsum("abg,adb->a", (base1, base2))
 
-    ntensor3 = ntorch.dot(("beta", "gamma", "delta"), ntensor1, ntensor2)
-    assert ntensor3.shape == OrderedDict([("alpha", 10)])
-    assert ntensor3.vshape == base3.shape
-    assert (np.abs(ntensor3._tensor - base3) < 1e-5).all()
+#     ntensor3 = ntorch.dot(("beta", "gamma", "delta"), ntensor1, ntensor2)
+#     assert ntensor3.shape == OrderedDict([("alpha", 10)])
+#     assert ntensor3.vshape == base3.shape
+#     assert (np.abs(ntensor3._tensor - base3) < 1e-5).all()
 
-    # ntensora = ntensor.reduce("alpha", "mean")
-    # assert ntensora.named_shape == OrderedDict([("beta", 2),
-    #                                        ("gamma", 50)])
+# ntensora = ntensor.reduce("alpha", "mean")
+# assert ntensora.named_shape == OrderedDict([("beta", 2),
+#                                        ("gamma", 50)])
 
-    # ntensorb = ntensor.reduce("alpha gamma", "mean")
-    # assert ntensorb.named_shape == OrderedDict([("beta", 2)])
+# ntensorb = ntensor.reduce("alpha gamma", "mean")
+# assert ntensorb.named_shape == OrderedDict([("beta", 2)])
 
 
 # def test_lift():
@@ -237,15 +340,15 @@ def test_unbind2():
     assert a.shape == OrderedDict([("alpha", 10), ("gamma", 50)])
 
 
-def test_access():
-    base1 = torch.randn(10, 2, 50)
+# def test_access():
+#     base1 = torch.randn(10, 2, 50)
 
-    ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
+#     ntensor1 = ntorch.tensor(base1, ("alpha", "beta", "gamma"))
 
-    assert (ntensor1.access("gamma")[45] == base1[:, :, 45]).all()
-    assert (ntensor1.get("gamma", 1)._tensor == base1[:, :, 1]).all()
+#     assert (ntensor1.access("gamma")[45] == base1[:, :, 45]).all()
+#     assert (ntensor1.get("gamma", 1)._tensor == base1[:, :, 1]).all()
 
-    assert (ntensor1.access("gamma beta")[45, 1] == base1[:, 1, 45]).all()
+#     assert (ntensor1.access("gamma beta")[45, 1] == base1[:, 1, 45]).all()
 
 
 def test_takes():
@@ -293,42 +396,42 @@ def test_unmask():
     base2 = base2.softmax("alpha")
 
 
-def test_division():
-    base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
-    expected = NamedTensor(torch.ones(3) / 4, ("short",))
-    assert_match(base1 / base1.sum("long"), expected)
+# def test_division():
+#     base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
+#     expected = NamedTensor(torch.ones(3) / 4, ("short",))
+#     assert_match(base1 / base1.sum("long"), expected)
 
 
-def test_scalarmult():
-    base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
-    rmul = 3 * base1
-    lmul = base1 * 3
-    assert_match(rmul, lmul)
+# def test_scalarmult():
+#     base1 = NamedTensor(torch.ones(3, 4), ("short", "long"))
+#     rmul = 3 * base1
+#     lmul = base1 * 3
+#     assert_match(rmul, lmul)
 
 
-def test_subtraction():
-    base1 = ntorch.ones(3, 4, names=("short", "long"))
-    base2 = ntorch.ones(3, 4, names=("short", "long"))
-    expect = ntorch.zeros(3, 4, names=("short", "long"))
-    assert_match(base1 - base2, expect)
+# def test_subtraction():
+#     base1 = ntorch.ones(3, 4, names=("short", "long"))
+#     base2 = ntorch.ones(3, 4, names=("short", "long"))
+#     expect = ntorch.zeros(3, 4, names=("short", "long"))
+#     assert_match(base1 - base2, expect)
 
 
-def test_rightsubtraction():
-    base1 = ntorch.ones(3, 4, names=("short", "long"))
-    expect = ntorch.zeros(3, 4, names=("short", "long"))
-    assert_match(1 - base1, expect)
+# def test_rightsubtraction():
+#     base1 = ntorch.ones(3, 4, names=("short", "long"))
+#     expect = ntorch.zeros(3, 4, names=("short", "long"))
+#     assert_match(1 - base1, expect)
 
 
-def test_rightaddition():
-    base1 = ntorch.ones(3, 4, names=("short", "long"))
-    expect = NamedTensor(2 * torch.ones(3, 4), names=("short", "long"))
-    assert_match(1 + base1, expect)
+# def test_rightaddition():
+#     base1 = ntorch.ones(3, 4, names=("short", "long"))
+#     expect = NamedTensor(2 * torch.ones(3, 4), names=("short", "long"))
+#     assert_match(1 + base1, expect)
 
 
-def test_neg():
-    base = ntorch.ones(3, names=("short",))
-    expected = NamedTensor(-1 * torch.ones(3), ("short",))
-    assert_match(-base, expected)
+# def test_neg():
+#     base = ntorch.ones(3, names=("short",))
+#     expected = NamedTensor(-1 * torch.ones(3), ("short",))
+#     assert_match(-base, expected)
 
 
 def test_nonzero():
@@ -390,19 +493,18 @@ def test_nonzero_names():
     assert 2 == len(y.shape)
 
 
-def test_log_softmax():
-    base = (
-        ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
-        .float()
-        .log_softmax("dim")
-    )
-    y = F.log_softmax(torch.tensor([0, 1, 2, 0, 5]).float(), dim=0)
-    expected = ntorch.tensor(y, names=("dim",))
-    assert_match(base, expected)
+# def test_log_softmax():
+#     base = (
+#         ntorch.tensor([0, 1, 2, 0, 5], names=("dim",))
+#         .float()
+#         .log_softmax("dim")
+#     )
+#     y = F.log_softmax(torch.tensor([0, 1, 2, 0, 5]).float(), dim=0)
+#     expected = ntorch.tensor(y, names=("dim",))
+#     assert_match(base, expected)
 
 
-def test_indexing():
-
+def test_indexing_basic():
     base = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
 
     base1 = base[{"alpha": 2}]
@@ -418,26 +520,11 @@ def test_indexing():
 
 
 def test_index_set():
-
     base = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
     new = ntorch.randn(2, 50, names=("beta", "gamma"))
-
     base[{"alpha": 2}] = new
-
     new = ntorch.randn(3, 2, 50, names=("alpha", "beta", "gamma"))
     base[{"alpha": slice(0, 3)}] = new
-
-
-def test_tensor_mask():
-    base = ntorch.zeros(10, 2, 50, names=("alpha", "beta", "gamma"))
-    base[{"alpha": slice(2, 5), "gamma": slice(4, 6)}] = 1
-
-    mask = base > 0.5
-    base1 = base[mask]
-    assert base1.shape == OrderedDict([("on", 12)])
-    base[mask] = 6
-    print(base[{"alpha": 2, "gamma": 4, "beta": 0}])
-    assert base[{"alpha": 2, "gamma": 4, "beta": 0}].values == 6
 
 
 def test_index_tensor():
@@ -469,14 +556,19 @@ def test_setindex_tensor():
 
     base[{"gamma": indices}] = 2
 
-    # mask = base > 0.5
-    # base1 = base[mask]
-    # assert base1.shape == OrderedDict([("on", 12)])
-    # base[mask] = 6
-    # print(base[{"alpha": 2, "gamma": 4, "beta": 0}])
-    # assert base[{"alpha": 2, "gamma": 4, "beta": 0}].values == 6
+
+@pytest.mark.xfail
+def test_unique_names():
+    base = torch.zeros([10, 2])
+    assert ntorch.tensor(base, ("alpha", "beta", "alpha"))
 
 
-# def test_scalar():
-#     base1 = ntorch.randn(dict(alpha=10, beta=2, gamma=50))
-#     base2 = base1 + 10
+def test_names():
+    base = torch.zeros([10, 2, 50])
+    assert ntorch.tensor(base, ("alpha", "beta", "gamma"))
+
+
+@pytest.mark.xfail
+def test_bad_names():
+    base = torch.zeros([10, 2])
+    assert ntorch.tensor(base, ("elements_dim", "input_dims"))
