@@ -441,6 +441,7 @@ doc is the same as below.
         "index_select",
         "index_copy_",
         "index_fill_",
+        "topk"
     }
 
     # def gather(self, dim, index, index_dim):
