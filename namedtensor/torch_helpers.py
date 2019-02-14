@@ -72,8 +72,9 @@ class NamedTensor(NamedTensorBase):
     def get(self, name, idx):
         "Returns a namedtensor by indexing into dim name"
         dim = self._schema.get(name)
-        return self._new(self.values.narrow(dim, torch.tensor(idx), 1).squeeze(dim),
-                         name)
+        return self._new(
+            self.values.narrow(dim, torch.tensor(idx), 1).squeeze(dim), name
+        )
 
     def renorm(self, p, name, maxnorm):
         "Apply :py:meth:`torch.Tensor.renorm` over `name`"
@@ -85,7 +86,6 @@ class NamedTensor(NamedTensorBase):
         from .torch_base import ntorch
 
         return ntorch.dot(names, *((self,) + others))
-
 
     # def access(self, dims):
     #     term = dims.split() + [d for d in self._schema._names if d not in dims]
@@ -203,11 +203,11 @@ class NamedTensor(NamedTensorBase):
                 call.__doc__ = method.__doc__
             elif methodname in self._noshift_nn:
                 method = getattr(F, methodname)
+
                 def call(*args, **kwargs):
                     return self._new(method(self.values, *args, **kwargs))
 
                 call.__doc__ = method.__doc__
-
 
             elif methodname in self._noshift_dim:
 
@@ -219,13 +219,18 @@ class NamedTensor(NamedTensorBase):
                 call.__doc__ = method.__doc__
             elif methodname in self._noshift_nn_dim:
                 method = getattr(F, methodname)
+
                 def call(dim, *args, **kwargs):
                     return self._new(
-                        method(self.values, dim=self._schema.get(dim), *args, **kwargs)
+                        method(
+                            self.values,
+                            dim=self._schema.get(dim),
+                            *args,
+                            **kwargs
+                        )
                     )
 
                 call.__doc__ = method.__doc__
-
 
             elif methodname in self._inline:
 
@@ -265,9 +270,12 @@ class NamedTensor(NamedTensorBase):
 
             elif methodname in self._core:
                 from .torch_base import ntorch
+
                 method = getattr(ntorch, methodname)
+
                 def call(*args, **kwargs):
                     return method(self, *args, **kwargs)
+
                 call.__doc__ = method.__doc__
 
             elif methodname in self._binop:
@@ -305,7 +313,6 @@ class NamedTensor(NamedTensorBase):
             | self._inline
             | self._core
         )
-
 
     # Torch Ops
     # Return a tensor of the same dimensions
@@ -349,24 +356,11 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_args = {
-        "tril",
-        "triu",
-        "pow",
-        "fmod",
-        "clamp",
-        "reciprical",
-    }
+    _noshift_args = {"tril", "triu", "pow", "fmod", "clamp", "reciprical"}
 
-    _noshift_nn = {
-        "relu",
-    }
+    _noshift_nn = {"relu"}
 
-    _noshift_nn_dim = {
-        "softmax",
-        "log_softmax",
-    }
-
+    _noshift_nn_dim = {"softmax", "log_softmax"}
 
     _noshift_dim = {"cumprod", "cumsum"}
 
@@ -397,36 +391,14 @@ doc is the same as below.
     """
 
     # Takes a dim arg and reduces it.
-    _reduce = {
-        "argmax",
-        "argmin",
-        "logsumexp",
-        "mean",
-        "prod",
-        "std",
-        "sum",
-    }
+    _reduce = {"argmax", "argmin", "logsumexp", "mean", "prod", "std", "sum"}
 
     _reduce_multi = {"min", "max", "sort", "unbind", "median"}
 
-    _extra = {
-        "masked_fill",
-        "type_as",
-    }
+    _extra = {"masked_fill", "type_as"}
 
     # Broadcast and apply.
-    _binop = {
-        "add",
-        "sub",
-        "div",
-        "mul",
-        "eq",
-        "ne",
-        "lt",
-        "gt",
-        "le",
-        "ge",
-    }
+    _binop = {"add", "sub", "div", "mul", "eq", "ne", "lt", "gt", "le", "ge"}
 
     # Inline.
     _inline = {
@@ -457,7 +429,6 @@ doc is the same as below.
         "tanh_",
     }
 
-
     _core = {
         "gather",
         "nonzero",
@@ -469,7 +440,6 @@ doc is the same as below.
         "index_select",
         "index_copy_",
         "index_fill_",
-
     }
 
     # def gather(self, dim, index, index_dim):
@@ -490,7 +460,6 @@ doc is the same as below.
     #     from .torch_base import ntorch
 
     #     ntorch.scatter_(self, dim, index, src, index_dim)
-
 
     # def narrow(self, name, start, end):
     #     "Narrow into the `kwargs` dimension and rename it"

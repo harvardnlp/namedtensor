@@ -2,6 +2,7 @@ torch
 numpy
 pytest
 pytest-runner
+hypothesis
 einops
 opt-einsum
 torchtext
