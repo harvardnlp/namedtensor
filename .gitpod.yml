@@ -1,2 +1,3 @@
-image:
-  file: Dockerfile
+tasks:
+  - command: >
+      pip install -r requirements.txt && pip install .

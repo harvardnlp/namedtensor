@@ -1,7 +1,5 @@
 torch
 numpy
-pytest
-pytest-runner
 einops
 opt-einsum
 torchtext

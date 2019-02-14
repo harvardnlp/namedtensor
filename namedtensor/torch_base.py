@@ -59,11 +59,15 @@ class NTorch(type):
     @staticmethod
     def stack(tensors, name):
         old_names = tensors[0]._schema._names
-        for t in tensors[1:]:
-            if t._schema._names != old_names:
-                raise RuntimeError(
-                    "Tensors to stack don't have matching dimension names"
-                )
+        for i in range(1, len(tensors)):
+            if tensors[i]._schema._names != old_names:
+                if set(tensors[i]._schema._names) != set(
+                    tensors[0]._schema._names
+                ):
+                    raise RuntimeError(
+                        "Tensors to stack don't have matching dimension names"
+                    )
+                tensors[i] = tensors[i]._force_order(tensors[0]._schema._names)
         to_stack = [tensor.values for tensor in tensors]
         old_names = list(old_names)
         old_names.insert(0, name)
@@ -71,10 +75,17 @@ class NTorch(type):
 
     @staticmethod
     def cat(tensors, dim):
-        "Concate a list of named tensors along dim."
+        "Concate a list of named tensors along dim"
         dim = tensors[0]._schema.get(dim)
-        for t in tensors[1:]:
-            assert t._schema._names == tensors[0]._schema._names
+        for i in range(1, len(tensors)):
+            if tensors[i]._schema._names != tensors[0]._schema._names:
+                if set(tensors[i]._schema._names) != set(
+                    tensors[0]._schema._names
+                ):
+                    raise RuntimeError(
+                        "Tensors to stack don't have matching dimension names"
+                    )
+                tensors[i] = tensors[i]._force_order(tensors[0]._schema._names)
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
@@ -87,15 +98,67 @@ class NTorch(type):
         b1 = index._force_order(index_order)
         dim = input._schema.get(indim)
         return input._new(
-            input.values.gather(dim, b1.values), updates={index_dim: index}
+            input.values.gather(dim, b1.values), updates={indim: outdim}
         )
 
     @staticmethod
-    def masked_select(input, mask, name):
+    def masked_select(input, mask, name="on"):
         order = mask._mask_broadcast_order(input)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
         return NamedTensor(a1.values.masked_select(b1.values), name)
+
+    @staticmethod
+    def masked_scatter_(input, mask, source):
+        return input._setter(mask, "masked_scatter_", [source])
+
+    @staticmethod
+    def masked_fill_(input, mask, value):
+        return input._setter(mask, "masked_fill_", [value])
+
+    @staticmethod
+    def _index_base(self, dim, index):
+        name = dim
+        new_names = []
+        sizes = []
+        for n in self._schema._names:
+            if n == name:
+                for n2 in index._schema._names:
+                    new_names.append(n2)
+                    sizes.append(index.size(n2))
+            else:
+                new_names.append(n)
+                sizes.append(self.size(n))
+        return new_names, sizes
+
+    @staticmethod
+    def index_select(self, dim, index):
+        "Index into dimension names with the `index` named tensors."
+        new_names, sizes = NTorch._index_base(self, dim, index)
+        return NamedTensor(
+            self._tensor.index_select(
+                self._schema.get(dim), index._tensor.view(-1)
+            ).view(*sizes),
+            new_names,
+        )
+
+    @staticmethod
+    def index_fill_(self, dim, index, val):
+        "Index into dimension names with the `index` named tensors."
+        self._tensor.index_fill_(
+            self._schema.get(dim), index._tensor.view(-1), val
+        )
+        return self
+
+    @staticmethod
+    def index_copy_(self, dim, index, source):
+        "Index into dimension names with the `index` named tensors."
+        order = source._mask_broadcast_order(index)
+        source = source._force_order(order)
+        self.values.index_copy_(
+            self._schema.get(dim), index.values, source.values
+        )
+        return self
 
     @staticmethod
     def nonzero(tensor, names=("elements", "inputdims")):
@@ -175,6 +238,7 @@ class NTorch(type):
         "log",
         "pow",
         "reciprical",
+        "relu",
         "round",
         "rsqrt",
         "short",
