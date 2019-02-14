@@ -167,7 +167,7 @@ def test_tensor_indexing(data, x):
     )
     n = data.draw(name(x))
     ind_vector = ntorch.tensor(indices, names=n).long()
-    x2 = x[{d : ind_vector}]
+    x2 = x[{d: ind_vector}]
     assert set(x2.dims) == (set(x.dims) | set([n])) - set([d])
 
     x[{d: ind_vector}] = 5
@@ -180,7 +180,6 @@ def test_tensor_mask(data, x):
     x[mask] = 6
     x2 = x[mask]
     assert x2.dims == ("on",)
-
 
 
 @given(data(), named_tensor())
