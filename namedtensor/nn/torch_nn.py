@@ -25,6 +25,7 @@ class _Update:
 
     def __call__(self, input):
         if "_spec" in self.__dict__:
+            print(*self._input_order)
             input = input.transpose(*self._input_order).contiguous()
             updates = {k: v for (v, k) in self._output_update.items()}
             return input.op(super(_Update, self).forward, **updates)
@@ -146,26 +147,26 @@ class MaxPool3d(_Update, nn.MaxPool3d):
 
 
 class ConstantPad1d(_Update, nn.ConstantPad1d):
-    def spec(self, dim_in, dim_pad, name_out=None):
+    def spec(self, dim_pad):
         self._spec = True
-        self._input_order = (dim_in, dim_pad)
-        self._output_update = {dim_in: name_out if name_out else dim_in}
+        self._input_order = (dim_pad,)
+        self._output_update = {}
         return self
 
 
 class ConstantPad2d(_Update, nn.ConstantPad2d):
-    def spec(self, dim_in, dims_pad, name_out=None):
+    def spec(self, dims_pad):
         self._spec = True
-        self._input_order = (dim_in,) + dims_pad
-        self._output_update = {dim_in: name_out if name_out else dim_in}
+        self._input_order = dims_pad
+        self._output_update = {}
         return self
 
 
 class ConstantPad3d(_Update, nn.ConstantPad3d):
-    def spec(self, dim_in, dims_pad, name_out=None):
+    def spec(self, dims_pad):
         self._spec = True
-        self._input_order = (dim_in,) + dims_pad
-        self._output_update = {dim_in: name_out if name_out else dim_in}
+        self._input_order = dims_pad
+        self._output_update = {}
         return self
 
 
@@ -180,6 +181,7 @@ _update = [
     "ConstantPad1d",
     "ConstantPad2d",
     "ConstantPad3d"
+
 ]
 
 
