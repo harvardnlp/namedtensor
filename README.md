@@ -152,6 +152,7 @@ http://nlp.seas.harvard.edu/namedtensor/
 (NamedTensor is being collectively developed by Harvard CS 287)
 
 * Yuntian Deng
+* Justin Chiu
 * Francisco Rivera
 * Jiafeng Chen
 * Celine Liang
