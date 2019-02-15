@@ -108,32 +108,28 @@ def test_embedding():
     assert out.shape == OrderedDict([("start", 3), ("extra", 10)])
 
 
-def test_pad_1d():
+def test_pad():
+    # Test 1d
     const_pad = ntorch.nn.ConstantPad1d((2, 0), 0).spec("cols", "rows")
     input = ntorch.tensor([[[1, 2, 3],
                             [1, 2, 3]]], names=["batch", "rows", "cols"])
     output = const_pad(input)
     print(output, output.shape)
     assert output.shape == OrderedDict([("batch", 1), ("cols", 3), ("rows", 4)])
-    const_pad_2 = ntorch.nn.ConstantPad1d((2, 0), 0).spec("rows", "cols")
-    output_2 = const_pad_2(input)
-    print(output_2, output_2.shape)
-    assert output_2.shape == OrderedDict([("batch", 1), ("rows", 2), ("cols", 5)])
-
-
-def test_pad_2d():
-    const_pad = ntorch.nn.ConstantPad2d((2, 0, 2, 0), 0).spec("batch", ("rows", "cols"))
-    input = ntorch.tensor([[[1, 2, 3],
-                            [1, 2, 3]]], names=["batch", "rows", "cols"])
+    const_pad = ntorch.nn.ConstantPad1d((2, 0), 0).spec("rows", "cols")
     output = const_pad(input)
+    print(output, output.shape)
+    assert output.shape == OrderedDict([("batch", 1), ("rows", 2), ("cols", 5)])
+
+    # Test 2d
+    const_pad_2d = ntorch.nn.ConstantPad2d((2, 0, 2, 0), 0).spec("batch", ("rows", "cols"))
+    output = const_pad_2d(input)
     print(output, output.shape)
     assert output.shape == OrderedDict([("batch", 1), ("rows", 4), ("cols", 5)])
 
-
-def test_pad_3d():
-    const_pad = ntorch.nn.ConstantPad3d((2, 0, 2, 0, 2, 0), 0).spec("firstdim", ("batch", "rows", "cols"))
-    input = ntorch.tensor([[[[1, 2, 3],
-                            [1, 2, 3]]]], names=["firstdim", "batch", "rows", "cols"])
-    output = const_pad(input)
+    # Test 3d
+    const_pad_3d = ntorch.nn.ConstantPad3d((2, 0, 2, 0, 2, 0), 0).spec("firstdim", ("batch", "rows", "cols"))
+    input = ntorch.tensor(input.values.unsqueeze(0), names=(["firstdim", "batch", "rows", "cols"]))
+    output = const_pad_3d(input)
     print(output, output.shape)
     assert output.shape == OrderedDict([("firstdim", 1), ("batch", 3), ("rows", 4), ("cols", 5)])
