@@ -161,3 +161,4 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Belén Saldías
 * Jason Ren
 * Josh Feldman
+* Jambay Kinley
