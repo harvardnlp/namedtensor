@@ -17,7 +17,10 @@ class NamedTensor(NamedTensorBase):
                     cur = cur.get(k, v)
             return cur
         elif isinstance(index, NamedTensor):
-            if index.type() == "torch.ByteTensor":
+            if (
+                index.type() == "torch.ByteTensor"
+                or index.type() == "torch.cuda.ByteTensor"
+            ):
                 return self.masked_select(index)
             raise RuntimeError("Masked namedtensor must be byte tensor.")
         else:
@@ -49,7 +52,10 @@ class NamedTensor(NamedTensorBase):
             else:
                 cur.fill_(val)
         elif isinstance(index, NamedTensor):
-            if index.type() == "torch.ByteTensor":
+            if (
+                index.type() == "torch.ByteTensor"
+                or index.type() == "torch.cuda.ByteTensor"
+            ):
                 if copy:
                     return self.masked_scatter_(index, val)
                 else:
