@@ -144,6 +144,33 @@ class MaxPool3d(_Update, nn.MaxPool2d):
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
 
+class MaxPool3d(_Update, nn.MaxPool2d):
+    def spec(self, dim_in, dims_conv, name_out=None):
+        self._spec = True
+        self._input_order = (dim_in,) + dims_conv
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+class ConstantPad1d(_Update, nn.ConstantPad1d):
+    def spec(self, dim_in, dim_pad, name_out=None):
+        self._spec = True
+        self._input_order = (dim_in, dim_pad)
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+class ConstantPad2d(_Update, nn.ConstantPad2d):
+    def spec(self, dim_in, dims_pad, name_out=None):
+        self._spec = True
+        self._input_order = (dim_in,) + dims_pad
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+class ConstantPad3d(_Update, nn.ConstantPad3d):
+    def spec(self, dim_in, dims_pad, name_out=None):
+        self._spec = True
+        self._input_order = (dim_in,) + dims_pad
+        self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
 
 _update = [
     "Linear",
@@ -153,6 +180,9 @@ _update = [
     "MaxPool1d",
     "MaxPool2d",
     "MaxPool3d",
+    "ConstantPad1d", 
+    "ConstantPad2d",
+    "ConstantPad3d"
 ]
 
 
@@ -163,6 +193,9 @@ Conv3d.__doc__ = nn.Conv3d.__doc__
 MaxPool1d.__doc__ = nn.MaxPool1d.__doc__
 MaxPool2d.__doc__ = nn.MaxPool2d.__doc__
 MaxPool3d.__doc__ = nn.MaxPool3d.__doc__
+ConstantPad1d.__doc__ = nn.ConstantPad1d.__doc__
+ConstantPad2d.__doc__ = nn.ConstantPad2d.__doc__
+ConstantPad3d.__doc__ = nn.ConstantPad3d.__doc__
 
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):
