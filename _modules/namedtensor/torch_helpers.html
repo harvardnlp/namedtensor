@@ -166,7 +166,10 @@
                     <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">cur</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span>
+                <span class="ow">or</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.cuda.ByteTensor&quot;</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Masked namedtensor must be byte tensor.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -198,7 +201,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cur</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.ByteTensor&quot;</span>
+                <span class="ow">or</span> <span class="n">index</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch.cuda.ByteTensor&quot;</span>
+            <span class="p">):</span>
                 <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masked_scatter_</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
