@@ -137,19 +137,13 @@ class MaxPool2d(_Update, nn.MaxPool2d):
         return self
 
 
-class MaxPool3d(_Update, nn.MaxPool2d):
+class MaxPool3d(_Update, nn.MaxPool3d):
     def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
 
-class MaxPool3d(_Update, nn.MaxPool2d):
-    def spec(self, dim_in, dims_conv, name_out=None):
-        self._spec = True
-        self._input_order = (dim_in,) + dims_conv
-        self._output_update = {dim_in: name_out if name_out else dim_in}
-        return self
 
 class ConstantPad1d(_Update, nn.ConstantPad1d):
     def spec(self, dim_in, dim_pad, name_out=None):
@@ -158,6 +152,7 @@ class ConstantPad1d(_Update, nn.ConstantPad1d):
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
 
+
 class ConstantPad2d(_Update, nn.ConstantPad2d):
     def spec(self, dim_in, dims_pad, name_out=None):
         self._spec = True
@@ -165,12 +160,14 @@ class ConstantPad2d(_Update, nn.ConstantPad2d):
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
 
+
 class ConstantPad3d(_Update, nn.ConstantPad3d):
     def spec(self, dim_in, dims_pad, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_pad
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
+
 
 _update = [
     "Linear",
@@ -180,7 +177,7 @@ _update = [
     "MaxPool1d",
     "MaxPool2d",
     "MaxPool3d",
-    "ConstantPad1d", 
+    "ConstantPad1d",
     "ConstantPad2d",
     "ConstantPad3d"
 ]
