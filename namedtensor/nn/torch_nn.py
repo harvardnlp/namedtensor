@@ -25,7 +25,6 @@ class _Update:
 
     def __call__(self, input):
         if "_spec" in self.__dict__:
-            print(*self._input_order)
             input = input.transpose(*self._input_order).contiguous()
             updates = {k: v for (v, k) in self._output_update.items()}
             return input.op(super(_Update, self).forward, **updates)
