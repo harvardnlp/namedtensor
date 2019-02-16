@@ -25,6 +25,7 @@ class _Update:
 
     def __call__(self, input):
         if "_spec" in self.__dict__:
+            print(*self._input_order)
             input = input.transpose(*self._input_order).contiguous()
             updates = {k: v for (v, k) in self._output_update.items()}
             return input.op(super(_Update, self).forward, **updates)
@@ -137,11 +138,35 @@ class MaxPool2d(_Update, nn.MaxPool2d):
         return self
 
 
-class MaxPool3d(_Update, nn.MaxPool2d):
+class MaxPool3d(_Update, nn.MaxPool3d):
     def spec(self, dim_in, dims_conv, name_out=None):
         self._spec = True
         self._input_order = (dim_in,) + dims_conv
         self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+
+class ConstantPad1d(_Update, nn.ConstantPad1d):
+    def spec(self, dim_pad):
+        self._spec = True
+        self._input_order = (dim_pad,)
+        self._output_update = {}
+        return self
+
+
+class ConstantPad2d(_Update, nn.ConstantPad2d):
+    def spec(self, dims_pad):
+        self._spec = True
+        self._input_order = dims_pad
+        self._output_update = {}
+        return self
+
+
+class ConstantPad3d(_Update, nn.ConstantPad3d):
+    def spec(self, dims_pad):
+        self._spec = True
+        self._input_order = dims_pad
+        self._output_update = {}
         return self
 
 
@@ -153,6 +178,10 @@ _update = [
     "MaxPool1d",
     "MaxPool2d",
     "MaxPool3d",
+    "ConstantPad1d",
+    "ConstantPad2d",
+    "ConstantPad3d"
+
 ]
 
 
@@ -163,6 +192,9 @@ Conv3d.__doc__ = nn.Conv3d.__doc__
 MaxPool1d.__doc__ = nn.MaxPool1d.__doc__
 MaxPool2d.__doc__ = nn.MaxPool2d.__doc__
 MaxPool3d.__doc__ = nn.MaxPool3d.__doc__
+ConstantPad1d.__doc__ = nn.ConstantPad1d.__doc__
+ConstantPad2d.__doc__ = nn.ConstantPad2d.__doc__
+ConstantPad3d.__doc__ = nn.ConstantPad3d.__doc__
 
 
 class CrossEntropyLoss(_Loss, nn.CrossEntropyLoss):

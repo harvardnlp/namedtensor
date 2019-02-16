@@ -106,3 +106,29 @@ def test_embedding():
     out = embedding(input)
     print(out.shape)
     assert out.shape == OrderedDict([("start", 3), ("extra", 10)])
+
+
+def test_pad():
+    # Test 1d
+    const_pad = ntorch.nn.ConstantPad1d((2, 0), 0).spec("rows")
+    input = ntorch.tensor([[[1, 2, 3],
+                            [1, 2, 3]]], names=["batch", "rows", "cols"])
+    output = const_pad(input)
+    print(output, output.shape)
+    assert output.shape == OrderedDict([("batch", 1), ("cols", 3), ("rows", 4)])
+    const_pad = ntorch.nn.ConstantPad1d((2, 0), 0).spec("cols")
+    output = const_pad(input)
+    print(output, output.shape)
+    assert output.shape == OrderedDict([("batch", 1), ("rows", 2), ("cols", 5)])
+
+    # Test 2d
+    const_pad_2d = ntorch.nn.ConstantPad2d((2, 0, 2, 0), 0).spec(("rows", "cols"))
+    output = const_pad_2d(input)
+    print(output, output.shape)
+    assert output.shape == OrderedDict([("batch", 1), ("rows", 4), ("cols", 5)])
+
+    # Test 3d
+    const_pad_3d = ntorch.nn.ConstantPad3d((2, 0, 2, 0, 2, 0), 0).spec(("batch", "rows", "cols"))
+    output = const_pad_3d(input)
+    print(output, output.shape)
+    assert output.shape == OrderedDict([("batch", 3), ("rows", 4), ("cols", 5)])
