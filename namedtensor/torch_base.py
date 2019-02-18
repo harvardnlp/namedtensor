@@ -128,6 +128,21 @@ class NTorch(type):
         return input._setter(mask, "masked_fill_", [value])
 
     @staticmethod
+    def convert(input, names):
+        if isinstance(input, NamedTensor):
+            # Check that names are in named tensor
+            assert (names & input.dims) == names
+            return input
+        else:
+            # Convert tensor to named tensor
+            assert input.dim() >= len(names)
+            new_names = ["placeholder%d"%i for i in range(input.dim() - len(names))] + list(names)
+            return NamedTensor(input, names=new_names)
+
+    def order(input, dims):
+        return input.transpose(dims).value
+
+    @staticmethod
     def _index_base(self, dim, index):
         name = dim
         new_names = []
@@ -220,7 +235,7 @@ class NTorch(type):
     def __dir__(cls):
         return set(cls.__dict__.keys()) | cls._build | cls._noshift
 
-    _build = {"ones", "zeros", "randn", "empty", "rand"}
+    _build = {"ones", "zeros", "randn", "empty", "rand", "arange"}
 
     _noshift = {
         "abs",

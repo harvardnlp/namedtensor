@@ -586,3 +586,8 @@ def test_names():
 def test_bad_names():
     base = torch.zeros([10, 2])
     assert ntorch.tensor(base, ("elements_dim", "input_dims"))
+
+
+def test_ensure():
+    x = torch.zeros([4, 5, 6])
+    y = ntorch.ensure(x, names=("a", "b"))
