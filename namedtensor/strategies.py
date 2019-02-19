@@ -52,7 +52,7 @@ def names(tensor, max_size=5):
     return lists(name(tensor), unique=True, min_size=2, max_size=max_size)
 
 
-def broadcast_named_tensor(x, dtype=np.float):
+def broadcast_named_tensor(x, dtype=np.float32):
     @composite
     def fill(draw):
         ds = draw(dims(x, max_size=2))

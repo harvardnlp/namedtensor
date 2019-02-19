@@ -56,7 +56,7 @@ def test_split(data, x):
 def test_reduce(data, x):
     ns = data.draw(dims(x))
     method = data.draw(sampled_from(sorted(x._reduce)))
-    if method in ["unsqueeze"]:
+    if method in ["squeeze"]:
         return
 
     if method not in ["logsumexp"]:
