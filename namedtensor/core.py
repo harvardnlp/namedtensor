@@ -38,6 +38,8 @@ class NamedTensorBase:
                 "Tensor has %d dim, but %d names"
                 % (len(self._tensor.shape), len(self._schema._names))
             )
+        else:
+            assert len(names) == 0, str(tensor)
 
     @property
     def dims(self):

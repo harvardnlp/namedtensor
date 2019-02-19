@@ -398,7 +398,16 @@ doc is the same as below.
     """
 
     # Takes a dim arg and reduces it.
-    _reduce = {"argmax", "argmin", "logsumexp", "mean", "prod", "std", "sum"}
+    _reduce = {
+        "argmax",
+        "argmin",
+        "logsumexp",
+        "mean",
+        "prod",
+        "std",
+        "sum",
+        "squeeze",
+    }
 
     _reduce_multi = {"min", "max", "sort", "unbind", "median"}
 
