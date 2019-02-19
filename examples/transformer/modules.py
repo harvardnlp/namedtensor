@@ -1,11 +1,12 @@
 from namedtensor import ntorch
-import torch.nn as nn
+nn = ntorch.nn
+import torch
 
-class Attention(ntorch.nn.Module):
+class Attention(nn.Module):
     "Scaled dot product attention"
     def __init__(self, p, scale):
         super(Attention, self).__init__()
-        self.dropout = ntorch.nn.Dropout(p)
+        self.dropout = nn.Dropout(p)
         self.scale = scale
 
     def spec(self, dim_query, dim_keys):
@@ -19,35 +20,41 @@ class Attention(ntorch.nn.Module):
         p_attn = self.dropout(scores.softmax(self.dim_keys))
         return value.dot(self.dim_keys, p_attn), p_attn
 
-class MultiHeadedAttention(ntorch.nn.Module):
+class MultiHeadedAttention(nn.Module):
     def __init__(self, heads, d_model, p=0.1):
         super(MultiHeadedAttention, self).__init__()
         assert d_model % heads == 0
         self.d_k = d_model // heads
-        self.proj = nn.Parameter(ntorch.zeros(3, heads, d_k, d_model))
-        self.out_proj = nn.Parameter(torch.zeros(heads, d_k, d_model))
-        self.attention = Attention()
+        self.proj = nn.ModuleList(
+            [nn.Linear(d_model, d_model, bias=False).spec("hidden")
+            for _ in range(3)])
+        self.out_proj = nn.Linear(d_model, d_model, bias=False).spec("hidden")
+        self.attention = Attention(p, d_model)
 
     def spec(self, dim_keys, dim_hidden):
         self.dim_hidden = dim_hidden
         self.dim_keys = dim_keys
-        self.proj.spec(names=("qkv", "heads", "lower", dim_hidden))
-        self.out_proj.spec(names=("heads", "lower", dim_hidden))
+        self.proj.spec(dim_hidden)
+        self.out_proj.spec(dim_hidden)
+        self.attention.spec("lower", dim_keys)
         return self
 
     def forward(self, query, key, value, mask):
-        group = ntorch.stack([query, key, value], "qkv")
-        query, key, value = self.proj.tensor.dot(self.dim_hidden, group).unbind("qkv")
-        x, self.attn = self.attention(query, key, value, self.d_k, mask=mask)
-        return self.out_proj.tensor.dot(("heads", "lower"), x)
+        split = lambda x: x.split(self.dim_hidden, ("heads", "lower"),
+                                  heads=self.d_k)
+        query = split(self.proj[0](query))
+        key = split(self.proj[1](key))
+        value = split(self.proj[2](value))
+        x, self.attn = self.attention(query, key, value, mask=mask)
+        return self.out_proj(x.stack(("heads", "lower"), self.dim_hidden))
 
-class LabelSmoothing(ntorch.nn.Module):
+class LabelSmoothing(nn.Module):
     def __init__(self, smoothing, size, padding_idx):
         super(LabelSmoothing, self).__init__()
         self.size = size
         self.padding_idx = padding_idx
         self.smoothing = smoothing
-        self.criterion = nn.KLDivLoss(reduction='sum')
+        self.criterion = torch.nn.KLDivLoss(reduction='sum')
 
         # Internal
         self._off_prob = self.smoothing / (self.size - 2)
@@ -68,7 +75,7 @@ class LabelSmoothing(ntorch.nn.Module):
         return self.criterion(x[on].values, target_dist[on].values)
 
 
-class Residual(ntorch.nn.Module):
+class Residual(nn.Module):
     """
     A residual connection followed by a layer norm.
     Note for code simplicity the norm is first as opposed to last.
@@ -87,7 +94,7 @@ class Residual(ntorch.nn.Module):
         "Apply residual connection to any sublayer with the same size."
         return x + self.dropout(sublayer(self.norm(x)))
 
-class PositionwiseFeedForward(ntorch.nn.Module):
+class PositionwiseFeedForward(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim, p):
         super(PositionwiseFeedForward, self).__init__()
         self.w_1 = ntorch.nn.Linear(input_dim, hidden_dim)

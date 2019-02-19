@@ -14,8 +14,11 @@ class Module(nn.Module):
         else:
             super(Module, self).register_parameter(name, tensor)
 
-
-ModuleList = nn.ModuleList
+class ModuleList(nn.ModuleList):
+    def spec(self, *args, **kwargs):
+        for x in self:
+            x.spec(*args, **kwargs)
+        return self
 
 
 class _Update:

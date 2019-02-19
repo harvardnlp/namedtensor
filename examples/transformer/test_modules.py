@@ -10,7 +10,7 @@ def test_attention():
     mod = Attention(0.5, 0.1).spec("hidden", "src")
     mod(query, key, value, mask)
 
-    mod = MultiHeadedAttention(8, 256, 0).spec("hidden", "src")
+    mod = MultiHeadedAttention(8, 256, 0).spec("src", "hidden")
     mod(query, key, value, mask)
 
 
