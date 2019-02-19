@@ -1,6 +1,7 @@
 import torch.nn as nn
 from ..torch_helpers import NamedTensor
 
+
 class NamedParameter(nn.Module):
     def __init__(self, ntensor, *args, **kwargs):
         super(NamedParameter, self).__init__()
@@ -11,6 +12,7 @@ class NamedParameter(nn.Module):
     @property
     def param(self):
         return self._param
+
 
 class Module(nn.Module):
     def register_parameter(self, name, tensor):
