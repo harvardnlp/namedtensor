@@ -1,8 +1,11 @@
+from namedtensor import ntorch
+import torch.nn as nn
 
-class Attention(nn.Module):
+class Attention(ntorch.nn.Module):
     "Scaled dot product attention"
     def __init__(self, p, scale):
-        self.dropout = self.Dropout(p)
+        super(Attention, self).__init__()
+        self.dropout = ntorch.nn.Dropout(p)
         self.scale = scale
 
     def spec(self, dim_query, dim_keys):
@@ -11,21 +14,22 @@ class Attention(nn.Module):
         return self
 
     def forward(self, query, key, value, mask):
-        scores = query.dot(self.dim_key, key) / scale
+        scores = query.dot(self.dim_query, key) / self.scale
         scores[mask] = -1e9
-        p_attn = self.dropout(scores.softmax(dim_query))
+        p_attn = self.dropout(scores.softmax(self.dim_keys))
         return value.dot(self.dim_keys, p_attn), p_attn
 
-class MultiHeadedAttention(nn.Module):
+class MultiHeadedAttention(ntorch.nn.Module):
     def __init__(self, heads, d_model, p=0.1):
+        super(MultiHeadedAttention, self).__init__()
         assert d_model % heads == 0
-        d_k = d_model // heads
-        proj = nn.Parameter(ntorch.zeros(3, heads, d_k, d_model))
-        out_proj = nn.Parameter(torch.zeros(heads, d_k, d_model))
+        self.d_k = d_model // heads
+        self.proj = nn.Parameter(ntorch.zeros(3, heads, d_k, d_model))
+        self.out_proj = nn.Parameter(torch.zeros(heads, d_k, d_model))
+        self.attention = Attention()
 
-    def spec(self, dim_query, dim_keys, dim_hidden):
+    def spec(self, dim_keys, dim_hidden):
         self.dim_hidden = dim_hidden
-        self.dim_query = dim_query
         self.dim_keys = dim_keys
         self.proj.spec(names=("qkv", "heads", "lower", dim_hidden))
         self.out_proj.spec(names=("heads", "lower", dim_hidden))
@@ -37,8 +41,9 @@ class MultiHeadedAttention(nn.Module):
         x, self.attn = self.attention(query, key, value, self.d_k, mask=mask)
         return self.out_proj.tensor.dot(("heads", "lower"), x)
 
-class LabelSmoothing(nn.Module):
+class LabelSmoothing(ntorch.nn.Module):
     def __init__(self, smoothing, size, padding_idx):
+        super(LabelSmoothing, self).__init__()
         self.size = size
         self.padding_idx = padding_idx
         self.smoothing = smoothing
@@ -51,24 +56,25 @@ class LabelSmoothing(nn.Module):
     def spec(self, dim_batch, dim_classes):
         self.dim_classes = dim_classes
         self.dim_batch = dim_batch
-        self.criterion.spec(dim_classes)
+        # self.criterion.spec(dim_classes)
         return self
 
     def forward(self, x, target):
         assert x.shape[self.dim_classes] == self.size
-        target_dist = ntorch(x, names=x.dims).fill_(self._off_prob)
+        target_dist = ntorch.tensor(x.values, names=x.dims).fill_(self._off_prob)
         target_dist[{self.dim_classes: target}] = self._on_prob
         target_dist[{self.dim_classes: self.padding_idx}] = 0
-        on = {self.dim_batch: (target != self.padding_idx).nonzero(name="off")}
-        return self.criterion(x[on], target_dist[on])
+        on = {self.dim_batch: (target != self.padding_idx).nonzero()}
+        return self.criterion(x[on].values, target_dist[on].values)
 
 
-class Residual(nn.Module):
+class Residual(ntorch.nn.Module):
     """
     A residual connection followed by a layer norm.
     Note for code simplicity the norm is first as opposed to last.
     """
     def __init__(self, p):
+        super(Residual, self).__init__()
         self.norm = nn.LayerNorm()
         self.dropout = nn.Dropout(p)
 
@@ -81,11 +87,12 @@ class Residual(nn.Module):
         "Apply residual connection to any sublayer with the same size."
         return x + self.dropout(sublayer(self.norm(x)))
 
-class PositionwiseFeedForward(nn.Module):
+class PositionwiseFeedForward(ntorch.nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim, p):
-        self.w_1 = nn.Linear(input_dim, hidden_dim)
-        self.w_2 = nn.Linear(hidden_dim, output_dim)
-        self.dropout = nn.Dropout(p)
+        super(PositionwiseFeedForward, self).__init__()
+        self.w_1 = ntorch.nn.Linear(input_dim, hidden_dim)
+        self.w_2 = ntorch.nn.Linear(hidden_dim, output_dim)
+        self.dropout = ntorch.nn.Dropout(p)
 
     def spec(self, dim_hidden):
         self.dim_hidden = dim_hidden
