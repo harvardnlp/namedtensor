@@ -13,7 +13,7 @@ import numpy as np
 
 
 # Setup Hypothesis helpers
-def named_tensor(dtype=np.float, shape=array_shapes(2, 5, max_side=5)):
+def named_tensor(dtype=np.float32, shape=array_shapes(2, 5, max_side=5)):
     @composite
     def name(draw, array):
         array = draw(array)
@@ -28,11 +28,7 @@ def named_tensor(dtype=np.float, shape=array_shapes(2, 5, max_side=5)):
         return ntorch.tensor(array, names=names)
 
     return name(
-        arrays(
-            dtype,
-            shape,
-            elements=floats(allow_nan=False, allow_infinity=False),
-        )
+        arrays(dtype, shape, elements=floats(min_value=-1e9, max_value=1e9))
     )
 
 
@@ -40,8 +36,10 @@ def dim(tensor):
     return sampled_from(list(tensor.shape.keys()))
 
 
-def dims(tensor, max_size=5):
-    return lists(dim(tensor), unique=True, min_size=2, max_size=max_size)
+def dims(tensor, min_size=2, max_size=5):
+    return lists(
+        dim(tensor), unique=True, min_size=min_size, max_size=max_size
+    )
 
 
 def name(tensor):
