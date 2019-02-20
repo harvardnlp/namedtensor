@@ -361,6 +361,8 @@ class NamedTensor(NamedTensorBase):
         "tan",
         "tanh",
         "trunc",
+        "triu",
+        "tril",
     }
 
     _noshift_args = {"tril", "triu", "pow", "fmod", "clamp", "reciprical"}
