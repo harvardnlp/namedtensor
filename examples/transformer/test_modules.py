@@ -22,6 +22,14 @@ def test_label():
     mod = LabelSmoothing(0.1, vocab, 0).spec("batch", "classes")
     mod(classes, target)
 
+def test_position():
+    vocab = 100
+    input = ntorch.randint(vocab, (5,), names=("src"))
+    mod = PositionalEmbeddings(vocab, 200, 10, 0).spec("src", "hidden")
+
+    mod(input)
+
+
 
 def test_all():
     EncoderDecoder(Params())

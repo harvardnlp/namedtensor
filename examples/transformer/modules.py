@@ -124,9 +124,10 @@ class PositionalEmbeddings(nn.Module):
                           names=(self.dim_length, self.dim_hidden))
         position = ntorch.arange(0, MAX_LEN,
                                  names=self.dim_length).float()
-        shift = ntorch.arange(0, self.d_model, 2, names=self.dim_hidden)
+        shift = ntorch.arange(0, self.d_model, 2, names=self.dim_hidden )
         div_term = ntorch.exp(shift.float() * -(math.log(10000.0) / self.d_model))
         val = ntorch.mul(position, div_term)
+        print(val.shape, shift.shape, pe.shape)
         pe[{self.dim_hidden: shift}] = val.sin()
         pe[{self.dim_hidden: shift + 1}] = val.cos()
         return pe
