@@ -13,7 +13,7 @@ install:
   - python setup.py install
 
 script:
-  - pytest .
+  - pytest namedtensor
 
 
 env:
