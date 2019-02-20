@@ -14,6 +14,7 @@ class Module(nn.Module):
         else:
             super(Module, self).register_parameter(name, tensor)
 
+
 class ModuleList(nn.ModuleList):
     def spec(self, *args, **kwargs):
         for x in self:
@@ -149,7 +150,6 @@ class Dropout(_Flat, nn.Dropout):
     pass
 
 
-
 Dropout.__doc__ = nn.Dropout.__doc__
 
 
@@ -161,13 +161,17 @@ class Linear(_Update, nn.Linear):
         self._output_update = {dim_in: name_out if name_out else dim_in}
         return self
 
+
 class LayerNorm(_Update, nn.LayerNorm):
     def spec(self, dim_normalized, name_out=None):
         self._spec = True
         self._front_pad = 0
         self._input_order = (dim_normalized,)
-        self._output_update = {dim_normalized: name_out if name_out else dim_normalized}
+        self._output_update = {
+            dim_normalized: name_out if name_out else dim_normalized
+        }
         return self
+
 
 class Conv1d(_Update, nn.Conv1d):
     def spec(self, dim_in, dim_conv, name_out=None):
