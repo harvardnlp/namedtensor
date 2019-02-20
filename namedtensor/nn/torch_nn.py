@@ -15,7 +15,11 @@ class Module(nn.Module):
             super(Module, self).register_parameter(name, tensor)
 
 
-ModuleList = nn.ModuleList
+class ModuleList(nn.ModuleList):
+    def spec(self, *args, **kwargs):
+        for x in self:
+            x.spec(*args, **kwargs)
+        return self
 
 
 class _Update:
@@ -155,6 +159,17 @@ class Linear(_Update, nn.Linear):
         self._front_pad = 0
         self._input_order = (dim_in,)
         self._output_update = {dim_in: name_out if name_out else dim_in}
+        return self
+
+
+class LayerNorm(_Update, nn.LayerNorm):
+    def spec(self, dim_normalized, name_out=None):
+        self._spec = True
+        self._front_pad = 0
+        self._input_order = (dim_normalized,)
+        self._output_update = {
+            dim_normalized: name_out if name_out else dim_normalized
+        }
         return self
 
 
