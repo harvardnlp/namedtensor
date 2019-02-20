@@ -1,5 +1,6 @@
 from namedtensor import ntorch
 from modules import *
+from encoder_decoder import *
 
 def test_attention():
     query = ntorch.randn(10, 6, 256, names=("batch", "target", "hidden"))
@@ -22,5 +23,5 @@ def test_label():
     mod(classes, target)
 
 
-# def test_all():
-#     EncoderDecoder()
+def test_all():
+    EncoderDecoder(Params())

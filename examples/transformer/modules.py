@@ -1,6 +1,6 @@
 from namedtensor import ntorch
 nn = ntorch.nn
-import torch
+import torch, math
 
 class Attention(nn.Module):
     "Scaled dot product attention"
@@ -26,9 +26,8 @@ class MultiHeadedAttention(nn.Module):
         assert d_model % heads == 0
         self.d_k = d_model // heads
         self.proj = nn.ModuleList(
-            [nn.Linear(d_model, d_model, bias=False).spec("hidden")
-            for _ in range(3)])
-        self.out_proj = nn.Linear(d_model, d_model, bias=False).spec("hidden")
+            [nn.Linear(d_model, d_model, bias=False) for _ in range(3)])
+        self.out_proj = nn.Linear(d_model, d_model, bias=False)
         self.attention = Attention(p, d_model)
 
     def spec(self, dim_keys, dim_hidden):
@@ -36,17 +35,18 @@ class MultiHeadedAttention(nn.Module):
         self.dim_keys = dim_keys
         self.proj.spec(dim_hidden)
         self.out_proj.spec(dim_hidden)
+        self.dims_proj = ("heads", "lower")
         self.attention.spec("lower", dim_keys)
         return self
 
     def forward(self, query, key, value, mask):
-        split = lambda x: x.split(self.dim_hidden, ("heads", "lower"),
+        split = lambda x: x.split(self.dim_hidden, self.dims_proj,
                                   heads=self.d_k)
         query = split(self.proj[0](query))
         key = split(self.proj[1](key))
         value = split(self.proj[2](value))
         x, self.attn = self.attention(query, key, value, mask=mask)
-        return self.out_proj(x.stack(("heads", "lower"), self.dim_hidden))
+        return self.out_proj(x.stack(self.dims_proj, self.dim_hidden))
 
 class LabelSmoothing(nn.Module):
     def __init__(self, smoothing, size, padding_idx):
@@ -63,7 +63,6 @@ class LabelSmoothing(nn.Module):
     def spec(self, dim_batch, dim_classes):
         self.dim_classes = dim_classes
         self.dim_batch = dim_batch
-        # self.criterion.spec(dim_classes)
         return self
 
     def forward(self, x, target):
@@ -76,13 +75,9 @@ class LabelSmoothing(nn.Module):
 
 
 class Residual(nn.Module):
-    """
-    A residual connection followed by a layer norm.
-    Note for code simplicity the norm is first as opposed to last.
-    """
-    def __init__(self, p):
+    def __init__(self, d_model, p):
         super(Residual, self).__init__()
-        self.norm = nn.LayerNorm()
+        self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(p)
 
     def spec(self, dim_hidden):
@@ -91,7 +86,6 @@ class Residual(nn.Module):
         return self
 
     def forward(self, x, sublayer):
-        "Apply residual connection to any sublayer with the same size."
         return x + self.dropout(sublayer(self.norm(x)))
 
 class PositionwiseFeedForward(nn.Module):
@@ -113,14 +107,16 @@ class PositionwiseFeedForward(nn.Module):
 MAX_LEN = 5000
 class PositionalEmbeddings(nn.Module):
     def __init__(self, input_dim, output_dim, scale, p):
+        super(PositionalEmbeddings, self).__init__()
         self.dropout = nn.Dropout(p)
         self.lut =  nn.Embedding(input_dim, output_dim)
         self.scale = scale
+        self.d_model = output_dim
 
     def spec(self, dim_length, dim_hidden):
         self.dim_length = dim_length
         self.dim_hidden = dim_hidden
-        self.pe = self.pe(self.d_model)
+        self.pe = self.pe()
         return self
 
     def pe(self):
@@ -128,8 +124,8 @@ class PositionalEmbeddings(nn.Module):
                           names=(self.dim_length, self.dim_hidden))
         position = ntorch.arange(0, MAX_LEN,
                                  names=self.dim_length).float()
-        shift = torch.arange(0, self.d_model, 2, names=self.dim_hidden)
-        div_term = torch.exp(shift.float() * -(math.log(10000.0) / d_model))
+        shift = ntorch.arange(0, self.d_model, 2, names=self.dim_hidden)
+        div_term = ntorch.exp(shift.float() * -(math.log(10000.0) / self.d_model))
         val = ntorch.mul(position, div_term)
         pe[{self.dim_hidden: shift}] = val.sin()
         pe[{self.dim_hidden: shift + 1}] = val.cos()

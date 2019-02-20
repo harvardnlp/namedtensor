@@ -220,7 +220,7 @@ class NTorch(type):
     def __dir__(cls):
         return set(cls.__dict__.keys()) | cls._build | cls._noshift
 
-    _build = {"ones", "zeros", "randn", "empty", "rand", "randint"}
+    _build = {"ones", "zeros", "randn", "empty", "rand", "randint", "arange"}
 
     _noshift = {
         "abs",
@@ -247,6 +247,7 @@ class NTorch(type):
         "int",
         "long",
         "log",
+        "mul",
         "pow",
         "reciprical",
         "relu",
