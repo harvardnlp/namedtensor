@@ -11,7 +11,7 @@ http://nlp.seas.harvard.edu/NamedTensor
 
 NamedTensor is an thin-wrapper on Torch tensor that makes three changes to the API:
 
-1) *Naming* Dimension access and reduction use a named `dim(s)` argument instead of an index. Constructing and adding dimensions use a `name(s)` argument. Axis-based indexing \[ \] is replaced by named indexing. 
+1) *Naming* Dimension access and reduction use a named `dim` argument instead of an index. Constructing and adding dimensions use a `name` argument. Axis-based indexing \[ \] is replaced by named indexing. 
 2) *Broadcasting* All functions broadcast based on set-operations not through heuristic rules, e.g. if `z = x + y` then `z` has the union of the dimension in `x` and `y`.    
 3) *Lifting* Order-based functions can be lifted by providing name annotations through `.spec` methods. For instance, convolution requires the user to name the channel and kernel dims, e.g .`conv2d.spec("channel", ("x", "y"))`. This provides dynamic checks, better error messages, and consistent documentation.
 
