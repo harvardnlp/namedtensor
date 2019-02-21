@@ -14,13 +14,13 @@ class NamedField(torchtext.data.Field):
     def numericalize(self, arr, device=None):
         vals = super(NamedField, self).numericalize(arr, device=device)
 
-        if vals is list or vals is tuple:
+        if isinstance(vals, list) or isinstance(vals, tuple):
             assert len(vals) == 2
             var, lengths = vals
             if self.sequential and not self.batch_first:
-                var = NamedTensor(vals, self.names + ("batch",))
+                var = NamedTensor(var, self.names + ("batch",))
             else:
-                var = NamedTensor(vals, ("batch",) + self.names)
+                var = NamedTensor(var, ("batch",) + self.names)
                 lengths = NamedTensor(lengths, ("batch",))
             return var, lengths
 
