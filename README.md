@@ -48,6 +48,7 @@ Indexing and masking operation work by name as opposed to absolute position.
 first_batch = x[{"batch": 1}]
 three_examples = x[{"batch": slice(1, 4)}]
 masked = x[ x > 0.5 ]
+```
 
 Advanced indexing by named tensors.
 
