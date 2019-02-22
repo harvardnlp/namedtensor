@@ -175,6 +175,12 @@ def test_all_scalar_ops(data, x, y):
     x = -x
 
 
+def test_mod():
+    base1 = ntorch.tensor(torch.Tensor([[1, 2, 3], [3, 4, 5]]), ("a", "b"))
+    expected = ntorch.tensor(torch.Tensor([[1, 2, 0], [0, 1, 2]]), ("a", "b"))
+    assert_match(ntorch.fmod(base1, 3), expected)
+
+
 @given(data(), named_tensor())
 def test_indexing(data, x):
     d = data.draw(dim(x))
