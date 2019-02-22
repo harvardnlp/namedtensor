@@ -5,7 +5,6 @@ from collections import namedtuple
 from namedtensor import NamedTensor
 
 
-
 JaggedInfo = namedtuple("JaggedInfo", ["lengths", "mask"])
 
 
@@ -38,7 +37,7 @@ class NamedField(torchtext.data.Field):
             lengths = NamedTensor(lengths, ("batch",))
 
             # Construct a JaggedInfo
-            jagged_info = JaggedInfo(lengths = lengths, mask = mask)
+            jagged_info = JaggedInfo(lengths=lengths, mask=mask)
 
             return var, jagged_info
 
