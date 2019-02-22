@@ -337,7 +337,7 @@ class _RNN:
             output, state = super(_RNN, self).forward(input.values, state_value)
         else:
             output, state = super(_RNN, self).forward(
-                pack(input.values, lengths, True), state_value)
+                pack(input.values, lengths.values, True), state_value)
             output = unpack(output, True)[0]
         state = run(state, lambda x: x.transpose(0, 1).contiguous())
 
