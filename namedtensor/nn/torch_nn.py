@@ -1,5 +1,7 @@
 import torch.nn as nn
 from ..torch_helpers import NamedTensor
+from torch.nn.utils.rnn import pack_padded_sequence as pack
+from torch.nn.utils.rnn import pad_packed_sequence as unpack
 
 
 class Module(nn.Module):
@@ -313,7 +315,7 @@ Embedding.__doc__ = nn.Embedding.__doc__
 
 
 class _RNN:
-    def __call__(self, input, state=None):
+    def __call__(self, input, state=None, lengths=None):
         input = input.transpose(*self._input_order).contiguous()
 
         def run(v, fn):
@@ -326,10 +328,17 @@ class _RNN:
 
         # For some reason, even with batch_first pytorch returns
         # the state with batch second. Need to transpose it.
+        state_order = (self._layer_name, "batch", self._name_out)
         state_value = run(
-            state, lambda x: x.values.transpose(0, 1).contiguous()
+            state,
+            lambda x: x._force_order(state_order).values
         )
-        output, state = super(_RNN, self).forward(input.values, state_value)
+        if lengths is None:
+            output, state = super(_RNN, self).forward(input.values, state_value)
+        else:
+            output, state = super(_RNN, self).forward(
+                pack(input.values, lengths.values, True), state_value)
+            output = unpack(output, True)[0]
         state = run(state, lambda x: x.transpose(0, 1).contiguous())
 
         updates = self._output_update
