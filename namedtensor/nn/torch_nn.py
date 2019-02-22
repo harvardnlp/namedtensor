@@ -4,7 +4,6 @@ from torch.nn.utils.rnn import pack_padded_sequence as pack
 from torch.nn.utils.rnn import pad_packed_sequence as unpack
 
 
-
 class Module(nn.Module):
     def register_parameter(self, name, tensor):
         if isinstance(tensor, NamedTensor):
