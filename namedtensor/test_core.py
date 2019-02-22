@@ -33,6 +33,46 @@ def test_stack_basic(data, x):
     assert not (x.shape.keys() & s)
 
 
+@given(named_tensor())
+def test_deepcopy(x):
+    import copy
+
+    x2 = copy.deepcopy(x)
+    assert id(x2.values) != id(x.values)
+    assert torch.equal(x2.values, x.values)
+    assert id(x2._schema) != id(x._schema)
+    assert x2._schema._names == x._schema._names
+    assert x2._schema._masked == x._schema._masked
+
+
+@given(data(), named_tensor())
+def test_unique(data, x):
+    s = data.draw(dim(x))
+    nu = data.draw(name(x))
+    ni = data.draw(name(x))
+    output, inverse_indices = ntorch.unique(
+        x, sorted=True, return_inverse=True, dim=s, names=(nu, ni)
+    )
+    assert all(
+        output[{nu: i}] <= output[{nu: i + 1}]
+        for i in range(output.shape[nu] - 1)
+    )
+    assert torch.equal(
+        x.values, output.index_select(nu, inverse_indices).values
+    )
+
+    output, inverse_indices = ntorch.unique(
+        x, sorted=True, return_inverse=True, names=(nu, ni)
+    )
+    assert all(
+        (output[{nu: i}] <= output[{nu: i + 1}]).values
+        for i in range(output.shape[nu] - 1)
+    )
+    assert torch.equal(
+        x.values, output.index_select(nu, inverse_indices).values
+    )
+
+
 @given(data(), named_tensor())
 def test_rename(data, x):
     s = data.draw(dim(x))

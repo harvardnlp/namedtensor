@@ -100,6 +100,43 @@ class NTorch(type):
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
+    def equal(tensor1, tensor2):
+        if (
+            torch.equal(tensor1._tensor, tensor2._tensor)
+            and tensor1._schema._names == tensor2._schema._names
+            and tensor1._schema._masked == tensor2._schema._masked
+        ):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def unique(
+        input,
+        sorted=False,
+        return_inverse=False,
+        dim=None,
+        names=("unique", "Indices"),
+    ):
+        dim_name = dim
+        if dim is not None:
+            dim = input._schema.get(dim)
+        output, inverse_indices = torch.unique(
+            input.values, sorted=sorted, return_inverse=return_inverse, dim=dim
+        )
+        if dim_name is not None:
+            output = NamedTensor(output, input.dims).rename(
+                dim_name, (names[0])
+            )
+            inverse_indices = NamedTensor(inverse_indices, names[1])
+        else:
+            output = NamedTensor(output, names[0])
+            inverse_indices = NamedTensor(
+                inverse_indices, (["%s%s" % (s, names[1]) for s in input.dims])
+            )
+        return output, inverse_indices
+
+    @staticmethod
     def gather(input, dim, index, index_dim):
         outdim = index_dim
         indim = dim

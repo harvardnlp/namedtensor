@@ -41,6 +41,11 @@ class NamedTensorBase:
         else:
             assert len(names) == 0, str(tensor)
 
+    def __deepcopy__(self, memo):
+        new_ntensor = self._new(self._tensor.__deepcopy__(memo))
+        memo[id(self)] = new_ntensor
+        return new_ntensor
+
     @property
     def dims(self):
         "Return the dim names for the tensor"
