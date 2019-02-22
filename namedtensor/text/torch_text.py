@@ -21,7 +21,7 @@ class NamedField(torchtext.data.Field):
                 var = NamedTensor(var, self.names + ("batch",))
             else:
                 var = NamedTensor(var, ("batch",) + self.names)
-                lengths = NamedTensor(lengths, ("batch",))
+            lengths = NamedTensor(lengths, ("batch",))
             return var, lengths
 
         else:
