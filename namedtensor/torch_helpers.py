@@ -342,6 +342,7 @@ class NamedTensor(NamedTensorBase):
         "expm1",
         "float",
         "floor",
+        "fmod",
         "frac",
         "half",
         "int",
