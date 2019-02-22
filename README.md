@@ -169,3 +169,4 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Jason Ren
 * Josh Feldman
 * Jambay Kinley
+* Ian Kivlichan
