@@ -179,6 +179,7 @@ class NamedTensorBase:
         """ Forces self to take order in names, adds 1-size dims if needed """
         ex = []
         view = []
+        trans = []
         for d in names:
             if d not in self._schema._names:
                 ex.append(d)
@@ -186,7 +187,10 @@ class NamedTensorBase:
             else:
                 ex.append(d)
                 view.append(self.shape[d])
-        return self.__class__(self._tensor.contiguous().view(*view), ex)
+                trans.append(d)
+        return self.__class__(
+            self.transpose(*trans)._tensor.contiguous().view(*view), ex
+        )
 
     def _broadcast_order(self, other):
         """ Outputs a shared order (list) that works for self and other """
