@@ -1,6 +1,7 @@
 from namedtensor import ntorch
 from modules import *
 from encoder_decoder import *
+
 # def test_attention():
 #     query = ntorch.randn(10, 6, 256, names=("batch", "target", "hidden"))
 #     key = ntorch.randn(10, 5, 256, names=("batch", "src", "hidden"))

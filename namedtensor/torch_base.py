@@ -58,14 +58,17 @@ class NTorch(type):
 
     @staticmethod
     def topk(tensor, dim, k, largest=True, sorted=True):
-        old_names = tensor._schema._names
         top_k, arg_top_k = tensor._tensor.topk(
             k, dim=tensor._schema.get(dim), largest=largest, sorted=sorted
         )
-        return (
-            ntorch.tensor(top_k, old_names),
-            ntorch.tensor(arg_top_k, old_names),
+        return (tensor._new(top_k), tensor._new(arg_top_k))
+
+    @staticmethod
+    def chunk(tensor, number_of_chunks, dim):
+        tuple_of_chunks = tensor._tensor.chunk(
+            number_of_chunks, dim=tensor._schema.get(dim)
         )
+        return tuple(tensor._new(chunk) for chunk in tuple_of_chunks)
 
     @staticmethod
     def stack(tensors, name):

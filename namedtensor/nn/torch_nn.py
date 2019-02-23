@@ -329,15 +329,15 @@ class _RNN:
         # For some reason, even with batch_first pytorch returns
         # the state with batch second. Need to transpose it.
         state_order = (self._layer_name, "batch", self._name_out)
-        state_value = run(
-            state,
-            lambda x: x._force_order(state_order).values
-        )
+        state_value = run(state, lambda x: x._force_order(state_order).values)
         if lengths is None:
-            output, state = super(_RNN, self).forward(input.values, state_value)
+            output, state = super(_RNN, self).forward(
+                input.values, state_value
+            )
         else:
             output, state = super(_RNN, self).forward(
-                pack(input.values, lengths.values, True), state_value)
+                pack(input.values, lengths.values, True), state_value
+            )
             output = unpack(output, True)[0]
         state = run(state, lambda x: x.transpose(0, 1).contiguous())
 
