@@ -360,7 +360,7 @@ class NamedTensor(NamedTensorBase):
         "to",
         "tan",
         "tanh",
-        "trunc"
+        "trunc",
     }
 
     _noshift_args = {"tril", "triu", "pow", "fmod", "clamp", "reciprical"}

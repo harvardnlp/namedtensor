@@ -1,9 +1,11 @@
 from .schema import _Schema
-from einops import rearrange
-import operator, functools
+import operator
+import functools
+
 
 def prod(factors):
     return functools.reduce(operator.mul, factors, 1)
+
 
 def assert_match(*tensors):
     sizes = {}
@@ -167,9 +169,9 @@ class NamedTensorBase:
 
     def _promote(self, dims):
         "Move dims to the front of the line"
-        term = \
-            [d for d in self._schema._names if d not in dims] \
-            + dims.split()[1:]
+        term = [
+            d for d in self._schema._names if d not in dims
+        ] + dims.split()[1:]
 
         return self.transpose(*term)
 
