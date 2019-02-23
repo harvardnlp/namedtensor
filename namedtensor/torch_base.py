@@ -63,15 +63,17 @@ class NTorch(type):
             k, dim=tensor._schema.get(dim), largest=largest, sorted=sorted
         )
         return (
-            ntorch.tensor(top_k, old_names),
-            ntorch.tensor(arg_top_k, old_names),
+            tensor._new(top_k, old_names),
+            tensor._new(arg_top_k, old_names),
         )
 
     @staticmethod
-    def chunk(tensor, chunks, dim):
+    def chunk(tensor, number_of_chunks, dim):
         old_names = tensor._schema._names
-        chunks = tensor._tensor.chunk(chunks, dim=tensor._schema.get(dim))
-        return [ntorch.tensor(chunk, old_names) for chunk in chunks]
+        list_of_chunks = tensor._tensor.chunk(
+            number_of_chunks, dim=tensor._schema.get(dim)
+        )
+        return [tensor._new(chunk, old_names) for chunk in list_of_chunks]
 
     @staticmethod
     def stack(tensors, name):
@@ -88,7 +90,7 @@ class NTorch(type):
         to_stack = [tensor.values for tensor in tensors]
         old_names = list(old_names)
         old_names.insert(0, name)
-        return ntorch.tensor(torch.stack(to_stack, dim=0), old_names)
+        return tensors[0]._new(torch.stack(to_stack, dim=0), old_names)
 
     @staticmethod
     def cat(tensors, dim):
