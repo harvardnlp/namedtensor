@@ -1,5 +1,11 @@
 import torchtext
+import torch
+from collections import namedtuple
+
 from namedtensor import NamedTensor
+
+
+JaggedInfo = namedtuple("JaggedInfo", ["lengths", "mask"])
 
 
 class NamedField(torchtext.data.Field):
@@ -21,8 +27,19 @@ class NamedField(torchtext.data.Field):
                 var = NamedTensor(var, self.names + ("batch",))
             else:
                 var = NamedTensor(var, ("batch",) + self.names)
+
+            # Compute the mask based on lengths
+            idxs = torch.arange(0, max(lengths)).to(lengths)
+            mask = idxs.repeat(len(lengths), 1) >= lengths.unsqueeze(-1)
+            mask = NamedTensor(mask, names=("batch",) + self.names)
+
+            # Convert lengths to NamedTensor
             lengths = NamedTensor(lengths, ("batch",))
-            return var, lengths
+
+            # Construct a JaggedInfo
+            jagged_info = JaggedInfo(lengths=lengths, mask=mask)
+
+            return var, jagged_info
 
         else:
             if self.sequential and not self.batch_first:
