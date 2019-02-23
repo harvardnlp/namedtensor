@@ -68,6 +68,12 @@ class NTorch(type):
         )
 
     @staticmethod
+    def chunk(tensor, chunks, dim):
+        old_names = tensor._schema._names
+        chunks = tensor._tensor.chunk(chunks, dim=tensor._schema.get(dim))
+        return [ntorch.tensor(chunk, old_names) for chunk in chunks]
+
+    @staticmethod
     def stack(tensors, name):
         old_names = tensors[0]._schema._names
         for i in range(1, len(tensors)):
