@@ -461,6 +461,7 @@ doc is the same as below.
         "topk",
         "equal",
         "unique",
+        "chunk",
     }
 
     # def gather(self, dim, index, index_dim):
