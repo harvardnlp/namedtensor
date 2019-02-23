@@ -36,7 +36,6 @@ def test_stack_basic(data, x):
 @given(named_tensor())
 def test_deepcopy(x):
     import copy
-
     x2 = copy.deepcopy(x)
     assert id(x2.values) != id(x.values)
     assert torch.equal(x2.values, x.values)
