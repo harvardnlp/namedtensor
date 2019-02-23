@@ -541,6 +541,16 @@ def test_topk():
     assert_match(base[1], expected[1])
 
 
+def test_chunk():
+    base_torch = torch.rand([10, 10])
+    dim_names = ("dim1", "dim2")
+    named_chunks = ntorch.tensor(base_torch, names=dim_names).chunk(3, "dim1")
+    torch_chunks = base_torch.chunk(3, 0)
+    expected = tuple(named_chunks[0]._new(chunk) for chunk in torch_chunks)
+    for i in range(len(torch_chunks)):
+        assert named_chunks[i] == expected[i]
+
+
 def test_index_set():
     base = ntorch.randn(10, 2, 50, names=("alpha", "beta", "gamma"))
     new = ntorch.randn(2, 50, names=("beta", "gamma"))
