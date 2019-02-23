@@ -36,6 +36,7 @@ def test_stack_basic(data, x):
 @given(named_tensor())
 def test_deepcopy(x):
     import copy
+
     x2 = copy.deepcopy(x)
     assert id(x2.values) != id(x.values)
     assert torch.equal(x2.values, x.values)
@@ -47,8 +48,7 @@ def test_deepcopy(x):
 @given(data(), named_tensor())
 def test_unique(data, x):
     s = data.draw(dim(x))
-    nu = data.draw(name(x))
-    ni = data.draw(name(x))
+    nu, ni = data.draw(names(x, max_size=2))
     output, inverse_indices = ntorch.unique(
         x, sorted=True, return_inverse=True, dim=s, names=(nu, ni)
     )
