@@ -459,9 +459,9 @@ doc is the same as below.
         "index_copy_",
         "index_fill_",
         "topk",
+        "chunk",
         "equal",
         "unique",
-        "chunk",
     }
 
     # def gather(self, dim, index, index_dim):
