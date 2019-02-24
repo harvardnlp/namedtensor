@@ -137,7 +137,7 @@ Examples
 ```python
   loss = ntorch.nn.NLLLoss().spec("target")
   predict = ntorch.randn(20, 4, names=("target", "batch"))
-  target = ntorch.tensor([2, 2, 3, 4], ["batch"])
+  target = ntorch.tensor([2, 2, 3, 4], names=("batch",))
   out = loss(predict, target)
 ```
 
