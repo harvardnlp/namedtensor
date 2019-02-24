@@ -9,7 +9,7 @@ setup(
               "namedtensor.distributions"],
     package_data={"namedtensor": []},
     url="https://github.com/harvardnlp/NamedTensor",
-    install_requires=["torch", "torchtext", "numpy", "einops", "opt-einsum"],
+    install_requires=["torch", "torchtext", "numpy", "opt-einsum"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"]
 
