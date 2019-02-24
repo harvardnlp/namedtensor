@@ -103,6 +103,62 @@ class NTorch(type):
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
 
     @staticmethod
+    def equal(tensor1, tensor2):
+        equality = False
+        if set(tensor1._schema._names) == set(tensor2._schema._names):
+            tensor2 = tensor2.transpose(*tensor1._schema._names)
+            if torch.equal(tensor1._tensor, tensor2._tensor):
+                equality = True
+        return equality
+
+    @staticmethod
+    def unique(input, dim=None, names=("unique", "Indices"), **kwargs):
+        """
+        Returns the unique elements of the input ntensor for a specific dimension.
+
+        Parameters
+        ----------
+        input (NamedTensor) – the input ntensor
+        dim (string): the dimension to apply unique. If None, the unique of the flattened input is returned.
+                        default: None
+        names (tuple of strings): the names for the output ntensor of unique elements and the output ntensor of
+                                    corresponding indices. default: ("unique", "Indices")
+        sorted (bool): Whether to sort the unique elements in ascending order before returning as output.
+                        default: False
+        return_inverse (bool): Whether to also return the indices for where elements in the original input
+                                ended up in the returned unique output. default: False
+
+        Returns:
+        ----------
+        A namedtensor or a tuple of namedtensors containing
+
+        output (NamedTensor): the output ntensor of unique elements.
+        inverse_indices (NamedTensor): (optional) the output ntensor representing the indices for
+                                        where elements in the original input map to in the output.
+
+        """
+        dim_name = dim
+        if dim is not None:
+            dim = input._schema.get(dim)
+        output, inverse_indices = torch.unique(input.values, dim=dim, **kwargs)
+
+        # If dim is not None, the output ntensor has the same dimensions as input while the dim is renamed,
+        # and the inverse_indices is an 1-D ntensor.
+        if dim_name is not None:
+            output = NamedTensor(output, input.dims).rename(
+                dim_name, (names[0])
+            )
+            inverse_indices = NamedTensor(inverse_indices, names[1])
+        # If dim is None, the output is an 1-D ntensor,
+        # and the inverse_indices has the same dimensions as input while the dimensions are renamed.
+        else:
+            output = NamedTensor(output, names[0])
+            inverse_indices = NamedTensor(
+                inverse_indices, (["%s%s" % (s, names[1]) for s in input.dims])
+            )
+        return output, inverse_indices
+
+    @staticmethod
     def gather(input, dim, index, index_dim):
         outdim = index_dim
         indim = dim

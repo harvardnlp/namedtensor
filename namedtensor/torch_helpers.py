@@ -459,6 +459,8 @@ doc is the same as below.
         "index_copy_",
         "index_fill_",
         "topk",
+        "equal",
+        "unique",
         "chunk",
     }
 
