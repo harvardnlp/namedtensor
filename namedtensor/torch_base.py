@@ -193,6 +193,24 @@ class NTorch(type):
         return NamedTensor(tensor=indices, names=names)
 
     @staticmethod
+    def triu(input, diagonal=0, dims=None):
+        old_dims = list(input.dims)
+        return (
+            input.transpose(*dims)
+            ._new(input.transpose(*dims).values.triu(diagonal))
+            .transpose(*old_dims)
+        )
+
+    @staticmethod
+    def tril(input, diagonal=0, dims=None):
+        old_dims = list(input.dims)
+        return (
+            input.transpose(*dims)
+            ._new(input.transpose(*dims).values.tril(diagonal))
+            .transpose(*old_dims)
+        )
+
+    @staticmethod
     def scatter_(input, dim, index, src, index_dim):
         indim = dim
         outdim = index_dim
@@ -266,8 +284,6 @@ class NTorch(type):
         "to",
         "tan",
         "tanh",
-        "tril",
-        "triu",
         "trunc",
     }
 

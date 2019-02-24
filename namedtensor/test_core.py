@@ -603,3 +603,18 @@ def test_names():
 def test_bad_names():
     base = torch.zeros([10, 2])
     assert ntorch.tensor(base, ("elements_dim", "input_dims"))
+
+
+def test_tri():
+    indices = ntorch.ones(10, 10, names=("a", "b")).long()
+    assert (
+        indices.triu(1, dims=("a", "b")).values == indices.values.triu(1)
+    ).all()
+
+    indices = ntorch.ones(10, 10, names=("a", "b")).long()
+    assert (
+        indices.triu(dims=("b", "a")).values == indices.values.tril()
+    ).all()
+    assert (
+        indices.tril(dims=("a", "b")).values == indices.values.tril()
+    ).all()

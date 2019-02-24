@@ -363,7 +363,7 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_args = {"tril", "triu", "pow", "fmod", "clamp", "reciprical"}
+    _noshift_args = {"pow", "fmod", "clamp", "reciprical"}
 
     _noshift_nn = {"relu"}
 
@@ -449,6 +449,8 @@ doc is the same as below.
         "gather",
         "nonzero",
         "scatter_",
+        "tril",
+        "triu",
         "narrow",
         "masked_select",
         "masked_scatter",

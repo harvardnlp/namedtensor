@@ -5,6 +5,7 @@ from ..strategies import named_tensor, dim, dims, name
 from hypothesis.strategies import data, integers, permutations
 from hypothesis.extra.numpy import array_shapes
 
+
 ## HYPOTHESIS Tests
 @given(data(), named_tensor())
 def test_hyp_nn(data, x):
