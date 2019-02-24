@@ -148,7 +148,12 @@
             
   <h1>Source code for namedtensor.core</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">.schema</span> <span class="k">import</span> <span class="n">_Schema</span>
-<span class="kn">from</span> <span class="nn">einops</span> <span class="k">import</span> <span class="n">rearrange</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+
+<span class="k">def</span> <span class="nf">prod</span><span class="p">(</span><span class="n">factors</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">factors</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">assert_match</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
@@ -269,76 +274,72 @@
         <span class="n">to_dims</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">tuple</span><span class="p">((</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">))</span> <span class="o">+</span> <span class="n">dims</span>
         <span class="p">)</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">to_dims</span><span class="p">))</span>
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">recipe</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">to_dims</span><span class="p">]</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="o">*</span><span class="n">indices</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">to_dims</span><span class="p">)</span>
 
     <span class="c1"># Todo: fix arg names</span>
     <span class="k">def</span> <span class="nf">_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
                 <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
             <span class="k">elif</span> <span class="n">first</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="n">names</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prod</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d2</span><span class="p">]</span> <span class="k">for</span> <span class="n">d2</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]))</span>
                 <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
                 <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">s</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">size_dict</span><span class="p">):</span>
-        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">enum_all</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="n">dim</span><span class="p">:</span>
-                <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
+                <span class="n">query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
                 <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="n">query</span> <span class="o">+=</span> <span class="n">names</span>
+                <span class="k">for</span> <span class="n">d2</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                    <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">size_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
                 <span class="n">ex</span> <span class="o">+=</span> <span class="n">names</span>
-
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ex</span><span class="p">)),</span>
-            <span class="o">**</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">size_dict</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">size_dict</span><span class="p">}</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_rearrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="s2">&quot;)&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">term</span><span class="p">)</span>
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">recipe</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">),</span> <span class="n">ex</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_promote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
         <span class="s2">&quot;Move dims to the front of the line&quot;</span>
-        <span class="n">term</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
-            <span class="o">+</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rearrange</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">term</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_force_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Forces self to take order in names, adds 1-size dims if needed &quot;&quot;&quot;</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="n">ex</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">trans</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
                 <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; ()&quot;</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-                <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">d</span>
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_einops</span><span class="p">(),</span> <span class="n">s</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+                <span class="n">trans</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">trans</span><span class="p">)</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">),</span> <span class="n">ex</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Outputs a shared order (list) that works for self and other &quot;&quot;&quot;</span>

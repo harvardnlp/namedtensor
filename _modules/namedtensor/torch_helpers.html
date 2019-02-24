@@ -351,7 +351,7 @@
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methodname</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">methodname</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">):</span>
             <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">methodname</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">methodname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noshift</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">methodname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noshift</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noshift_args</span><span class="p">:</span>
 
                 <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new</span><span class="p">(</span><span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
@@ -491,7 +491,6 @@
         <span class="s2">&quot;expm1&quot;</span><span class="p">,</span>
         <span class="s2">&quot;float&quot;</span><span class="p">,</span>
         <span class="s2">&quot;floor&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fmod&quot;</span><span class="p">,</span>
         <span class="s2">&quot;frac&quot;</span><span class="p">,</span>
         <span class="s2">&quot;half&quot;</span><span class="p">,</span>
         <span class="s2">&quot;int&quot;</span><span class="p">,</span>
@@ -511,8 +510,6 @@
         <span class="s2">&quot;tan&quot;</span><span class="p">,</span>
         <span class="s2">&quot;tanh&quot;</span><span class="p">,</span>
         <span class="s2">&quot;trunc&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;triu&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;tril&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">_noshift_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;tril&quot;</span><span class="p">,</span> <span class="s2">&quot;triu&quot;</span><span class="p">,</span> <span class="s2">&quot;pow&quot;</span><span class="p">,</span> <span class="s2">&quot;fmod&quot;</span><span class="p">,</span> <span class="s2">&quot;clamp&quot;</span><span class="p">,</span> <span class="s2">&quot;reciprical&quot;</span><span class="p">}</span>
