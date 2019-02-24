@@ -202,7 +202,7 @@ class NamedTensor(NamedTensorBase):
     def __getattr__(self, methodname):
         if methodname in dir(self._tensor):
             method = getattr(self._tensor, methodname)
-            if methodname in self._noshift:
+            if methodname in self._noshift | self._noshift_args:
 
                 def call(*args, **kwargs):
                     return self._new(method(*args, **kwargs))
@@ -342,7 +342,6 @@ class NamedTensor(NamedTensorBase):
         "expm1",
         "float",
         "floor",
-        "fmod",
         "frac",
         "half",
         "int",
@@ -362,8 +361,6 @@ class NamedTensor(NamedTensorBase):
         "tan",
         "tanh",
         "trunc",
-        "triu",
-        "tril",
     }
 
     _noshift_args = {"tril", "triu", "pow", "fmod", "clamp", "reciprical"}
