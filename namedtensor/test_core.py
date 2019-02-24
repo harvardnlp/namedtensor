@@ -64,7 +64,7 @@ def test_unique(data, x):
         x, sorted=True, return_inverse=True, names=(nu, ni)
     )
     assert all(
-        (output[{nu: i}] <= output[{nu: i + 1}]).values
+        (output[{nu: i}].values <= output[{nu: i + 1}].values)
         for i in range(output.shape[nu] - 1)
     )
     assert torch.equal(
