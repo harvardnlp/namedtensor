@@ -170,3 +170,4 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Josh Feldman
 * Jambay Kinley
 * Ian Kivlichan
+* Sanyuan Chen
