@@ -1,5 +1,4 @@
 torch
 numpy
-einops
 opt-einsum
 torchtext

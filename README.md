@@ -1,4 +1,4 @@
-# NamedTensor
+# Named Tensor for Torch
 
 [![Build Status](https://travis-ci.org/harvardnlp/namedtensor.svg?branch=master)](https://travis-ci.org/harvardnlp/namedtensor) [![Coverage Status](https://coveralls.io/repos/github/harvardnlp/namedtensor/badge.svg?branch=master)](https://coveralls.io/github/harvardnlp/namedtensor?branch=master)
 
@@ -137,7 +137,7 @@ Examples
 ```python
   loss = ntorch.nn.NLLLoss().spec("target")
   predict = ntorch.randn(20, 4, names=("target", "batch"))
-  target = ntorch.tensor([2, 2, 3, 4], ["batch"])
+  target = ntorch.tensor([2, 2, 3, 4], names=("batch",))
   out = loss(predict, target)
 ```
 

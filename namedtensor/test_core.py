@@ -338,7 +338,6 @@ def test_multiple():
     ntensor3 = ntensor1.mul(ntensor2).transpose(
         "alpha", "delta", "beta", "gamma"
     )
-
     assert base3.shape == ntensor3.vshape
     assert (base3 == ntensor3.values).all()
 
