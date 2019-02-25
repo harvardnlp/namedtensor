@@ -160,15 +160,20 @@ class NTorch(type):
 
     @staticmethod
     def gather(input, dim, index, index_dim):
+        "Gathers elements using `index` from `input`."
         outdim = index_dim
         indim = dim
-        index_order = [
-            (n if n != indim else outdim) for n in input._schema._names
-        ]
-        b1 = index._force_order(index_order)
-        dim = input._schema.get(indim)
-        return input._new(
-            input.values.gather(dim, b1.values), updates={indim: outdim}
+        input_order, index_order, input_shape, index_shape = (
+            input._broadcast_order_shape(index, indim, outdim)
+        )
+        input1 = input._force_order(input_order)
+        index1 = index._force_order(index_order)
+        dim = input1._schema.get(indim)
+        return input1._new(
+            input1.values.expand(input_shape).gather(
+                dim, index1.values.expand(index_shape)
+            ),
+            updates={indim: outdim}
         )
 
     @staticmethod
