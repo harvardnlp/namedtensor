@@ -326,7 +326,7 @@ class NTorch(type):
         "log",
         "mul",
         "pow",
-        "reciprical",
+        "reciprocal",
         "relu",
         "round",
         "rsqrt",
