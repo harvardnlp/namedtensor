@@ -347,6 +347,7 @@ class NamedTensor(NamedTensorBase):
         "int",
         "long",
         "log",
+        "reciprocal",
         "relu",
         "round",
         "rsqrt",
@@ -363,7 +364,7 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_args = {"pow", "fmod", "clamp", "reciprical"}
+    _noshift_args = {"pow", "fmod", "clamp"}
 
     _noshift_nn = {"relu"}
 
