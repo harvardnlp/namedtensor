@@ -209,7 +209,7 @@ class NamedTensorBase:
 
     def _broadcast_order_shape(self, other, indim, outdim):
         """
-        Outputs two orders (list) that works for self and other,
+        Outputs two orders (list) for self and other,
         as well as the shapes necessary to expand to a shared size.
         Assumes update from indim to outdim.
         Moves indim and outdim to the front to ensure the most spacing.
