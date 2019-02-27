@@ -335,10 +335,7 @@ class NamedTensor(NamedTensorBase):
         "trunc",
     }
 
-    _noshift_dim = {
-        "cumprod",
-        "cumsum",
-    }
+    _noshift_dim = {"cumprod", "cumsum"}
 
     # Return a non-tensor info object
     _info = {

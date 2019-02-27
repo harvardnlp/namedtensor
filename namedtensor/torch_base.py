@@ -76,9 +76,9 @@ class NTorch(type):
             dims = [dims] * len(tensors)
         if out is not None:
             tensors = [t.rename(d, out) for t, d in zip(tensors, dims)]
-            dim = out
         else:
-            dim = tensors[0]._schema.get(dims[0])
+            out = dims[0]
+        dim = tensors[0]._schema.get(out)
         for t in tensors[1:]:
             assert t._schema._names == tensors[0]._schema._names
         return tensors[0]._new(torch.cat([t.values for t in tensors], dim=dim))
