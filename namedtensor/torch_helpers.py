@@ -83,6 +83,10 @@ class NamedTensor(NamedTensorBase):
             self.values.narrow(dim, torch.tensor(idx), 1).squeeze(dim), name
         )
 
+    def iter(self, dim):
+        for i in range(self.shape[dim]):
+            yield self.get(dim, i)
+
     def renorm(self, p, name, maxnorm):
         "Apply :py:meth:`torch.Tensor.renorm` over `name`"
         results = self._tensor.renorm(p, self.get(name), maxnorm)

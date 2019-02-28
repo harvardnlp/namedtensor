@@ -627,6 +627,17 @@ def test_setindex_tensor():
     base[{"gamma": indices}] = 2
 
 
+def test_iter():
+    tensor = torch.Tensor([[1, 2], [3, 4], [5, 6]])
+    ntensor = ntorch.tensor(tensor, ("a", "b"))
+
+    for i, e in enumerate(ntensor.iter("a")):
+        assert (e.values == tensor[i, :]).all()
+
+    for i, e in enumerate(ntensor.iter("b")):
+        assert (e.values == tensor[:, i]).all()
+
+
 @pytest.mark.xfail
 def test_unique_names():
     base = torch.zeros([10, 2])
