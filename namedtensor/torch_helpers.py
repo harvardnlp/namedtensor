@@ -1,47 +1,92 @@
 import torch.nn.functional as F
+import torch
 from .core import NamedTensorBase, assert_match
 from .utils import make_tuple
 
 
 class NamedTensor(NamedTensorBase):
-    def index_select(self, dim, index):
-        "Index into dimension names with the `index` named tensors."
-        name = dim
-        new_names = []
-        sizes = []
-        for n in self._schema._names:
-            if n == name:
-                for n2 in index._schema._names:
-                    new_names.append(n2)
-                    sizes.append(index.size(n2))
+    def __getitem__(self, index):
+        if isinstance(index, dict):
+            cur = self
+            for k, v in index.items():
+                if isinstance(v, slice):
+                    cur = cur.narrow(k, v.start, v.stop - v.start)
+                elif isinstance(v, NamedTensor):
+                    cur = cur.index_select(k, v)
+                else:
+                    cur = cur.get(k, v)
+            return cur
+        elif isinstance(index, NamedTensor):
+            if (
+                index.type() == "torch.ByteTensor"
+                or index.type() == "torch.cuda.ByteTensor"
+            ):
+                return self.masked_select(index)
+            raise RuntimeError("Masked namedtensor must be byte tensor.")
+        else:
+            raise RuntimeError("Index must be dict or namedtensor.")
+
+    def __setitem__(self, index, val):
+
+        if isinstance(val, NamedTensor):
+            copy = True
+        else:
+            copy = False
+
+        if isinstance(index, dict):
+            cur = self
+            for k, v in index.items():
+                if isinstance(v, slice):
+                    cur = cur.narrow(k, v.start, v.stop - v.start)
+                elif isinstance(v, NamedTensor):
+                    assert len(index) == 1
+                    if copy:
+                        cur.index_copy_(k, v, val)
+                    else:
+                        cur.index_fill_(k, v, val)
+                    return self
+                else:
+                    cur = cur.get(k, v)
+            if copy:
+                cur.copy_(val)
             else:
-                new_names.append(n)
-                sizes.append(self.size(n))
-        return NamedTensor(
-            self._tensor.index_select(
-                self._schema.get(name), index._tensor.view(-1)
-            ).view(*sizes),
-            new_names,
+                cur.fill_(val)
+        elif isinstance(index, NamedTensor):
+            if (
+                index.type() == "torch.ByteTensor"
+                or index.type() == "torch.cuda.ByteTensor"
+            ):
+                if copy:
+                    return self.masked_scatter_(index, val)
+                else:
+                    return self.masked_fill_(index, val)
+            raise RuntimeError("Masked namedtensor must be byte tensor.")
+        else:
+            raise RuntimeError("Index must be dict or namedtensor.")
+        return self
+
+    def copy_(self, other):
+        return self._setter(other, "copy_")
+
+    def _setter(self, other, method, vals=[]):
+        order = other._mask_broadcast_order(self)
+        other = other._force_order(order)
+
+        args = [other.values] + vals
+        getattr(self.values, method)(*args)
+        return self
+
+    def get(self, name, idx):
+        "Returns a namedtensor by indexing into dim name"
+        dim = self._schema.get(name)
+        return self._new(
+            self.values.narrow(dim, torch.tensor(idx), 1).squeeze(dim), name
         )
 
-    def gather(self, dim, index, index_dim):
-        """
-        Apply gather where `self_dim` is reduced out
-        based on `index` from `index_dim`.
-        """
-        from .torch_base import ntorch
-
-        return ntorch.gather(self, dim, index, index_dim)
-
-    def scatter_(self, dim, index, src, index_dim):
-        """
-        Apply scatter where `dim` gets the
-        scattered values of `src` based in `index` along `index_dim`.
-        """
-
-        from .torch_base import ntorch
-
-        ntorch.scatter_(self, dim, index, src, index_dim)
+    def renorm(self, p, name, maxnorm):
+        "Apply :py:meth:`torch.Tensor.renorm` over `name`"
+        results = self._tensor.renorm(p, self.get(name), maxnorm)
+        return self._new(results)
 
     def dot(self, names, *others):
         "Contract dimension `names` with each of the other tensors"
@@ -49,66 +94,13 @@ class NamedTensor(NamedTensorBase):
 
         return ntorch.dot(names, *((self,) + others))
 
-    def narrow(self, name, start, end):
-        "Narrow into the `kwargs` dimension and rename it"
-        from .torch_base import ntorch
+    # def access(self, dims):
+    #     term = dims.split() + [d for d in self._schema._names if d not in dims]
+    #     return self.transpose(*term)._tensor
 
-        return ntorch.narrow(self, name, start, end)
-
-    def masked_select(self, mask, name):
-        "Applies `mask` and returns a 1D tensor with name `name`"
-        from .torch_base import ntorch
-
-        return ntorch.masked_select(self, mask, name)
-
-    def nonzero(self, names=("elements", "inputdims")):
-        """
-        Returns a tensor containing the indices of all non-zero elements.
-
-        Parameters
-        ----------
-        names : tuple, optional
-            Names for the output dimensions
-            default value: ("elements", "inputdims")
-            default output shape: OrderedDict([("elements", number of non-zero elements),
-                                               ("inputdims", input tensor's number of dimensions)])
-        """
-
-        from .torch_base import ntorch
-
-        return ntorch.nonzero(self, names)
-
-    def relu(self):
-        "Apply relu"
-        return self._new(F.relu(self._tensor))
-
-    def softmax(self, name):
-        "Apply softmax over dim `name`"
-        return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
-
-    def log_softmax(self, name):
-        "Apply log softmax over dim `name`"
-        return self._new(
-            F.log_softmax(self._tensor, dim=self._schema.get(name))
-        )
-
-    def get(self, name, idx):
-        "Returns a namedtensor by indexing into dim name"
-        results = self.access(name)[idx]
-        return self._new(results, name)
-
-    def renorm(self, p, name, maxnorm):
-        "Apply :py:meth:`torch.Tensor.renorm` over `name`"
-        results = self._tensor.renorm(p, self.get(name), maxnorm)
-        return self._new(results)
-
-    def access(self, dims):
-        term = dims.split() + [d for d in self._schema._names if d not in dims]
-        return self.transpose(*term)._tensor
-
-    def debug(self):
-        print(self.shape)
-        return self
+    # def debug(self):
+    #     print(self.shape)
+    #     return self
 
     def augment(self, axis_op, add, dim=None, **kwargs):
         return self.op(axis_op, dim=dim, _add=add, **kwargs)
@@ -168,8 +160,14 @@ class NamedTensor(NamedTensorBase):
     def __add__(self, b):
         return self.add(b)
 
+    def __radd__(self, b):
+        return self.add(b)
+
     def __sub__(self, b):
         return self.sub(b)
+
+    def __rsub__(self, b):
+        return -self.sub(b)
 
     def __mul__(self, b):
         return self.mul(b)
@@ -204,17 +202,39 @@ class NamedTensor(NamedTensorBase):
     def __getattr__(self, methodname):
         if methodname in dir(self._tensor):
             method = getattr(self._tensor, methodname)
-            if methodname in self._noshift:
+            if methodname in self._noshift | self._noshift_args:
 
                 def call(*args, **kwargs):
                     return self._new(method(*args, **kwargs))
 
                 call.__doc__ = method.__doc__
+            elif methodname in self._noshift_nn:
+                method = getattr(F, methodname)
+
+                def call(*args, **kwargs):
+                    return self._new(method(self.values, *args, **kwargs))
+
+                call.__doc__ = method.__doc__
+
             elif methodname in self._noshift_dim:
 
                 def call(dim, *args, **kwargs):
                     return self._new(
                         method(self._schema.get(dim), *args, **kwargs)
+                    )
+
+                call.__doc__ = method.__doc__
+            elif methodname in self._noshift_nn_dim:
+                method = getattr(F, methodname)
+
+                def call(dim, *args, **kwargs):
+                    return self._new(
+                        method(
+                            self.values,
+                            dim=self._schema.get(dim),
+                            *args,
+                            **kwargs
+                        )
                     )
 
                 call.__doc__ = method.__doc__
@@ -236,8 +256,7 @@ class NamedTensor(NamedTensorBase):
                     method = getattr(cur._tensor, methodname)
                     if dim is None:
                         return NamedTensor(method(*args, **kwargs), ())
-                    if not isinstance(dim, tuple):
-                        dim = (dim,)
+                    dim = make_tuple(dim)
                     method = getattr(self._tensor, methodname)
                     for d in dim:
                         cur = cur._new(
@@ -255,6 +274,16 @@ class NamedTensor(NamedTensorBase):
                     return tuple((self._new(r, dim) for r in results))
 
                 call.__doc__ = self._reduce_doc + method.__doc__
+
+            elif methodname in self._core:
+                from .torch_base import ntorch
+
+                method = getattr(ntorch, methodname)
+
+                def call(*args, **kwargs):
+                    return method(self, *args, **kwargs)
+
+                call.__doc__ = method.__doc__
 
             elif methodname in self._binop:
 
@@ -282,11 +311,14 @@ class NamedTensor(NamedTensorBase):
         return (
             set(self.__class__.__dict__.keys())
             | self._noshift
+            | self._noshift_args
+            | self._noshift_nn
             | self._info
             | self._reduce
             | self._reduce_multi
             | self._binop
             | self._inline
+            | self._core
         )
 
     # Torch Ops
@@ -298,26 +330,25 @@ class NamedTensor(NamedTensorBase):
         "atan",
         "byte",
         "ceil",
-        "clamp",
         "clone",
         "contiguous",
         "cos",
         "cosh",
         "cpu",
         "cuda",
+        "detach",
         "double",
         "exp",
         "expm1",
         "float",
         "floor",
-        "fmod",
         "frac",
         "half",
         "int",
         "long",
         "log",
-        "pow",
-        "reciprical",
+        "reciprocal",
+        "relu",
         "round",
         "rsqrt",
         "short",
@@ -330,10 +361,14 @@ class NamedTensor(NamedTensorBase):
         "to",
         "tan",
         "tanh",
-        "tril",
-        "triu",
         "trunc",
     }
+
+    _noshift_args = {"pow", "fmod", "clamp"}
+
+    _noshift_nn = {"relu"}
+
+    _noshift_nn_dim = {"softmax", "log_softmax"}
 
     _noshift_dim = {"cumprod", "cumsum"}
 
@@ -351,7 +386,6 @@ class NamedTensor(NamedTensorBase):
         "any",
         "backward",
         "numpy",
-        "detach",
         "item",
         "type",
     }
@@ -370,31 +404,18 @@ doc is the same as below.
         "argmin",
         "logsumexp",
         "mean",
-        "median",
-        "norm",
         "prod",
-        "squeeze",
         "std",
         "sum",
+        "squeeze",
     }
 
-    _reduce_multi = {"min", "max", "sort", "unbind"}
+    _reduce_multi = {"min", "max", "sort", "unbind", "median"}
+
+    _extra = {"masked_fill", "type_as"}
 
     # Broadcast and apply.
-    _binop = {
-        "add",
-        "masked_fill",
-        "sub",
-        "div",
-        "mul",
-        "eq",
-        "ne",
-        "lt",
-        "gt",
-        "le",
-        "ge",
-        "type_as",
-    }
+    _binop = {"add", "sub", "div", "mul", "eq", "ne", "lt", "gt", "le", "ge"}
 
     # Inline.
     _inline = {
@@ -424,3 +445,76 @@ doc is the same as below.
         "tan_",
         "tanh_",
     }
+
+    _core = {
+        "gather",
+        "nonzero",
+        "scatter_",
+        "tril",
+        "triu",
+        "narrow",
+        "masked_select",
+        "masked_scatter",
+        "masked_fill_",
+        "index_select",
+        "index_copy_",
+        "index_fill_",
+        "topk",
+        "equal",
+        "unique",
+        "chunk",
+    }
+
+    # def gather(self, dim, index, index_dim):
+    #     """
+    #     Apply gather where `self_dim` is reduced out
+    #     based on `index` from `index_dim`.
+    #     """
+    #     from .torch_base import ntorch
+
+    #     return ntorch.gather(self, dim, index, index_dim)
+
+    # def scatter_(self, dim, index, src, index_dim):
+    #     """
+    #     Apply scatter where `dim` gets the
+    #     scattered values of `src` based in `index` along `index_dim`.
+    #     """
+
+    #     from .torch_base import ntorch
+
+    #     ntorch.scatter_(self, dim, index, src, index_dim)
+
+    # def narrow(self, name, start, end):
+    #     "Narrow into the `kwargs` dimension and rename it"
+    #     from .torch_base import ntorch
+
+    #     return ntorch.narrow(self, name, start, end)
+
+    # def masked_select(self, mask, name="on"):
+    #     "Applies `mask` and returns a 1D tensor with name `name`"
+    #     from .torch_base import ntorch
+
+    #     return ntorch.masked_select(self, mask, name)
+
+    # def masked_fill_(self, mask, val):
+    #     from .torch_base import ntorch
+
+    #     return ntorch.masked_fill_(self, mask, val)
+
+    # def masked_scatter_(self, mask, source):
+    #     from .torch_base import ntorch
+
+    #     return ntorch.masked_scatter_(self, mask, source)
+    # def relu(self):
+    #     "Apply relu"
+    #     return self._new(F.relu(self._tensor))
+
+    # def softmax(self, name):
+    #     "Apply softmax over dim `name`"
+    #     return self._new(F.softmax(self._tensor, dim=self._schema.get(name)))
+
+    # def log_softmax(self, name):
+    #     "Apply log softmax over dim `name`"
+    #     return self._new(
+    #         F.log_softmax(self._tensor, dim=self._schema.get(name))
+    #     )

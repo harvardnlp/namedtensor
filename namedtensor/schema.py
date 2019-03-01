@@ -7,6 +7,7 @@ class _Schema:
 
     def __init__(self, names, mask=0):
         self._names = make_tuple(names)
+
         s = set()
         for n in self._names:
             assert n is not None
@@ -50,6 +51,14 @@ class _Schema:
         )
 
     def update(self, update):
+        if not update:
+            return self
+        fail = True
+        for n in self._names:
+            if n in update:
+                fail = False
+        if fail:
+            raise RuntimeError("Tried to update unknown dim %s" % update)
         return _Schema([update.get(n, n) for n in self._names], self._masked)
 
     def enum_masked(self):
