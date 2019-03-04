@@ -141,9 +141,20 @@ Examples
   out = loss(predict, target)
 ```
 
-## Other Goodies
+## Distributions
 
-* Named Distributions libary
+
+```python
+# Univariate
+mu = ntorch.randn(10, names=("batch"))
+sigma = ntorch.randn(10, names=("batch"))
+dist = ntorch.distributions.Normal(mu, sigma)
+sample = dist.sample((30, 40), names=("sample1", "sample2"))
+
+# Discrete
+params = ntorch.randn(10, 20, 30, names=("batch1", "batch2", "logits"))
+dist = ntorch.distributions.Categorical(logits=params, logit_dim="logits")
+```
 
 ## Documentation
 
