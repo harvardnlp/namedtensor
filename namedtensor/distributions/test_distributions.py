@@ -50,7 +50,7 @@ def test_multi():
     sigma = ntorch.ones(10, 20, 30, 30, names=("batch1", "batch2", "v1", "v2"))
     sigma.values[:, :] = torch.eye(30)
     dist = ndistributions.MultivariateNormal(
-        mean, sigma, event_dims=("m",), scale_dims=("v1", "v2")
+        mean, sigma, dims_event=("m",), dims_scale=("v1", "v2")
     )
 
     assert dist.batch_shape == OrderedDict([("batch1", 10), ("batch2", 20)])
@@ -60,7 +60,7 @@ def test_multi():
 
 def test_cat():
     logits = ntorch.randn(10, 20, 30, names=("batch1", "batch2", "logits"))
-    dist = ndistributions.Categorical(logits=logits, logit_dim="logits")
+    dist = ndistributions.Categorical(logits=logits, dim_logit="logits")
     assert dist.batch_shape == OrderedDict([("batch1", 10), ("batch2", 20)])
     assert dist.event_shape == OrderedDict([])
 

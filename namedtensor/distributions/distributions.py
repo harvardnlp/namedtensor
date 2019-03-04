@@ -21,14 +21,14 @@ class NamedDistribution:
             else:
                 return v
 
-        drop = {"event_dims", "scale_dims", "logit_dim"}
-        event_dims = kwargs.get("event_dims", [])
-        scale_dims = kwargs.get("scale_dims", [])
-        logit_dim = kwargs.get("logit_dim", "")
+        drop = {"dims_event", "dims_scale", "dim_logit"}
+        event_dims = kwargs.get("dims_event", [])
+        scale_dims = kwargs.get("dims_scale", [])
+        logit_dim = kwargs.get("dim_logit", "")
         args = list(args)
-        if "scale_dims" in kwargs:
-            args[1] = args[1].transpose(*kwargs["scale_dims"])
-        if "logit_dim" in kwargs:
+        if "dims_scale" in kwargs:
+            args[1] = args[1].transpose(*kwargs["dims_scale"])
+        if "dim_logit" in kwargs:
             if "logits" in kwargs:
                 kwargs["logits"] = kwargs["logits"].transpose(logit_dim)
             else:
