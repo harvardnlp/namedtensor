@@ -115,6 +115,12 @@ y = ntorch.randn(20, 30, names=("vocab", "embsize"))
 y.index_select("vocab", x)
 ```
 
+### Removed Functions
+
+The following functions are removed from the stdlib. 
+
+* view, expand, squeeze, unsqueeze, transpose
+
 ## NN Modules
 
 NN units no longer take ordered tensors. They now have a required additional method `spec`
