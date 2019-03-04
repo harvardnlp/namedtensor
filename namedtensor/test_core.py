@@ -284,7 +284,10 @@ def test_gather():
 
     t = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("a", "b"))
     index = ntorch.tensor(torch.LongTensor([[0, 0], [1, 0]]), ("a", "c"))
-    ntensor = ntorch.gather(t, "b", index, "c")
+    # Gather will move "b" and "c" to the front for t and index respectively
+    # so we must force the order in order to compare to the original
+    # torch.gather.
+    ntensor = ntorch.gather(t, "b", index, "c")._force_order(("a", "c"))
     assert (ntensor.values == base).all()
     assert ntensor.shape == OrderedDict([("a", 2), ("c", 2)])
 
