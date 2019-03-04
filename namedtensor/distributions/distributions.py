@@ -21,15 +21,29 @@ class NamedDistribution:
             else:
                 return v
 
+        drop = {"event_dims", "scale_dims", "logit_dim"}
+        event_dims = kwargs.get("event_dims", [])
+        scale_dims = kwargs.get("scale_dims", [])
+        logit_dim = kwargs.get("logit_dim", "")
+        args = list(args)
+        if "scale_dims" in kwargs:
+            args[1] = args[1].transpose(*kwargs["scale_dims"])
+        if "logit_dim" in kwargs:
+            if "logits" in kwargs:
+                kwargs["logits"] = kwargs["logits"].transpose(logit_dim)
+            else:
+                args[0] = args[0].transpose(logit_dim)
+
         new_args = [fix(v) for v in args]
-        new_kwargs = {k: fix(v) for k, v in kwargs.items()}
+        new_kwargs = {k: fix(v) for k, v in kwargs.items()
+                      if k not in drop}
         dist = init(*new_args, **new_kwargs)
 
         c = collect[0]
         return NamedDistribution(
             dist,
-            c._schema._names[: len(dist._batch_shape)],
-            c._schema._names[len(dist._batch_shape) :],
+            [n for n in c._schema._names if n not in event_dims and n not in scale_dims and n != logit_dim],
+            event_dims
         )
 
     @property
@@ -100,7 +114,6 @@ class NamedDistribution:
 class NDistributions(type):
     def __getattr__(cls, name):
         if name in cls._build:
-
             def call(*args, **kwargs):
                 return NamedDistribution.build(
                     getattr(torch.distributions, name), *args, **kwargs
@@ -108,7 +121,6 @@ class NDistributions(type):
 
             return call
         elif name in cls._other:
-
             def call(*args, **kwargs):
                 new_args = [arg._dist for arg in args]
                 return getattr(torch.distributions, name)(*new_args, **kwargs)
