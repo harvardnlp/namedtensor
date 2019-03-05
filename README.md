@@ -15,6 +15,13 @@ NamedTensor is an thin-wrapper on Torch tensor that makes three changes to the A
 2) **Broadcasting**: All functions broadcast based on set-operations not through heuristic ordering rules, e.g. if `z = x + y` then `z` has the union of the dimension in `x` and `y`.    
 3) **Lifting**: Order-based functions can be lifted by providing name annotations through `.spec` methods. For instance, convolution requires the user to name the channel and kernel dims, e.g .`conv2d.spec("channel", ("x", "y"))`. This provides dynamic checks, better error messages, and consistent documentation.
 
+## Setup 
+
+```
+!pip install git+https://github.com/harvardnlp/namedtensor
+```
+
+
 ## Usage
 
 ```python
