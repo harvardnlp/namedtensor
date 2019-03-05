@@ -18,7 +18,7 @@ NamedTensor is an thin-wrapper on Torch tensor that makes three changes to the A
 ## Setup 
 
 ```
-!pip install git+https://github.com/harvardnlp/namedtensor
+pip install git+https://github.com/harvardnlp/namedtensor
 ```
 
 
