@@ -173,7 +173,7 @@ class NTorch(type):
 
     @staticmethod
     def masked_select(input, mask, name="on"):
-        order = mask._mask_broadcast_order(input)
+        order = mask._mask_broadcast_order(input._schema._names)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
         return NamedTensor(a1.values.masked_select(b1.values), name)
@@ -223,10 +223,15 @@ class NTorch(type):
     @staticmethod
     def index_copy_(self, dim, index, source):
         "Index into dimension names with the `index` named tensors."
-        order = source._mask_broadcast_order(index)
+        destination_names, destination_sizes = NTorch._index_base(
+            self, dim, index
+        )
+        order = source._mask_broadcast_order(destination_names)
         source = source._force_order(order)
         self.values.index_copy_(
-            self._schema.get(dim), index.values, source.values
+            self._schema.get(dim),
+            index.values,
+            source.values.expand(destination_sizes),
         )
         return self
 

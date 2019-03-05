@@ -197,24 +197,24 @@ class NamedTensorBase:
             self.transpose(*trans)._tensor.contiguous().view(*view), ex
         )
 
-    def _broadcast_order(self, other):
+    def _broadcast_order(self, other_names):
         """ Outputs a shared order (list) that works for self and other """
         order = []
-        for d in other._schema._names:
+        for d in other_names:
             if d not in self._schema._names:
                 order.append(d)
         for d in self._schema._names:
             order.append(d)
         return order
 
-    def _mask_broadcast_order(self, main):
+    def _mask_broadcast_order(self, main_names):
         """
         If broadcasting possible from self (mask) to main, outputs a shared order.
         Otherwise errors and prints dimensions that exist in mask but not in main.
         """
 
         to_be_broadcasted = set(self._schema._names)
-        broadcasted_to = set(main._schema._names)
+        broadcasted_to = set(main_names)
 
         diff = to_be_broadcasted.difference(broadcasted_to)
         diff_string = ", ".join(diff)
@@ -224,4 +224,4 @@ class NamedTensorBase:
             % diff_string
         )
 
-        return main._schema._names
+        return main_names

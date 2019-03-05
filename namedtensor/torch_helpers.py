@@ -69,7 +69,7 @@ class NamedTensor(NamedTensorBase):
         return self._setter(other, "copy_")
 
     def _setter(self, other, method, vals=[]):
-        order = other._mask_broadcast_order(self)
+        order = other._mask_broadcast_order(self._schema._names)
         other = other._force_order(order)
 
         args = [other.values] + vals
@@ -290,7 +290,7 @@ class NamedTensor(NamedTensorBase):
                 def call(other, *args):
                     if isinstance(other, NamedTensor):
                         b = other
-                        order = self._broadcast_order(b)
+                        order = self._broadcast_order(b._schema._names)
                         a1 = self._force_order(order)
                         b1 = b._force_order(order)
                         method = getattr(a1._tensor, methodname)
