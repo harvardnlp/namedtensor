@@ -218,7 +218,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setter</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;copy_&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_setter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">vals</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="n">order</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_mask_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_mask_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
         <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_force_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">other</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">+</span> <span class="n">vals</span>
@@ -439,7 +439,7 @@
                 <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">NamedTensor</span><span class="p">):</span>
                         <span class="n">b</span> <span class="o">=</span> <span class="n">other</span>
-                        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_broadcast_order</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+                        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_broadcast_order</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
                         <span class="n">a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_force_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
                         <span class="n">b1</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">_force_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
                         <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">_tensor</span><span class="p">,</span> <span class="n">methodname</span><span class="p">)</span>

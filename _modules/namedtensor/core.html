@@ -346,24 +346,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">trans</span><span class="p">)</span><span class="o">.</span><span class="n">_tensor</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">),</span> <span class="n">ex</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_names</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Outputs a shared order (list) that works for self and other &quot;&quot;&quot;</span>
         <span class="n">order</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">other_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
                 <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
             <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">order</span>
 
-    <span class="k">def</span> <span class="nf">_mask_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_mask_broadcast_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_names</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If broadcasting possible from self (mask) to main, outputs a shared order.</span>
 <span class="sd">        Otherwise errors and prints dimensions that exist in mask but not in main.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">to_be_broadcasted</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
-        <span class="n">broadcasted_to</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">main</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
+        <span class="n">broadcasted_to</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">main_names</span><span class="p">)</span>
 
         <span class="n">diff</span> <span class="o">=</span> <span class="n">to_be_broadcasted</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">broadcasted_to</span><span class="p">)</span>
         <span class="n">diff_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
@@ -373,7 +373,7 @@
             <span class="o">%</span> <span class="n">diff_string</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">main</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">_names</span>
+        <span class="k">return</span> <span class="n">main_names</span>
 </pre></div>
 
            </div>
