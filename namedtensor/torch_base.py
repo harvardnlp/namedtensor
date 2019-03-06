@@ -139,13 +139,11 @@ class NTorch(type):
         """
         dim_name = dim
         return_inverse = "return_inverse" in kwargs and kwargs["return_inverse"]
-        if dim is not None:
-            dim = input._schema.get(dim)
-        output, inverse_indices = torch._unique(input.values, dim=dim, **kwargs)
-
         # If dim is not None, the output ntensor has the same dimensions as input while the dim is renamed,
         # and the inverse_indices is an 1-D ntensor.
-        if dim_name is not None:
+        if dim is not None:
+            dim = input._schema.get(dim)
+            output, inverse_indices = torch._unique_dim(input.values, dim=dim, **kwargs)
             output = NamedTensor(output, input.dims).rename(
                 dim_name, (names[0])
             )
@@ -154,6 +152,7 @@ class NTorch(type):
         # If dim is None, the output is an 1-D ntensor,
         # and the inverse_indices has the same dimensions as input while the dimensions are renamed.
         else:
+            output, inverse_indices = torch._unique(input.values, **kwargs)
             output = NamedTensor(output, names[0])
             if return_inverse:
                 inverse_indices = NamedTensor(
