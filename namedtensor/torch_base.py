@@ -138,28 +138,31 @@ class NTorch(type):
 
         """
         dim_name = dim
+        return_inverse = "return_inverse" in kwargs and kwargs["return_inverse"]
         if dim is not None:
             dim = input._schema.get(dim)
-        output = torch.unique(input.values, dim=dim, **kwargs)
-        
-        if not "return_inverse" in kwargs or not kwargs["return_inverse"]:
-            return output
-        output, inverse_indices = output
+        output, inverse_indices = torch._unique(input.values, dim=dim, **kwargs)
+
         # If dim is not None, the output ntensor has the same dimensions as input while the dim is renamed,
         # and the inverse_indices is an 1-D ntensor.
         if dim_name is not None:
             output = NamedTensor(output, input.dims).rename(
                 dim_name, (names[0])
             )
-            inverse_indices = NamedTensor(inverse_indices, names[1])
+            if return_inverse:
+                inverse_indices = NamedTensor(inverse_indices, names[1])
         # If dim is None, the output is an 1-D ntensor,
         # and the inverse_indices has the same dimensions as input while the dimensions are renamed.
         else:
             output = NamedTensor(output, names[0])
-            inverse_indices = NamedTensor(
-                inverse_indices, (["%s%s" % (s, names[1]) for s in input.dims])
-            )
-        return output, inverse_indices
+            if return_inverse:
+                inverse_indices = NamedTensor(
+                    inverse_indices, (["%s%s" % (s, names[1]) for s in input.dims])
+                )
+        if return_inverse:
+            return output, inverse_indices
+        else:
+            return output
 
     @staticmethod
     def gather(input, dim, index, index_dim):
