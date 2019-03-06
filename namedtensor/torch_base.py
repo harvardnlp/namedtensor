@@ -140,8 +140,11 @@ class NTorch(type):
         dim_name = dim
         if dim is not None:
             dim = input._schema.get(dim)
-        output, inverse_indices = torch.unique(input.values, dim=dim, **kwargs)
-
+        output = torch.unique(input.values, dim=dim, **kwargs)
+        
+        if not "return_inverse" in kwargs or not kwargs["return_inverse"]:
+            return output
+        output, inverse_indices = output
         # If dim is not None, the output ntensor has the same dimensions as input while the dim is renamed,
         # and the inverse_indices is an 1-D ntensor.
         if dim_name is not None:
