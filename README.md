@@ -195,3 +195,4 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Jambay Kinley
 * Ian Kivlichan
 * Sanyuan Chen
+* Simon Shen
