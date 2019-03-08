@@ -49,6 +49,12 @@ def test_deepcopy(x):
 def test_unique(data, x):
     s = data.draw(dim(x))
     nu, ni = data.draw(names(x, max_size=2))
+    output = ntorch.unique(
+        x, sorted=True, return_inverse=False, names=(nu, ni)
+    )
+    assert set(output.dims) == set([nu])
+    output = ntorch.unique(x, sorted=True, names=(nu, ni))
+    assert set(output.dims) == set([nu])
     output, inverse_indices = ntorch.unique(
         x, sorted=True, return_inverse=True, dim=s, names=(nu, ni)
     )
