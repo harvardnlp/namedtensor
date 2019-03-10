@@ -49,7 +49,22 @@ def test_multi():
     mean = ntorch.randn(10, 20, 30, names=("batch1", "batch2", "m"))
     sigma = ntorch.ones(10, 20, 30, 30, names=("batch1", "batch2", "v1", "v2"))
     sigma.values[:, :] = torch.eye(30)
-    dist = ndistributions.MultivariateNormal(mean, sigma)
+    dist = ndistributions.MultivariateNormal(
+        mean, sigma, dims_event=("m",), dims_scale=("v1", "v2")
+    )
 
     assert dist.batch_shape == OrderedDict([("batch1", 10), ("batch2", 20)])
+    print(dist.event_shape)
     assert dist.event_shape == OrderedDict([("m", 30)])
+
+
+def test_cat():
+    logits = ntorch.randn(10, 20, 30, names=("batch1", "batch2", "logits"))
+    dist = ndistributions.Categorical(logits=logits, dim_logit="logits")
+    assert dist.batch_shape == OrderedDict([("batch1", 10), ("batch2", 20)])
+    assert dist.event_shape == OrderedDict([])
+
+    s = dist.sample((30, 40), names=("sample1", "sample2"))
+    assert s.shape == OrderedDict(
+        [("sample1", 30), ("sample2", 40), ("batch1", 10), ("batch2", 20)]
+    )

@@ -1,14 +1,26 @@
-# NamedTensor
+# Named Tensor for Torch
 
 [![Build Status](https://travis-ci.org/harvardnlp/namedtensor.svg?branch=master)](https://travis-ci.org/harvardnlp/namedtensor) [![Coverage Status](https://coveralls.io/repos/github/harvardnlp/namedtensor/badge.svg?branch=master)](https://coveralls.io/github/harvardnlp/namedtensor?branch=master)
 
 ## Introduction
 
-A proposal for a named tensor for PyTorch described in the blog post:
+A proposal for a named tensor for Torch described here:
 
 http://nlp.seas.harvard.edu/NamedTensor
 
-Currently the library targets the PyTorch ecosystem.
+
+NamedTensor is an thin-wrapper on Torch tensor that makes three changes to the API:
+
+1) **Naming**: Dimension access and reduction use a named `dim` argument instead of an index. Constructing and adding dimensions use a `name` argument. Axis-based indexing \[ \] is replaced by named indexing. 
+2) **Broadcasting**: All functions broadcast based on set-operations not through heuristic ordering rules, e.g. if `z = x + y` then `z` has the union of the dimension in `x` and `y`.    
+3) **Lifting**: Order-based functions can be lifted by providing name annotations through `.spec` methods. For instance, convolution requires the user to name the channel and kernel dims, e.g .`conv2d.spec("channel", ("x", "y"))`. This provides dynamic checks, better error messages, and consistent documentation.
+
+## Setup 
+
+```
+pip install git+https://github.com/harvardnlp/namedtensor
+```
+
 
 ## Usage
 
@@ -25,7 +37,6 @@ x = ntorch.randn(10, 10, 20, names=("batch", "h", "w"))
 x = ntorch.ones(10, 10, 20, names=("batch", "h", "w"))
 ```
 
-
 ### Standard functions
 
 All functions that keep dimensionality work in the same way.
@@ -36,11 +47,28 @@ x = x.float()
 x = ntorch.exp(x)
 ```
 
-### View and Tranposition
+### Named Indexing
+
+Indexing and masking operation work by name as opposed to absolute position. 
+
+```python
+first_batch = x[{"batch": 1}]
+three_examples = x[{"batch": slice(1, 4)}]
+masked = x[ x > 0.5 ]
+```
+
+Advanced indexing by named tensors.
+
+```python
+select = ntorch.tensor([1, 4, 5], names=("rows",))
+y = x[{"h": select}] 
+# y shape ("batch", "rows", "w")
+```
+
+### No view or unsqueeze
 
 View, tranpose, and friends are deprecated in favor of named
 access and movement.
-
 
 ```python
 x = x.stack(("w", "h"), "stackdim")
@@ -50,17 +78,12 @@ x = x.stack(("w", "h"), "stackdim")
 x = x.split("stackdim", ("w", "h"), w=20)
 ```
 
-Transposition (discouraged in the API):
+There is no need to ever have unsqueeze since broadcasting is done by name overlap. 
 
-```python
-x = x.transpose("batch", "w", "h")
+Similar notation can be used for setting values.
 
-# or early dim stay in place
 
-x = x.transpose("w", "h")
-```
-
-### Dim replacements:
+### All methods take named args
 
 Any function with a `dim` argument now can be accessed based on the
 dimension name.
@@ -99,12 +122,16 @@ y = ntorch.randn(20, 30, names=("vocab", "embsize"))
 y.index_select("vocab", x)
 ```
 
+### Removed Functions
+
+The following functions are removed from the stdlib. 
+
+* view, expand, squeeze, unsqueeze, transpose
 
 ## NN Modules
 
-This api part is a work in progress. But many units are implemented to
-work with named tensor. They each have a required additional method `spec`
-that specifies the input and output dimensions of the object. 
+NN units no longer take ordered tensors. They now have a required additional method `spec`
+that lets the user set the the input and output dimensions of the object. 
 
 Examples
 
@@ -123,13 +150,24 @@ Examples
 ```python
   loss = ntorch.nn.NLLLoss().spec("target")
   predict = ntorch.randn(20, 4, names=("target", "batch"))
-  target = ntorch.tensor([2, 2, 3, 4], ["batch"])
+  target = ntorch.tensor([2, 2, 3, 4], names=("batch",))
   out = loss(predict, target)
 ```
 
-## Other Goodies
+## Distributions
 
-* Named Distributions libary
+
+```python
+# Univariate
+mu = ntorch.randn(10, names=("batch"))
+sigma = ntorch.randn(10, names=("batch"))
+dist = ntorch.distributions.Normal(mu, sigma)
+sample = dist.sample((30, 40), names=("sample1", "sample2"))
+
+# Discrete
+params = ntorch.randn(10, 20, 30, names=("batch1", "batch2", "logits"))
+dist = ntorch.distributions.Categorical(logits=params, logit_dim="logits")
+```
 
 ## Documentation
 
@@ -144,6 +182,7 @@ http://nlp.seas.harvard.edu/namedtensor/
 (NamedTensor is being collectively developed by Harvard CS 287)
 
 * Yuntian Deng
+* Justin Chiu
 * Francisco Rivera
 * Jiafeng Chen
 * Celine Liang
@@ -152,3 +191,8 @@ http://nlp.seas.harvard.edu/namedtensor/
 * Mirac Suzgun
 * Belén Saldías
 * Jason Ren
+* Josh Feldman
+* Jambay Kinley
+* Ian Kivlichan
+* Sanyuan Chen
+* Simon Shen

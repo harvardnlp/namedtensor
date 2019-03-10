@@ -1,5 +1,10 @@
 from .schema import _Schema
-from einops import rearrange
+import operator
+import functools
+
+
+def prod(factors):
+    return functools.reduce(operator.mul, factors, 1)
 
 
 def assert_match(*tensors):
@@ -15,7 +20,9 @@ def assert_match(*tensors):
                 failure = failure or sizes[k] != v
             else:
                 sizes[k] = v
-    assert not failure, " ".join([str(t._sizes) for t in tensors])
+    assert not failure, "Overlapping dim names must match: " + " ".join(
+        [str(t.shape) for t in tensors]
+    )
 
 
 class NamedTensorBase:
@@ -31,10 +38,18 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
-        assert len(self._tensor.shape) == len(self._schema._names), (
-            "Tensor has %d dim, but only %d names"
-            % (len(self._tensor.shape), len(self._schema._names))
-        )
+        if self._tensor.dim() > 0:
+            assert len(self._tensor.shape) == len(self._schema._names), (
+                "Tensor has %d dim, but %d names"
+                % (len(self._tensor.shape), len(self._schema._names))
+            )
+        else:
+            assert len(names) == 0, str(tensor)
+
+    def __deepcopy__(self, memo):
+        new_ntensor = self._new(self._tensor.__deepcopy__(memo))
+        memo[id(self)] = new_ntensor
+        return new_ntensor
 
     @property
     def dims(self):
@@ -115,95 +130,91 @@ class NamedTensorBase:
         to_dims = (
             tuple((d for d in self._schema._names if d not in dims)) + dims
         )
-        recipe = "%s -> %s" % (self._to_einops(), " ".join(to_dims))
-        tensor = rearrange(self._tensor, recipe)
+        indices = [self._schema.get(d) for d in to_dims]
+        tensor = self._tensor.permute(*indices)
         return self.__class__(tensor, to_dims)
 
     # Todo: fix arg names
     def _merge(self, names, dim):
-        s = ""
+        s = []
         ex = []
         first = True
+        view = []
         for d in self._schema._names:
             if d not in names:
-                s += " " + d
+                s.append(d)
                 ex.append(d)
+                view.append(self.shape[d])
             elif first:
-                s += " (" + " ".join(names) + ")"
+                s += names
+                view.append(prod([self.shape[d2] for d2 in names]))
                 ex.append(dim)
                 first = False
-        tensor = rearrange(
-            self._tensor, "%s -> %s" % (self._schema._to_einops(), s)
-        )
+        tensor = self.transpose(*s)._tensor.contiguous().view(*view)
         return self.__class__(tensor, ex)
 
     def _split(self, dim, names, size_dict):
-        query = ""
+        query = []
         ex = []
+        view = []
         for i, d in self._schema.enum_all():
             if d != dim:
-                query += " " + d
+                query.append(d)
                 ex.append(d)
+                view.append(self.shape[d])
             else:
-                query += " (" + " ".join(names) + ")"
+                query += names
+                for d2 in names:
+                    view.append(size_dict.get(d2, -1))
                 ex += names
-
-        tensor = rearrange(
-            self._tensor,
-            "%s -> %s" % (query, " ".join(ex)),
-            **{d: size_dict[d] for d in names if d in size_dict}
-        )
-        return self.__class__(tensor, ex)
-
-    def _rearrange(self, term):
-        assert ")" not in term
-        recipe = "%s -> %s" % (self._to_einops(), term)
-        tensor = rearrange(self._tensor, recipe)
-        return self.__class__(tensor, term)
+        return self.__class__(self._tensor.view(*view), ex)
 
     def __len__(self):
         return len(self._tensor)
 
     def _promote(self, dims):
         "Move dims to the front of the line"
-        term = " ".join(
-            [d for d in self._schema._names if d not in dims]
-            + dims.split()[1:]
-        )
-        return self._rearrange(term)
+        term = [
+            d for d in self._schema._names if d not in dims
+        ] + dims.split()[1:]
+
+        return self.transpose(*term)
 
     def _force_order(self, names):
         """ Forces self to take order in names, adds 1-size dims if needed """
-        s = ""
         ex = []
+        view = []
+        trans = []
         for d in names:
             if d not in self._schema._names:
                 ex.append(d)
-                s += " ()"
+                view.append(1)
             else:
                 ex.append(d)
-                s += " " + d
-        tensor = rearrange(self._tensor, "%s -> %s" % (self._to_einops(), s))
-        return self.__class__(tensor, ex)
+                view.append(self.shape[d])
+                trans.append(d)
+        return self.__class__(
+            self.transpose(*trans)._tensor.contiguous().view(*view), ex
+        )
 
-    def _broadcast_order(self, other):
+    def _broadcast_order(self, other_names):
         """ Outputs a shared order (list) that works for self and other """
         order = []
-        for d in other._schema._names:
+        for d in other_names:
             if d not in self._schema._names:
                 order.append(d)
         for d in self._schema._names:
             order.append(d)
         return order
 
-    def _mask_broadcast_order(self, main):
+    def _mask_broadcast_order(self, main_names):
         """
         If broadcasting possible from self (mask) to main, outputs a shared order.
         Otherwise errors and prints dimensions that exist in mask but not in main.
         """
 
         to_be_broadcasted = set(self._schema._names)
-        broadcasted_to = set(main._schema._names)
+        broadcasted_to = set(main_names)
 
         diff = to_be_broadcasted.difference(broadcasted_to)
         diff_string = ", ".join(diff)
@@ -213,4 +224,4 @@ class NamedTensorBase:
             % diff_string
         )
 
-        return self._broadcast_order(main)
+        return main_names
