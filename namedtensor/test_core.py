@@ -310,7 +310,7 @@ def test_gather():
 def test_renamecat():
     tensor_a = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim2"))
     tensor_b = ntorch.tensor(torch.Tensor([[1, 2], [3, 4]]), ("dim1", "dim3"))
-    tensor_c = ntorch.cat((tensor_a, tensor_b), ("dim2", "dim3"), out="dim4")
+    tensor_c = ntorch.cat((tensor_a, tensor_b), ("dim2", "dim3"), name="dim4")
     assert tensor_c.shape == OrderedDict([("dim1", 2), ("dim4", 4)])
 
 
