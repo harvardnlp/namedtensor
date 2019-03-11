@@ -88,9 +88,15 @@ class NTorch(type):
         return ntorch.tensor(torch.stack(to_stack, dim=0), old_names)
 
     @staticmethod
-    def cat(tensors, dim):
-        "Concate a list of named tensors along dim"
-        dim = tensors[0]._schema.get(dim)
+    def cat(tensors, dim, name=None):
+        "Concate a list of named tensors along dim."
+        if isinstance(dim, str):
+            dim = [dim] * len(tensors)
+        if name is not None:
+            tensors = [t.rename(d, name) for t, d in zip(tensors, dim)]
+        else:
+            name = dim[0]
+        dim = tensors[0]._schema.get(name)
         for i in range(1, len(tensors)):
             if tensors[i]._schema._names != tensors[0]._schema._names:
                 if set(tensors[i]._schema._names) != set(
