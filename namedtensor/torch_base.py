@@ -64,6 +64,12 @@ class NTorch(type):
         return (tensor._new(top_k), tensor._new(arg_top_k))
 
     @staticmethod
+    def cumsum(tensor, dim, dtype=None):
+        d = list(tensor.shape.keys()).index(dim)
+        vals = torch.cumsum(tensor.values, dim=d, dtype=dtype)
+        return tensor._new(vals)
+
+    @staticmethod
     def chunk(tensor, number_of_chunks, dim):
         tuple_of_chunks = tensor._tensor.chunk(
             number_of_chunks, dim=tensor._schema.get(dim)

@@ -592,6 +592,15 @@ def test_topk():
     assert_match(base[1], expected[1])
 
 
+def test_cumsum():
+    base_torch = torch.rand([10, 10])
+    dim_names = ("dim1", "dim2")
+    base = ntorch.tensor(base_torch, names=dim_names)
+    output = base.cumsum("dim1")
+    expected = ntorch.tensor(base_torch.cumsum(dim=0), names=dim_names)
+    assert_match(output, expected)
+
+
 def test_chunk():
     base_torch = torch.rand([10, 10])
     dim_names = ("dim1", "dim2")
