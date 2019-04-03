@@ -91,7 +91,7 @@ class NamedDistribution:
 
             def call(values):
                 method = getattr(self._dist, name)
-                print(values.values.size())
+                # print(values.values.size())
                 return NamedTensor(
                     method(values.values),
                     values._schema._names[-len(self._event_schema._names) :],
