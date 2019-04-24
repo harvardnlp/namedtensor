@@ -234,12 +234,8 @@ class NTorch(type):
         by adding to the indices in the order given in 'index'."""
         name = dim
         dim = self._schema.get(name)
-        tensor_names = [
-            n for n in tensor._schema._names if n in index._schema._names
-        ]
-        tensor_names += [
-            n for n in tensor._schema._names if n not in index._schema._names
-        ]
+        tensor_names = [i for i in self._schema._names]
+        tensor_names[dim] = index._schema._names[0]
         self._tensor.index_add_(
             dim, index._tensor, tensor._force_order(tensor_names)._tensor
         )

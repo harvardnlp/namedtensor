@@ -426,15 +426,15 @@ def test_takes():
 
 def test_index_add():
 
-    base = ntorch.zeros(5, 3, names=("alpha", "beta"))
-    vals = ntorch.randn(3, 3, names=("time", "beta"))
-    index = ntorch.randint(0, 5, (3,), names=("time"))
+    base = ntorch.zeros(3, 5, names=("beta", "alpha"))
+    vals = ntorch.randn(3, 4, names=("beta", "time"))
+    index = ntorch.randint(0, 5, (4,), names=("time"))
 
     result = base.index_add_("alpha", index, vals)
-    expected_result = base.values.index_add_(0, index.values, vals.values)
+    expected_result = base.values.index_add_(1, index.values, vals.values)
 
     assert (result._tensor == expected_result).all()
-    assert result.shape == OrderedDict([("alpha", 5), ("beta", 3)])
+    assert result.shape == OrderedDict([("beta", 3), ("alpha", 5)])
 
 
 def test_narrow():
