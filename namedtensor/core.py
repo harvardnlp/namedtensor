@@ -10,19 +10,13 @@ def prod(factors):
 def assert_match(*tensors):
     sizes = {}
     failure = False
-    for t in tensors:
-        shape = t.vshape
-        for i, k in t._schema.enum_all():
-            v = shape[i]
-            if v == 1:
-                continue
-            if k in sizes:
-                failure = failure or sizes[k] != v
-            else:
-                sizes[k] = v
-    assert not failure, "Overlapping dim names must match: " + " ".join(
-        [str(t.shape) for t in tensors]
-    )
+    axes = []
+    for tensor in tensors:
+        axes = axes + list(tensor._schema._axes)
+    for ax in axes:
+        assert not ax.conflict(*axes), "Overlapping dim names must match: " + " ".join(
+            [str(t.shape) for t in tensors]
+        )
 
 
 class NamedTensorBase:
@@ -37,14 +31,7 @@ class NamedTensorBase:
 
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
-        self._schema = _Schema.build(names, mask)
-        if self._tensor.dim() > 0:
-            assert len(self._tensor.shape) == len(self._schema._names), (
-                "Tensor has %d dim, but %d names"
-                % (len(self._tensor.shape), len(self._schema._names))
-            )
-        else:
-            assert len(names) == 0, str(tensor)
+        self._schema = _Schema.build(names, self._tensor.shape, mask)
 
     def __deepcopy__(self, memo):
         new_ntensor = self._new(self._tensor.__deepcopy__(memo))
@@ -64,7 +51,7 @@ class NamedTensorBase:
     @property
     def shape(self):
         "The ordered dict of available dimensions."
-        return self._schema.ordered_dict(self._tensor.size())
+        return self._schema.ordered_dict()
 
     def __repr__(self):
         return "NamedTensor(\n\t%s,\n\t%s)" % (
