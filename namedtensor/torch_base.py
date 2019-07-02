@@ -31,22 +31,23 @@ class NTorch(type):
     def dot(cls, dims, *tensors):
         names = make_tuple(dims)
         args = []
-        ids = {}
-        seen_names = []
+
+        schema = None
         for t in tensors:
+            schema = t._schema if schema is None else schema.merge(t._schema)
             group = []
-            for name in t._schema._names:
-                if name not in ids:
-                    ids[name] = len(ids)
-                    seen_names.append(name)
-                group.append(ids[name])
+            for a in t.dims:
+                group.append(schema.get(a))
             args.append(t._tensor)
             args.append(group)
-        keep = [n for n in seen_names if n not in names]
+        
         for n in names:
-            if n not in seen_names:
+            if n not in schema.axes:
                 raise RuntimeError("No dimension %s to contract along" % n)
-        args.append([ids[n] for n in keep])
+                
+        keep = [ a for a in schema.axes if a not in names]
+        args.append([ schema.get(a) for a in keep ])
+        print(args)
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
     @staticmethod
@@ -72,18 +73,18 @@ class NTorch(type):
 
     @staticmethod
     def stack(tensors, name):
-        old_names = tensors[0]._schema._names
+        old_axes = tensors[0]._schema._axes
         for i in range(1, len(tensors)):
-            if tensors[i]._schema._names != old_names:
-                if set(tensors[i]._schema._names) != set(
-                    tensors[0]._schema._names
+            if tensors[i]._schema._axes != old_axes:
+                if set(tensors[i]._schema._axes) != set(
+                    tensors[0]._schema._axes
                 ):
                     raise RuntimeError(
                         "Tensors to stack don't have matching dimension names"
                     )
-                tensors[i] = tensors[i]._force_order(tensors[0]._schema._names)
+                tensors[i] = tensors[i]._force_order(tensors[0]._schema._axes)
         to_stack = [tensor.values for tensor in tensors]
-        old_names = list(old_names)
+        old_names = list(tensors[0]._schema._names)
         old_names.insert(0, name)
         return ntorch.tensor(torch.stack(to_stack, dim=0), old_names)
 
