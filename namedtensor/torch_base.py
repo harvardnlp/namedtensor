@@ -3,6 +3,7 @@ from .torch_helpers import NamedTensor
 from .utils import make_tuple
 from .nn import nn
 from .distributions import ndistributions
+from .schema import _Axis
 import opt_einsum as oe
 
 
@@ -40,14 +41,13 @@ class NTorch(type):
                 group.append(schema.get(a))
             args.append(t._tensor)
             args.append(group)
-        
+
         for n in names:
             if n not in schema.axes:
                 raise RuntimeError("No dimension %s to contract along" % n)
-                
-        keep = [ a for a in schema.axes if a not in names]
-        args.append([ schema.get(a) for a in keep ])
-        print(args)
+
+        keep = schema.drop(names)
+        args.append([schema.get(a) for a in keep.axes])
         return cls.tensor(oe.contract(*args, backend="torch"), keep)
 
     @staticmethod
@@ -73,25 +73,25 @@ class NTorch(type):
 
     @staticmethod
     def stack(tensors, name):
-        old_axes = tensors[0]._schema._axes
+        old_axes = tensors[0].dims
         for i in range(1, len(tensors)):
-            if tensors[i]._schema._axes != old_axes:
-                if set(tensors[i]._schema._axes) != set(
-                    tensors[0]._schema._axes
+            if tensors[i].dims != old_axes:
+                if set(tensors[i]._schema._names) != set(
+                    tensors[0]._schema._names
                 ):
                     raise RuntimeError(
                         "Tensors to stack don't have matching dimension names"
                     )
-                tensors[i] = tensors[i]._force_order(tensors[0]._schema._axes)
+                tensors[i] = tensors[i]._force_order(tensors[0].dims)
         to_stack = [tensor.values for tensor in tensors]
-        old_names = list(tensors[0]._schema._names)
+        old_names = list(tensors[0].dims)
         old_names.insert(0, name)
         return ntorch.tensor(torch.stack(to_stack, dim=0), old_names)
 
     @staticmethod
     def cat(tensors, dim, name=None):
         "Concate a list of named tensors along dim."
-        if isinstance(dim, str):
+        if isinstance(dim, str) or isinstance(dim, _Axis):
             dim = [dim] * len(tensors)
         if name is not None:
             tensors = [t.rename(d, name) for t, d in zip(tensors, dim)]
@@ -190,7 +190,7 @@ class NTorch(type):
 
     @staticmethod
     def masked_select(input, mask, name="on"):
-        order = mask._mask_broadcast_order(input._schema._names)
+        order = mask._mask_broadcast_order(input)
         a1 = input._force_order(order)
         b1 = mask._force_order(order)
         return NamedTensor(a1.values.masked_select(b1.values), name)

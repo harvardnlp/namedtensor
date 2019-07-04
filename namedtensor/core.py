@@ -1,4 +1,5 @@
 from .schema import _Schema
+from collections import OrderedDict
 import operator
 import functools
 
@@ -10,13 +11,20 @@ def prod(factors):
 def assert_match(*tensors):
     sizes = {}
     failure = False
-    axes = []
-    for tensor in tensors:
-        axes = axes + list(tensor.dims)
-    for ax in axes:
-        assert not ax.conflict(*axes), "Overlapping dim names must match: " + " ".join(
-            [str(t.shape) for t in tensors]
-        )
+    for t in tensors:
+        shape = t.vshape
+        for i, k in t._schema.enum_all():
+            name = k.name
+            v = shape[i]
+            if v == 1:
+                continue
+            if name in sizes:
+                failure = failure or sizes[name] != v
+            else:
+                sizes[name] = v
+    assert not failure, "Overlapping dim names must match: " + " ".join(
+        [str(t.shape) for t in tensors]
+    )
 
 
 class NamedTensorBase:
@@ -32,6 +40,13 @@ class NamedTensorBase:
     def __init__(self, tensor, names, mask=0):
         self._tensor = tensor
         self._schema = _Schema.build(names, mask)
+        if self._tensor.dim() > 0:
+            assert len(self._tensor.shape) == len(self._schema.axes), (
+                "Tensor has %d dim, but %d names"
+                % (len(self._tensor.shape), len(self._schema.axes))
+            )
+        else:
+            assert len(names) == 0, str(tensor)
 
     def __deepcopy__(self, memo):
         new_ntensor = self._new(self._tensor.__deepcopy__(memo))
@@ -51,13 +66,11 @@ class NamedTensorBase:
     @property
     def shape(self):
         "The ordered dict of available dimensions."
-        return tuple(zip(self.dims, self._tensor.shape))
+        #return tuple(zip(self.dims, self._tensor.shape))
+        return OrderedDict(zip(self._schema._names, self._tensor.shape))
 
     def __repr__(self):
-        return "NamedTensor(\n\t{},\n\t{})".format(
-            self._tensor,
-            self.dims,
-        )
+        return "NamedTensor(\n\t{},\n\t{})".format(self._tensor, self.dims)
 
     def size(self, dim):
         "Return the raw shape of the tensor"
@@ -79,7 +92,7 @@ class NamedTensorBase:
         return self._tensor
 
     def _new(self, tensor, drop=None, add=None, updates={}, mask=None):
-        #raise RuntimeError("Err drop=%s" % drop +
+        # raise RuntimeError("Err drop=%s" % drop +
         #    " add=%s" % add + "updates=%s" % updates )
         return self.__class__(
             tensor,
@@ -111,8 +124,8 @@ class NamedTensorBase:
 
     def transpose(self, *dims):
         "Return a new DataArray object with transposed dimensions."
-        to_dims = ( tuple(d for d in self.dims if d not in dims) + dims )
-        indices = [ self._schema.get(d) for d in to_dims ]
+        to_dims = tuple(d for d in self.dims if d not in dims) + dims
+        indices = [self._schema.get(d) for d in to_dims]
         tensor = self._tensor.permute(*indices)
         return self.__class__(tensor, to_dims)
 
@@ -134,20 +147,22 @@ class NamedTensorBase:
         tensor = self.transpose(*trans)._tensor.contiguous().view(*view)
         return self.__class__(tensor, new_schema)
 
-    def _splitdim(self, dim, names, size_dict):
+    def _split(self, dim, names, size_dict):
         new_schema = []
         view = []
+        dim_num = self._schema.get(dim)
         for i, d in self._schema.enum_all():
-            if d != dim:
+            if i != dim_num:
                 new_schema.append(d)
                 view.append(self.size(d))
             else:
                 for d2 in names:
                     d2 = d2.split(":")
-                    view.append(size_dict.get(d2[-1], size_dict.get(d2[0],-1)))
+                    view.append(
+                        size_dict.get(d2[-1], size_dict.get(d2[0], -1))
+                    )
                 new_schema += names
         return self.__class__(self._tensor.view(*view), new_schema)
-
 
     def __len__(self):
         return len(self._tensor)
@@ -156,18 +171,18 @@ class NamedTensorBase:
         """ Move dims to the front of the line """
         raise RuntimeError("Err %s" % dims)
 
-        term = [
-            d for d in self.dims if d not in dims
-        ] + dims.split()[1:]
+        term = [d for d in self.dims if d not in dims] + dims.split()[1:]
 
         return self.transpose(*term)
 
-    def _force_order(self, schema):
+    def _force_order(self, names):
         """ Forces self to take order in names, adds 1-size dims if needed """
+        if isinstance(names, _Schema):
+            names = names.axes
         new_schema = []
         view = []
         trans = []
-        for d in schema.axes:
+        for d in names:
             if d not in self.dims:
                 new_schema.append(d)
                 view.append(1)
@@ -181,30 +196,31 @@ class NamedTensorBase:
 
     def _broadcast_order(self, other):
         """ Outputs a shared order (list) that works for self and other """
+        if isinstance(other, list):
+            return self._schema.merge(_Schema(other))
         return self._schema.merge(other._schema)
-        #order = []
-        #for d in other_names:
+        # order = []
+        # for d in other_names:
         #    if d not in self.dims:
         #        order.append(d)
-        #for d in self.dims:
+        # for d in self.dims:
         #    order.append(d)
-        #return order
+        # return order
 
-    def _mask_broadcast_order(self, main_names):
+    def _mask_broadcast_order(self, other):
         """
         If broadcasting possible from self (mask) to main, outputs a shared order.
         Otherwise errors and prints dimensions that exist in mask but not in main.
         """
-        raise RuntimeError("Err %s" % main_names)
-        to_be_broadcasted = set(self.dims)
-        broadcasted_to = set(main_names)
-
-        diff = to_be_broadcasted.difference(broadcasted_to)
-        diff_string = ", ".join(diff)
-
-        assert len(diff) == 0, (
-            "Attemped to broadcast mask but unable to broadcast dimensions %s"
-            % diff_string
-        )
-
-        return main_names
+        if isinstance(other, list):
+            return self._schema.merge(_Schema(other))
+        return self._schema.merge(other._schema)
+        #to_be_broadcasted = set(self.dims)
+        #broadcasted_to = set(main_names)
+        #diff = to_be_broadcasted.difference(broadcasted_to)
+        #diff_string = ", ".join(diff)
+        #assert len(diff) == 0, (
+        #    "Attemped to broadcast mask but unable to broadcast dimensions %s"
+        #    % diff_string
+        #)
+        #return main_names
