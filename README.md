@@ -1,3 +1,9 @@
+This draft implementation should now be considered completed. If you are interested in using Named Tensor check out the core PyTorch implementation: 
+
+https://pytorch.org/docs/stable/named_tensor.html
+
+Thanks for everyone who contributed to this version. 
+
 # Named Tensor for Torch
 
 [![Build Status](https://travis-ci.org/harvardnlp/namedtensor.svg?branch=master)](https://travis-ci.org/harvardnlp/namedtensor) [![Coverage Status](https://coveralls.io/repos/github/harvardnlp/namedtensor/badge.svg?branch=master)](https://coveralls.io/github/harvardnlp/namedtensor?branch=master)
