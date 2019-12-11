@@ -229,6 +229,19 @@ class NTorch(type):
         )
 
     @staticmethod
+    def index_add_(self, dim, index, tensor):
+        """Accumulate the elements of 'tensor' into the self tensor
+        by adding to the indices in the order given in 'index'."""
+        name = dim
+        dim = self._schema.get(name)
+        tensor_names = [i for i in self._schema._names]
+        tensor_names[dim] = index._schema._names[0]
+        self._tensor.index_add_(
+            dim, index._tensor, tensor._force_order(tensor_names)._tensor
+        )
+        return self
+
+    @staticmethod
     def index_fill_(self, dim, index, val):
         "Index into dimension names with the `index` named tensors."
         self._tensor.index_fill_(

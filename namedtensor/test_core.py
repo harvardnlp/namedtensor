@@ -424,6 +424,19 @@ def test_takes():
     )
 
 
+def test_index_add():
+
+    base = ntorch.zeros(3, 5, names=("beta", "alpha"))
+    vals = ntorch.randn(3, 4, names=("beta", "time"))
+    index = ntorch.randint(0, 5, (4,), names=("time"))
+
+    result = base.index_add_("alpha", index, vals)
+    expected_result = base.values.index_add_(1, index.values, vals.values)
+
+    assert (result._tensor == expected_result).all()
+    assert result.shape == OrderedDict([("beta", 3), ("alpha", 5)])
+
+
 def test_narrow():
     base1 = torch.randn(10, 2, 50)
 

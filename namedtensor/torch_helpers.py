@@ -457,6 +457,7 @@ doc is the same as below.
         "masked_scatter",
         "masked_fill_",
         "index_select",
+        "index_add_",
         "index_copy_",
         "index_fill_",
         "topk",
