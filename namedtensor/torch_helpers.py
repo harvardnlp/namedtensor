@@ -2,19 +2,72 @@ import torch.nn.functional as F
 import torch
 from .core import NamedTensorBase, assert_match
 from .utils import make_tuple
+import numbers
 
 
 class NamedTensor(NamedTensorBase):
+
+    access_order = []
     def __getitem__(self, index):
-        if isinstance(index, dict):
+        """
+        Valid formats are:
+        - a dict of pairs name - slice/ntensor/index
+        - an ntensor with (matching names)
+        - a sequence of strings
+        - a sequence of slices/ntensors/indexes
+        """
+        if isinstance(index, tuple):
+            cur = self
+            ops_dict = {}
+            count = 0
+            restart = True
+            for x in index:
+                if isinstance(x, str):
+                    if restart:
+                        if ops_dict:
+                            cur = cur[ops_dict]
+                        self.access_order = []
+                        ops_dict = {}
+                        count = 0
+                        restart = False
+                    self.access_order.append(x)
+                elif isinstance(x, slice) and isinstance(x.start, str):
+                    if x.step is None:
+                        ops_dict[x.start] = x.stop
+                    else:
+                        ops_dict[x.start] = slice(x.stop, x.step)
+                    restart = True
+                else:
+                    ops_dict[self.access_order[count]] = x
+                    count += 1
+                    restart = True
+            if ops_dict:
+                cur = cur[ops_dict]
+            return cur
+
+        elif isinstance(index, str):
+            self.access_order = [ index, ]
+            return self
+        elif isinstance(index, slice) and isinstance(index.start, str):
+            return 
+        elif isinstance(index, (slice, NamedTensor, numbers.Number)):
+            if len(self.access_order) != 1:
+                raise RuntimeError("Dimension name not set. Use v['name'].")
+            return self[dict([ (self.access_order[0], index), ])]
+
+        elif isinstance(index, dict):
             cur = self
             for k, v in index.items():
                 if isinstance(v, slice):
+
                     cur = cur.narrow(k, v.start, v.stop - v.start)
                 elif isinstance(v, NamedTensor):
                     cur = cur.index_select(k, v)
-                else:
+                elif isinstance(v, numbers.Number):
                     cur = cur.get(k, v)
+                else:
+                    raise RuntimeError("Index must be number, slice, " +
+                        "or NamedTensor, got {}".format(v))
             return cur
         elif isinstance(index, NamedTensor):
             if (
@@ -69,7 +122,7 @@ class NamedTensor(NamedTensorBase):
         return self._setter(other, "copy_")
 
     def _setter(self, other, method, vals=[]):
-        order = other._mask_broadcast_order(self._schema._names)
+        order = other._mask_broadcast_order(self)
         other = other._force_order(order)
 
         args = [other.values] + vals
@@ -290,7 +343,7 @@ class NamedTensor(NamedTensorBase):
                 def call(other, *args):
                     if isinstance(other, NamedTensor):
                         b = other
-                        order = self._broadcast_order(b._schema._names)
+                        order = self._broadcast_order(b)
                         a1 = self._force_order(order)
                         b1 = b._force_order(order)
                         method = getattr(a1._tensor, methodname)
